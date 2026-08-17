@@ -1,0 +1,292 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SUPABASE_DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  FLEET_MANAGER
+  MECHANIC
+  TECHNICIAN
+  DRIVER
+  INVENTORY_MANAGER
+  ACCOUNTANT
+}
+
+enum SubscriptionTier {
+  TRIAL_FREE
+  BASIC_300
+  PRO_500
+  ENTERPRISE_800
+}
+
+enum WorkOrderStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SENT
+  RECEIVED
+}
+
+enum FinancialType {
+  REVENUE
+  EXPENSE
+}
+
+enum OdometerSource {
+  MANUAL_DRIVER
+  GPS_API
+  MECHANIC
+}
+
+model Organization {
+  id               String            @id @default(uuid()) @db.Uuid
+  name             String
+  subscriptionTier SubscriptionTier  @default(TRIAL_FREE)
+  trialEndsAt      DateTime
+  maxVehicles      Int               @default(3)
+  maxUsers         Int               @default(5)
+  currency         String            @default("INR")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  users            User[]
+  vehicles         Vehicle[]
+  workOrders       WorkOrder[]
+  inventoryParts   InventoryPart[]
+  vendors          Vendor[]
+  purchaseOrders   PurchaseOrder[]
+  financials       FinancialRecord[]
+  documents        Document[]
+  invitations      Invitation[]
+  notifications    Notification[]
+
+  @@map("organizations")
+}
+
+model User {
+  id                 String          @id @default(uuid()) @db.Uuid
+  authUserId         String          @unique @db.Uuid
+  orgId              String          @db.Uuid
+  email              String
+  fullName           String
+  role               Role
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  org                Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  assignedWorkOrders WorkOrder[]     @relation("AssignedMechanic")
+  odometerLogs       OdometerLog[]
+
+  @@index([orgId])
+  @@map("users")
+}
+
+model Invitation {
+  id         String       @id @default(uuid()) @db.Uuid
+  orgId      String       @db.Uuid
+  email      String
+  role       Role
+  tokenHash  String       @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime     @default(now())
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, email])
+  @@map("invitations")
+}
+
+model Vehicle {
+  id              String            @id @default(uuid()) @db.Uuid
+  orgId           String            @db.Uuid
+  vin             String
+  licensePlate    String
+  make            String
+  model           String
+  year            Int
+  currentOdometer Decimal           @default(0) @db.Decimal(12, 1)
+  status          String            @default("ACTIVE")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  org             Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  components      Component[]
+  workOrders      WorkOrder[]
+  odometerLogs    OdometerLog[]
+  financials      FinancialRecord[]
+  documents       Document[]
+
+  @@unique([orgId, vin])
+  @@index([orgId, status])
+  @@map("vehicles")
+}
+
+model Component {
+  id                   String   @id @default(uuid()) @db.Uuid
+  vehicleId            String   @db.Uuid
+  name                 String
+  expectedLifeKm       Decimal  @db.Decimal(12, 1)
+  lastServicedOdometer Decimal  @db.Decimal(12, 1)
+  alertThresholdKm     Decimal  @db.Decimal(12, 1)
+  vehicle              Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@map("components")
+}
+
+model OdometerLog {
+  id        String         @id @default(uuid()) @db.Uuid
+  vehicleId String         @db.Uuid
+  driverId  String?        @db.Uuid
+  reading   Decimal        @db.Decimal(12, 1)
+  source    OdometerSource
+  isFlagged Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  vehicle   Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver    User?          @relation(fields: [driverId], references: [id])
+
+  @@index([vehicleId, createdAt])
+  @@map("odometer_logs")
+}
+
+model WorkOrder {
+  id                 String           @id @default(uuid()) @db.Uuid
+  orgId              String           @db.Uuid
+  vehicleId          String           @db.Uuid
+  assignedMechanicId String?          @db.Uuid
+  title              String
+  description        String?
+  priority           Priority         @default(MEDIUM)
+  status             WorkOrderStatus  @default(OPEN)
+  createdAt          DateTime         @default(now())
+  completedAt        DateTime?
+  org                Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  vehicle            Vehicle          @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  assignedMechanic   User?            @relation("AssignedMechanic", fields: [assignedMechanicId], references: [id])
+  partsUsed          WorkOrderPart[]
+
+  @@index([orgId, status])
+  @@index([vehicleId])
+  @@map("work_orders")
+}
+
+model InventoryPart {
+  id              String          @id @default(uuid()) @db.Uuid
+  orgId           String          @db.Uuid
+  sku             String
+  name            String
+  binLocation     String?
+  quantityOnHand  Int             @default(0)
+  minReorderLevel Int             @default(5)
+  unitCost        Decimal         @db.Decimal(12, 2)
+  org             Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  workOrderParts  WorkOrderPart[]
+
+  @@unique([orgId, sku])
+  @@index([orgId, quantityOnHand])
+  @@map("inventory_parts")
+}
+
+model WorkOrderPart {
+  id          String        @id @default(uuid()) @db.Uuid
+  workOrderId String        @db.Uuid
+  partId      String        @db.Uuid
+  qtyUsed     Int
+  unitPrice   Decimal       @db.Decimal(12, 2)
+  workOrder   WorkOrder     @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  part        InventoryPart @relation(fields: [partId], references: [id])
+
+  @@map("work_order_parts")
+}
+
+model Vendor {
+  id             String          @id @default(uuid()) @db.Uuid
+  orgId          String          @db.Uuid
+  name            String
+  contactPerson  String?
+  phone          String
+  email          String?
+  createdAt      DateTime        @default(now())
+  org            Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  purchaseOrders PurchaseOrder[]
+
+  @@index([orgId])
+  @@map("vendors")
+}
+
+model PurchaseOrder {
+  id        String              @id @default(uuid()) @db.Uuid
+  orgId     String              @db.Uuid
+  vendorId  String              @db.Uuid
+  status    PurchaseOrderStatus @default(DRAFT)
+  totalCost Decimal             @db.Decimal(12, 2)
+  createdAt DateTime            @default(now())
+  org       Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  vendor    Vendor              @relation(fields: [vendorId], references: [id])
+
+  @@index([orgId, status])
+  @@map("purchase_orders")
+}
+
+model FinancialRecord {
+  id              String        @id @default(uuid()) @db.Uuid
+  orgId           String        @db.Uuid
+  vehicleId       String        @db.Uuid
+  type            FinancialType
+  category        String
+  amount          Decimal       @db.Decimal(12, 2)
+  transactionDate DateTime
+  org             Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  vehicle         Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, transactionDate])
+  @@index([vehicleId, transactionDate])
+  @@map("financial_records")
+}
+
+model Document {
+  id         String       @id @default(uuid()) @db.Uuid
+  orgId      String       @db.Uuid
+  vehicleId  String?      @db.Uuid
+  title      String
+  docType    String
+  fileUrl    String
+  fileKey    String?
+  expiryDate DateTime
+  createdAt  DateTime     @default(now())
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  vehicle    Vehicle?     @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, expiryDate])
+  @@map("documents")
+}
+
+model Notification {
+  id          String       @id @default(uuid()) @db.Uuid
+  orgId       String       @db.Uuid
+  recipientId String       @db.Uuid
+  title       String
+  message     String
+  type        String
+  referenceId String?      @db.Uuid
+  isRead      Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, recipientId, isRead])
+  @@map("notifications")
+}
