@@ -13,6 +13,16 @@ export function assertWritable(org: { subscriptionTier: string; trialEndsAt: Dat
   }
 }
 
+async function assertVehicleCapacity(orgId: string, maxVehicles: number) {
+  const count = await prisma.vehicle.count({ where: { orgId } });
+  if (count >= maxVehicles) throw new TRPCError({ code: "FORBIDDEN", message: `Vehicle limit reached (${maxVehicles}). Upgrade your FleetOps plan to add more vehicles.` });
+}
+
+async function assertUserCapacity(orgId: string, maxUsers: number) {
+  const count = await prisma.user.count({ where: { orgId } });
+  if (count >= maxUsers) throw new TRPCError({ code: "FORBIDDEN", message: `User limit reached (${maxUsers}). Upgrade your FleetOps plan to invite more team members.` });
+}
+
 export function requireRole(role: string, allowed: string[]) {
   if (!allowed.includes(role)) throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot perform this action." });
 }
@@ -66,6 +76,7 @@ export const appRouter = router({
     create: fleetOpsProcedure.input(z.object({ vin: z.string().min(5), licensePlate: z.string().min(3), make: z.string().min(2), model: z.string().min(2), year: z.number().int().min(1980).max(2100), currentOdometer: z.number().min(0).default(0) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]);
       assertWritable(ctx.fleetopsUser.org);
+      await assertVehicleCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxVehicles);
       const count = await prisma.vehicle.count({ where: { orgId: ctx.fleetopsUser.orgId } });
       if (ctx.fleetopsUser.org.subscriptionTier === "TRIAL_FREE" && count >= ctx.fleetopsUser.org.maxVehicles) throw new TRPCError({ code: "FORBIDDEN", message: "Trial limit reached: maximum 3 vehicles." });
       return prisma.vehicle.create({ data: { ...input, orgId: ctx.fleetopsUser.orgId } });
@@ -125,7 +136,7 @@ export const appRouter = router({
   }),
   team: router({
     members: fleetOpsProcedure.query(({ ctx }) => prisma.user.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, select: { id: true, email: true, fullName: true, role: true, createdAt: true }, orderBy: { fullName: "asc" } })),
-    invite: fleetOpsProcedure.input(z.object({ email: z.string().email(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); return prisma.invitation.create({ data: { orgId: ctx.fleetopsUser.orgId, email: input.email, role: input.role, tokenHash: crypto.randomUUID(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) } }); }),
+    invite: fleetOpsProcedure.input(z.object({ email: z.string().email(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); await assertUserCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxUsers); return prisma.invitation.create({ data: { orgId: ctx.fleetopsUser.orgId, email: input.email, role: input.role, tokenHash: crypto.randomUUID(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) } }); }),
   }),
   purchaseOrders: router({
     list: fleetOpsProcedure.query(({ ctx }) => prisma.purchaseOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vendor: true }, orderBy: { createdAt: "desc" } })),

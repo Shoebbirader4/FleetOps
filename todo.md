@@ -6,9 +6,9 @@
 - [x] Implement authenticated organization provisioning, invitations, and role enforcement.
 - [x] Implement vehicle, odometer, component, work-order, inventory, purchase-order, document, notification, and financial APIs.
 - [x] Implement realtime subscriptions and deterministic maintenance/inventory automation.
-- [ ] Implement trial limits, expiration write-freeze, and Razorpay-ready subscription state.
+- [x] Implement trial limits, expiration write-freeze, and Razorpay-ready subscription state.
 - [x] Connect the dashboard to persisted backend state and verify critical flows.
-- [ ] Save a final checkpoint and deliver the backend-enabled project.
+- [x] Save a final checkpoint and deliver the backend-enabled project.
 
 - [x] Implement exact-stack backend path using Supabase PostgreSQL, Prisma ORM, Supabase Auth, and Supabase Realtime instead of the managed MySQL/Drizzle upgrade.
 - [x] Validate and configure required Supabase connection secrets before schema migration.
@@ -16,9 +16,9 @@
 - [x] Validate the Supabase project through the CLI using the supplied database password without printing or committing the secret.
 
 - [x] Wire all dashboard sections—vehicles, work orders, notifications, inventory, and activity—to persisted tRPC queries with loading, empty, and error states.
-- [ ] Trigger low-inventory automation after inventory-affecting mutations, especially work-order completion, and verify the scheduled Edge Function path.
+- [x] Trigger low-inventory automation after inventory-affecting mutations, especially work-order completion, and verify the scheduled Edge Function path.
 - [x] Remove or isolate the managed Drizzle/Manus auth fallback so the FleetOps runtime uses Supabase Auth and Prisma end to end.
-- [ ] Add subscription-state procedures and document the concrete Razorpay credential/deployment blocker if payment credentials are unavailable.
+- [x] Add subscription-state procedures and document the concrete Razorpay credential/deployment blocker if payment credentials are unavailable.
 
 - [x] Implement invitation redemption and acceptance tied to the authenticated Supabase user and organization role.
 - [x] Add component list/create/update/delete tRPC procedures and tests.
