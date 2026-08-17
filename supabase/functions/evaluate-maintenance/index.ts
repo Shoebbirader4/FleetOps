@@ -8,6 +8,9 @@ const supabase = createClient(
 
 Deno.serve(async (request) => {
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  const authorization = request.headers.get("authorization");
+  const expected = `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""}`;
+  if (!authorization || authorization !== expected) return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   try {
     const { data: organizations, error: orgError } = await supabase.from("organizations").select("id");
@@ -40,12 +43,12 @@ Deno.serve(async (request) => {
         }
       }
 
-      const { data: parts, error: partsError } = await supabase.from("inventory_parts").select("id, sku, name, quantityOnHand").eq("orgId", organization.id).lte("quantityOnHand", 5);
+      const { data: parts, error: partsError } = await supabase.from("inventory_parts").select("id, sku, name, quantityOnHand, minReorderLevel").eq("orgId", organization.id);
       if (partsError) throw partsError;
       for (const part of parts ?? []) {
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const { data: existingAlert } = await supabase.from("notifications").select("id").eq("orgId", organization.id).eq("referenceId", part.id).eq("type", "INVENTORY_LOW").gte("createdAt", since).limit(1);
-        if (existingAlert?.length || !admins?.length) continue;
+        if (existingAlert?.length || !admins?.length || Number(part.quantityOnHand) > Number(part.minReorderLevel)) continue;
         const { error: notificationError } = await supabase.from("notifications").insert(admins.map((admin) => ({ orgId: organization.id, recipientId: admin.id, title: "Inventory below reorder level", message: `${part.name} (${part.sku}) has ${part.quantityOnHand} units remaining.`, type: "INVENTORY_LOW", referenceId: part.id })));
         if (notificationError) throw notificationError;
         lowStockAlerts += 1;

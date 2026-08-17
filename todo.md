@@ -32,3 +32,7 @@
 - [x] Add component procedure tests that exercise CRUD callers and cross-organization isolation.
 - [x] Replace the notification bell/count and inventory summary with real persisted data and explicit loading, empty, and error states.
 - [x] Implement verified Supabase session-expired handling for protected queries and sign-out.
+
+- [ ] Prepare the production Edge Function deployment and scheduler configuration without publishing from this session.
+- [ ] Validate the deployed maintenance callback after the user publishes the project.
+- [ ] Run an end-to-end Supabase owner/invited-user Auth and invitation redemption test with real accounts.
