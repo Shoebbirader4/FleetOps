@@ -1,6 +1,6 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 type LegacyUser = { id: number; openId: string; name: string | null; email: string | null; loginMethod: string | null; role: "user" | "admin"; createdAt: Date; updatedAt: Date; lastSignedIn: Date };
-import type { User as FleetOpsUser } from "@prisma/client";
+type FleetOpsUser = { id: string; authUserId: string; orgId: string; email: string; fullName: string; role: string; name: string; org: { id: string; name: string; subscriptionTier: string; trialEndsAt: Date; maxVehicles: number; maxUsers: number } };
 import { getFleetOpsUserFromRequest } from "../supabase";
 
 export type TrpcContext = {

@@ -37,6 +37,10 @@
 - [ ] Validate the deployed maintenance callback after the user publishes the project.
 - [ ] Run an end-to-end Supabase owner/invited-user Auth and invitation redemption test with real accounts.
 
-- [ ] Replace Prisma ORM with Drizzle ORM while keeping Supabase PostgreSQL/Auth/Realtime/RLS unchanged.
-- [ ] Remove Prisma runtime imports and generated-client dependencies from FleetOps deployment.
-- [ ] Re-run typecheck, tests, and production build after the Drizzle migration.
+- [x] Replace Prisma ORM with Drizzle ORM while keeping Supabase PostgreSQL/Auth/Realtime/RLS unchanged.
+- [x] Remove Prisma runtime imports and generated-client dependencies from FleetOps deployment.
+- [x] Re-run typecheck, tests, and production build after the Drizzle migration.
+
+- [x] Fully replace Prisma data access with Drizzle PostgreSQL queries across Supabase provisioning, routers, automation, and tests.
+- [x] Remove Prisma schema, generated client, package dependencies, and runtime imports.
+- [x] Verify Drizzle-only server startup, tests, and production deployment bundle.

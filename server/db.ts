@@ -1,92 +1,82 @@
-import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { sql } from "drizzle-orm";
+import * as fleetopsSchema from "../drizzle/fleetops-schema";
 
-let _db: ReturnType<typeof drizzle> | null = null;
+const globalForDb = globalThis as unknown as { fleetopsPool?: Pool; fleetopsDb?: ReturnType<typeof drizzle> };
+const pool = globalForDb.fleetopsPool ?? new Pool({ connectionString: process.env.SUPABASE_DATABASE_URL, max: 5, ssl: { rejectUnauthorized: false } });
+if (process.env.NODE_ENV !== "production") globalForDb.fleetopsPool = pool;
+export const db = globalForDb.fleetopsDb ?? drizzle(pool);
+if (process.env.NODE_ENV !== "production") globalForDb.fleetopsDb = db;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
-export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
-    try {
-      _db = drizzle(process.env.DATABASE_URL);
-    } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
-      _db = null;
-    }
+const tables: Record<string, string> = {
+  organization: "organizations", user: "users", invitation: "invitations", vehicle: "vehicles", component: "components", odometerLog: "odometer_logs", workOrder: "work_orders", inventoryPart: "inventory_parts", workOrderPart: "work_order_parts", vendor: "vendors", purchaseOrder: "purchase_orders", financialRecord: "financial_records", document: "documents", notification: "notifications",
+};
+const drizzleTables: Record<string, unknown> = { organization: fleetopsSchema.organizations, user: fleetopsSchema.users, invitation: fleetopsSchema.invitations, vehicle: fleetopsSchema.vehicles, component: fleetopsSchema.components, odometerLog: fleetopsSchema.odometerLogs, workOrder: fleetopsSchema.workOrders, inventoryPart: fleetopsSchema.inventoryParts, workOrderPart: fleetopsSchema.workOrderParts, vendor: fleetopsSchema.vendors, purchaseOrder: fleetopsSchema.purchaseOrders, financialRecord: fleetopsSchema.financialRecords, document: fleetopsSchema.documents, notification: fleetopsSchema.notifications };
+
+type AnyRecord = Record<string, any>;
+type QueryOptions = AnyRecord;
+function quote(name: string) { return `"${name.replace(/[^a-zA-Z0-9_]/g, "")}"`; }
+function normalize(value: unknown) { return value instanceof Date ? value.toISOString() : value; }
+function condition(field: string, value: unknown): string {
+  const c = quote(field);
+  if (value === null) return `${c} IS NULL`;
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const o = value as AnyRecord;
+    if (o.in) return `${c} IN (${o.in.map((v: unknown) => `'${String(v).replaceAll("'", "''")}'`).join(",")})`;
+    if (o.gt !== undefined) return `${c} > '${String(normalize(o.gt)).replaceAll("'", "''")}'`;
+    if (o.gte !== undefined) return `${c} >= '${String(normalize(o.gte)).replaceAll("'", "''")}'`;
+    if (o.lt !== undefined) return `${c} < '${String(normalize(o.lt)).replaceAll("'", "''")}'`;
+    if (o.lte !== undefined) return `${c} <= '${String(normalize(o.lte)).replaceAll("'", "''")}'`;
   }
-  return _db;
+  if (typeof value === "boolean") return `${c} = ${value}`;
+  if (typeof value === "number") return `${c} = ${value}`;
+  return `${c} = '${String(normalize(value)).replaceAll("'", "''")}'`;
+}
+function whereClause(where: AnyRecord = {}) {
+  const parts: string[] = [];
+  for (const [field, value] of Object.entries(where)) {
+    if (field === "vehicle" && value?.orgId) parts.push(`"vehicleId" IN (SELECT "id" FROM "vehicles" WHERE "orgId" = '${String(value.orgId).replaceAll("'", "''")}')`);
+    else if (field === "org" && value?.id) parts.push(`"orgId" = '${String(value.id).replaceAll("'", "''")}'`);
+    else if (field !== "vehicle" && field !== "org") parts.push(condition(field, value));
+  }
+  return parts.length ? ` WHERE ${parts.join(" AND ")}` : "";
+}
+function dataColumns(data: AnyRecord) { return Object.keys(data).filter((key) => !["vehicle", "org", "components", "workOrders", "assignedMechanic", "partsUsed"].includes(key)); }
+function valueSql(value: unknown) { if (value === null || value === undefined) return "NULL"; if (typeof value === "boolean") return value ? "TRUE" : "FALSE"; if (typeof value === "number") return String(value); return `'${String(normalize(value)).replaceAll("'", "''")}'`; }
+
+function model(modelName: string) {
+  const table = tables[modelName];
+  return {
+    async findMany(options: QueryOptions = {}) {
+      const select = options.select ? Object.keys(options.select).map(quote).join(", ") : "*";
+      const order = options.orderBy ? Object.entries(options.orderBy).map(([k, v]) => `${quote(k)} ${String(v).toUpperCase()}`).join(", ") : undefined;
+      const limit = options.take ? ` LIMIT ${Number(options.take)}` : "";
+      const result = await db.execute(sql.raw(`SELECT ${select} FROM ${quote(table)}${whereClause(options.where)}${order ? ` ORDER BY ${order}` : ""}${limit}`));
+      return result.rows as AnyRecord[];
+    },
+    async findFirst(options: QueryOptions = {}) { const rows = await this.findMany({ ...options, take: 1 }); return rows[0]; },
+    async findUnique(options: QueryOptions = {}) { return this.findFirst(options); },
+    async count(options: QueryOptions = {}) { const result = await db.execute(sql.raw(`SELECT COUNT(*)::int AS count FROM ${quote(table)}${whereClause(options.where)}`)); return Number((result.rows[0] as AnyRecord)?.count ?? 0); },
+    async create(options: QueryOptions) { const data = { ...(options.data ?? {}) }; const keys = dataColumns(data); const result = await db.execute(sql.raw(`INSERT INTO ${quote(table)} (${keys.map(quote).join(", ")}) VALUES (${keys.map((k) => valueSql(data[k])).join(", ")}) RETURNING *`)); return result.rows[0] as AnyRecord; },
+    async createMany(options: QueryOptions) { const rows = (options.data ?? []) as AnyRecord[]; for (const row of rows) await this.create({ data: row }); return { count: rows.length }; },
+    async update(options: QueryOptions) { const data = options.data ?? {}; const set = dataColumns(data).map((k) => { const v = data[k]; return v && typeof v === "object" && v.decrement !== undefined ? `${quote(k)} = ${quote(k)} - ${Number(v.decrement)}` : `${quote(k)} = ${valueSql(v)}`; }).join(", "); const result = await db.execute(sql.raw(`UPDATE ${quote(table)} SET ${set}, "updatedAt" = NOW() WHERE "id" = '${String(options.where.id).replaceAll("'", "''")}' RETURNING *`)); return result.rows[0] as AnyRecord; },
+    async updateMany(options: QueryOptions) { const data = options.data ?? {}; const set = dataColumns(data).map((k) => `${quote(k)} = ${valueSql(data[k])}`).join(", "); const result = await db.execute(sql.raw(`UPDATE ${quote(table)} SET ${set}${whereClause(options.where)}`)); return { count: result.rowCount ?? 0 }; },
+    async delete(options: QueryOptions) { const result = await db.execute(sql.raw(`DELETE FROM ${quote(table)} WHERE "id" = '${String(options.where.id).replaceAll("'", "''")}' RETURNING *`)); return result.rows[0] as AnyRecord; },
+    async aggregate(options: QueryOptions = {}) { const sumField = options._sum ? Object.keys(options._sum)[0] : "amount"; const result = await db.execute(sql.raw(`SELECT COALESCE(SUM(${quote(sumField)}), 0) AS sum FROM ${quote(table)}${whereClause(options.where)}`)); return { _sum: { [sumField]: (result.rows[0] as AnyRecord)?.sum ?? 0 } }; },
+    async upsert(options: QueryOptions) { const existing = await this.findFirst({ where: options.where }); if (existing) return this.update({ where: { id: existing.id }, data: options.update }); return this.create({ data: options.create }); },
+  };
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
-  }
-
-  try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
-
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
-  }
-}
+export const fleetDb = new Proxy({}, { get: (_target, property) => property === "$transaction" ? transaction : model(String(property)) }) as any;
+export async function transaction<T>(fn: (tx: any) => Promise<T>): Promise<T> { return fn(fleetDb); }
 
 export async function getUserByOpenId(openId: string) {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
-  return result.length > 0 ? result[0] : undefined;
+  return fleetDb.user.findFirst({ where: { authUserId: openId } });
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function upsertUser(user: { openId: string; name?: string | null; email?: string | null; role?: string; loginMethod?: string | null; lastSignedIn?: Date }) {
+  const existing = await getUserByOpenId(user.openId);
+  if (existing) return fleetDb.user.update({ where: { id: existing.id }, data: { email: user.email ?? existing.email, fullName: user.name ?? existing.fullName, role: user.role ?? existing.role } });
+  return undefined;
+}

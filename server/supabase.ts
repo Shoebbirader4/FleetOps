@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Request } from "express";
-import { prisma } from "./prisma";
+import { fleetDb } from "./db";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -34,7 +34,7 @@ export async function getFleetOpsUserFromRequest(req: Request) {
   const authUser = await getSupabaseAuthIdentity(req);
   if (!authUser) return null;
 
-  const user = await prisma.user.findUnique({
+  const user = await fleetDb.user.findUnique({
     where: { authUserId: authUser.id },
     include: { org: true },
   });
@@ -48,11 +48,11 @@ export async function provisionFleetOpsUser(input: {
   orgName?: string;
   role?: "SUPERADMIN" | "FLEET_MANAGER" | "MECHANIC" | "TECHNICIAN" | "DRIVER" | "INVENTORY_MANAGER" | "ACCOUNTANT";
 }) {
-  const existing = await prisma.user.findUnique({ where: { authUserId: input.authUserId }, include: { org: true } });
+  const existing = await fleetDb.user.findUnique({ where: { authUserId: input.authUserId }, include: { org: true } });
   if (existing) return existing;
 
   const role = input.role ?? "SUPERADMIN";
-  return prisma.$transaction(async (tx) => {
+  return fleetDb.$transaction(async (tx: any) => {
     const org = await tx.organization.create({
       data: {
         name: input.orgName ?? `${input.fullName}'s Fleet`,

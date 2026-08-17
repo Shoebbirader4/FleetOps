@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   vehicle: { findFirst: vi.fn() },
 }));
 
-vi.mock("./prisma", () => ({ prisma: mocks }));
+vi.mock("./db", () => ({ fleetDb: mocks }));
 
 const component = mocks.component;
 const vehicle = mocks.vehicle;
