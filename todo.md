@@ -36,3 +36,7 @@
 - [ ] Prepare the production Edge Function deployment and scheduler configuration without publishing from this session.
 - [ ] Validate the deployed maintenance callback after the user publishes the project.
 - [ ] Run an end-to-end Supabase owner/invited-user Auth and invitation redemption test with real accounts.
+
+- [ ] Replace Prisma ORM with Drizzle ORM while keeping Supabase PostgreSQL/Auth/Realtime/RLS unchanged.
+- [ ] Remove Prisma runtime imports and generated-client dependencies from FleetOps deployment.
+- [ ] Re-run typecheck, tests, and production build after the Drizzle migration.

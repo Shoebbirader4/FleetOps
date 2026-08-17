@@ -1,6 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import prismaClient from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { fleetopsPrisma?: PrismaClient };
+const { PrismaClient } = prismaClient;
+type PrismaClientInstance = InstanceType<typeof PrismaClient>;
+const globalForPrisma = globalThis as unknown as { fleetopsPrisma?: PrismaClientInstance };
 
 export const prisma = globalForPrisma.fleetopsPrisma ?? new PrismaClient({
   log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],

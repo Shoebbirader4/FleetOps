@@ -4,7 +4,8 @@ import { fleetOpsProcedure, publicProcedure, router } from "./_core/trpc";
 import { systemRouter } from "./_core/systemRouter";
 import { prisma } from "./prisma";
 import { getSupabaseAuthIdentity, provisionFleetOpsUser } from "./supabase";
-import { Priority, WorkOrderStatus } from "@prisma/client";
+import prismaClient from "@prisma/client";
+const { Priority, WorkOrderStatus } = prismaClient;
 import { evaluateAllOrganizations, evaluateLowInventory, evaluateVehicleMaintenance } from "./automation";
 
 export function assertWritable(org: { subscriptionTier: string; trialEndsAt: Date }) {
