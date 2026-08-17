@@ -44,3 +44,21 @@
 - [x] Fully replace Prisma data access with Drizzle PostgreSQL queries across Supabase provisioning, routers, automation, and tests.
 - [x] Remove Prisma schema, generated client, package dependencies, and runtime imports.
 - [x] Verify Drizzle-only server startup, tests, and production deployment bundle.
+
+- [x] Replace placeholder dashboard controls with real functional routes and backend-backed actions.
+- [x] Add a visible Team workspace with invite form, member list, role selection, and invitation status.
+- [x] Add authenticated sign-in/sign-out gating and remove misleading demo fallback content from live views.
+- [x] Add functional Vehicles, Work Orders, Inventory, Notifications, Compliance, P&L, and Billing views.
+- [ ] Verify the published UI flows and save a functional-product checkpoint.
+
+- [x] Replace command-center placeholder actions with real backend-backed behavior or remove unavailable actions.
+- [x] Add pending, accepted, and expired invitation status records to Team.
+- [x] Expose dedicated Notifications and Billing workspace routes with persisted or explicit subscription state.
+- [ ] Re-verify the published UI after these functional views/actions are live and save a new checkpoint.
+
+- [x] Replace Quick find navigation with an actual command-center vehicle/work-order search interaction.
+- [x] Replace the work-order completion affordance with a real persisted completion mutation and success/error state.
+- [x] Re-verify command-center controls and save the next checkpoint.
+
+- [x] Implement Quick find results that search both persisted vehicles and work orders with visible result and empty states.
+- [x] Save a new checkpoint after verifying the combined Quick find interaction.
