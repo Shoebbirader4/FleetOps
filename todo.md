@@ -62,3 +62,19 @@
 
 - [x] Implement Quick find results that search both persisted vehicles and work orders with visible result and empty states.
 - [x] Save a new checkpoint after verifying the combined Quick find interaction.
+
+- [x] Remove all static demo fallback arrays and hardcoded dashboard metrics from the authenticated FleetOps UI.
+- [x] Ensure every visible command-center action is persisted through a backend procedure or is removed.
+- [ ] Add explicit backend-backed create/update flows for the visible resource views and show real empty/loading/error states.
+- [ ] Verify the published UI uses the latest checkpoint and contains no placeholder/demo copy before delivery.
+
+- [x] Remove remaining authenticated command-center placeholder copy, fallback content, and hardcoded metrics.
+- [x] Complete dedicated data-backed Notifications actions and Billing capacity/status presentation.
+- [ ] Re-run typecheck, Vitest, production build, and visual verification for the live-connected frontend.
+- [ ] Save and deliver the new published frontend connection checkpoint.
+
+
+- [x] Add a real backend-backed work-order creation flow or remove the command-center CTA.
+- [x] Remove the non-persisted export action from the command center.
+- [x] Fix Billing utilization to query live vehicles and team members within the Billing view.
+- [ ] Verify the authenticated published deployment after saving this round of changes.
