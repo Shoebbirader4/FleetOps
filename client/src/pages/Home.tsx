@@ -41,6 +41,7 @@ import { useFleetOpsRealtime } from "@/hooks/useFleetOpsRealtime";
 import FunctionalWorkspace from "@/components/FunctionalWorkspace";
 import OrganizationOnboarding from "@/components/OrganizationOnboarding";
 import { roleNavAccess } from "@/workspaceAccess";
+import LandingPage from "@/pages/LandingPage";
 
 const roles = [
   { name: "Owner command center", short: "Owner", icon: LayoutDashboard },
@@ -85,7 +86,7 @@ function HealthRing({ value }: { value: number }) {
   return <div className="health-ring" style={{ "--ring-progress": `${(value / 100) * circumference}px` } as React.CSSProperties}><svg viewBox="0 0 64 64"><circle className="ring-track" cx="32" cy="32" r={radius} /><circle className="ring-value" cx="32" cy="32" r={radius} /></svg><strong>{value}</strong></div>;
 }
 
-export default function Home({ initialSection = "Command center" }: { initialSection?: string }) {
+export default function Home({ initialSection = "Command center", publicMode = "landing" }: { initialSection?: string; publicMode?: "landing" | "signin" | "signup" }) {
   const { session, loading: authLoading, signOut, signInWithEmail, signUpWithEmail, refreshSession } = useFleetOpsAuth();
   useEffect(() => {
     const onExpired = () => toast.warning("Supabase session expired", { description: "Sign in again to resume live FleetOps data." });
@@ -131,7 +132,7 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authFullName, setAuthFullName] = useState("");
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authMode, setAuthMode] = useState<"signin" | "signup">(publicMode === "signup" ? "signup" : "signin");
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -188,6 +189,7 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   if (session && (metadataNeedsOnboarding || backendSummary?.needsOnboarding)) return <OrganizationOnboarding initialName={String(session.user.user_metadata?.fullName ?? backendSummary?.org?.name ?? "")} initialOrganization={String(session.user.user_metadata?.orgName ?? "")} onComplete={async () => { const { error } = await refreshSession(); if (error) { toast.error("Session refresh failed", { description: error.message }); return; } window.localStorage.setItem("fleetops.openTeam", "1"); window.location.reload(); }} />;
   if (session && !backendSummary && summaryError) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>We could not load your workspace.</h1><p>Your Supabase session is active, but the organization summary did not respond. Refresh the page to retry without losing your session.</p><button className="primary-button" onClick={() => window.location.reload()}>Retry workspace load</button></section></main>;
   if (session && !backendSummary && summaryLoading) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>Loading your workspace.</h1><p>We are checking your organization and role before opening operational data.</p><div className="workspace-state"><RefreshCw className="spin" size={18} /> Connecting to Supabase…</div></section></main>;
+  if (!authLoading && !session && publicMode === "landing") return <LandingPage />;
   if (!authLoading && !session) return <div className="auth-page"><div className="auth-card"><div className="brand-lockup auth-brand"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div></div><div className="panel-kicker">Fleet operations workspace</div><h1>{authMode === "signup" ? "Create your Superadmin account." : "Sign in to your fleet ledger."}</h1><p>{authMode === "signup" ? "Start with your name and a secure Supabase Auth account. Organization setup comes immediately after signup." : "Use your Supabase Auth account to access vehicles, work orders, inventory, team access, and financial records."}</p><form onSubmit={authMode === "signup" ? handleSignUp : handleSignIn} className="auth-form">{authMode === "signup" && <label>Full name<input required minLength={2} value={authFullName} onChange={(event) => setAuthFullName(event.target.value)} placeholder="Your full name" /></label>}<label>Email<input required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@company.com" /></label><label>Password<input required minLength={8} type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? authMode === "signup" ? "Creating account…" : "Signing in…" : authMode === "signup" ? "Create Superadmin account" : "Sign in to FleetOps"}</button></form><button className="auth-switch" onClick={() => { setAuthMode(authMode === "signup" ? "signin" : "signup"); setAuthError(""); }}>{authMode === "signup" ? "Already have an account? Sign in" : "New to FleetOps? Create the first Superadmin account"}</button></div></div>;
 
   const completeOrder = (id?: string) => {

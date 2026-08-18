@@ -15,7 +15,15 @@ function WorkspaceRoute() {
 }
 
 function DefaultRoute() {
-  return <Home />;
+  return <Home publicMode="landing" />;
+}
+
+function LoginRoute() {
+  return <Home publicMode="signin" />;
+}
+
+function CreateOrganizationRoute() {
+  return <Home publicMode="signup" />;
 }
 
 function GuardedWorkspaceRoute({ section, allowedRoles }: { section: string; allowedRoles: string[] }) {
@@ -41,6 +49,8 @@ function App() {
           <Toaster />
           <Switch>
             <Route path="/join/:token" component={JoinOrganization} />
+            <Route path="/login" component={LoginRoute} />
+            <Route path="/create-organization" component={CreateOrganizationRoute} />
             <Route path="/fleet-manager" component={FleetManagerRoute} />
             <Route path="/mechanic" component={MechanicRoute} />
             <Route path="/driver" component={DriverRoute} />
