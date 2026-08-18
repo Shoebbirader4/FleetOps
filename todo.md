@@ -193,3 +193,6 @@
 - [ ] Add regression coverage and verify an authenticated Team invitation request after republishing.
 
 - [x] Create and deliver a comprehensive implementation summary covering FleetOps from initial frontend through current published release, validation, deferred Razorpay scope, and remaining real-account verification.
+
+- [ ] Verify the reported `index-DPlPMMp2.js` asset is not the current release asset and compare it with the latest HTML mapping.
+- [ ] Force a fresh published asset revision containing the current tRPC Authorization header fix and verify the live mapping.
