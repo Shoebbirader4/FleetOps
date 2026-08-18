@@ -1,4 +1,9 @@
--- Provision the first FleetOps organization and owner when a Supabase Auth user signs up.
+import pg from "pg";
+
+const { Client } = pg;
+const client = new Client({ connectionString: process.env.SUPABASE_DATABASE_URL, ssl: { rejectUnauthorized: false } });
+
+const sql = `
 create or replace function public.handle_fleetops_auth_user()
 returns trigger
 language plpgsql
@@ -13,14 +18,14 @@ begin
   insert into public.organizations ("id", "name", "subscriptionTier", "trialEndsAt", "maxVehicles", "maxUsers", "currency", "updatedAt")
   values (gen_random_uuid(), coalesce(new.raw_user_meta_data ->> 'orgName', display_name || '''s Fleet'''), 'TRIAL_FREE', now() + interval '7 days', 3, 5, 'INR', now())
   returning id into new_org_id;
-
   insert into public.users ("id", "authUserId", "orgId", "email", "fullName", "role", "updatedAt")
   values (gen_random_uuid(), new.id, new_org_id, new.email, display_name, 'SUPERADMIN', now());
   return new;
 end;
 $$;
+`;
 
-drop trigger if exists on_auth_user_created_fleetops on auth.users;
-create trigger on_auth_user_created_fleetops
-after insert on auth.users
-for each row execute procedure public.handle_fleetops_auth_user();
+await client.connect();
+await client.query(sql);
+await client.end();
+console.log("Auth trigger updated.");

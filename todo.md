@@ -106,3 +106,14 @@
 - [x] Record fuel-log odometer updates in the validated odometer history.
 - [x] Add visible Compliance renew/update actions wired to documents.update.
 - [x] Add explicit guarded route segments for role-specific FleetOps workspaces.
+
+- [x] Diagnose the production Superadmin signup database error reported during account creation.
+- [x] Fix Supabase signup provisioning and verify the database path with regression coverage.
+- [ ] Republish and verify the Superadmin signup-to-onboarding flow after the fix.
+
+- [x] Re-test Superadmin signup after the Auth trigger fix and confirm organization and user rows are provisioned successfully.
+- [x] Add or document an integration-level verification of the real signup provisioning path.
+
+- [x] Capture the exact second-attempt production signup error and identify the remaining live Supabase failure.
+- [x] Verify live organization and user schema defaults/constraints against the Auth trigger and provisioning path.
+- [x] Apply and integration-test the definitive signup fix before republishing.
