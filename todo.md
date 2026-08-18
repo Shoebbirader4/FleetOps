@@ -293,3 +293,4 @@
 - [ ] Run the updated background Mechanic and Technician lifecycle harnesses against the deployed release, including evidence and labor assertions.
 - [x] Verify the first production Heartbeat maintenance execution log.
 - [x] Implement Driver Report Vehicle Issue workflow with assigned-vehicle scope, urgency, notes, optional photo evidence, Fleet Manager visibility, and regression coverage.
+- [x] Add Accountant revenue/expense entry form and detailed INR financial ledger with tenant/RBAC validation and regression coverage.
