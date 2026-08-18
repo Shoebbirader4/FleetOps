@@ -242,3 +242,7 @@
 - [x] Fix Mechanic work-order completion notification handling when nested vehicle includes are unavailable and add regression coverage before rerunning.
 - [x] Fix Mechanic activity-feed rendering when nested vehicle relations are unavailable and add regression coverage before rerunning.
 - [x] Fix Mechanic activity-feed sorting when database timestamps arrive as strings and add regression coverage before rerunning.
+- [x] Add an Accountant background lifecycle covering invitation creation, organization-bound profile completion, role routing, financial record creation/listing/metrics, denial checks, single-use rejection, and cleanup.
+- [x] Add regression coverage for Accountant invitation binding, financial mutations/metrics, workspace permissions, and cleanup.
+- [x] Run and publish the Accountant lifecycle validation with the full test suite and report any production-edge limitations.
+- [x] Fix Accountant financial-record creation when the live table requires an explicit ID and add regression coverage before rerunning.
