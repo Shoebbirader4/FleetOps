@@ -191,3 +191,5 @@
 - [ ] Trace why the published Supabase session is not reaching authenticated tRPC requests after login.
 - [ ] Fix session persistence, Authorization transport, or refresh handling so dashboard and Team requests do not return 401.
 - [ ] Add regression coverage and verify an authenticated Team invitation request after republishing.
+
+- [x] Create and deliver a comprehensive implementation summary covering FleetOps from initial frontend through current published release, validation, deferred Razorpay scope, and remaining real-account verification.
