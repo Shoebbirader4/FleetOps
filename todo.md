@@ -221,3 +221,5 @@
 - [x] Align workOrders.create with the live PostgreSQL schema by supplying required ID, status, and audit timestamps, with regression coverage.
 
 - [x] Align documents.create with the live PostgreSQL schema by supplying required identity and audit fields, with regression coverage.
+
+- [ ] Force the public HTML release marker to the Fleet Manager checkpoint and verify the domain no longer serves the older session-transport document.
