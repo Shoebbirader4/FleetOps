@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import JoinOrganization from "./pages/JoinOrganization";
 import { useFleetOpsAuth } from "./hooks/useFleetOpsAuth";
 import { trpc } from "./lib/trpc";
 import { Route, Switch, useRoute } from "wouter";
@@ -25,6 +26,8 @@ function GuardedWorkspaceRoute({ section, allowedRoles }: { section: string; all
   return <Home initialSection={section} />;
 }
 
+function FleetManagerRoute() { return <GuardedWorkspaceRoute section="Fleet manager workspace" allowedRoles={["FLEET_MANAGER"]} />; }
+function MechanicRoute() { return <GuardedWorkspaceRoute section="Mechanic workspace" allowedRoles={["MECHANIC", "TECHNICIAN"]} />; }
 function DriverRoute() { return <GuardedWorkspaceRoute section="Driver portal" allowedRoles={["DRIVER", "SUPERADMIN"]} />; }
 function AccountantRoute() { return <GuardedWorkspaceRoute section="Accountant ledger" allowedRoles={["ACCOUNTANT", "SUPERADMIN"]} />; }
 function TeamRoute() { return <GuardedWorkspaceRoute section="Team" allowedRoles={["SUPERADMIN"]} />; }
@@ -37,6 +40,9 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Switch>
+            <Route path="/join/:token" component={JoinOrganization} />
+            <Route path="/fleet-manager" component={FleetManagerRoute} />
+            <Route path="/mechanic" component={MechanicRoute} />
             <Route path="/driver" component={DriverRoute} />
             <Route path="/accountant" component={AccountantRoute} />
             <Route path="/team" component={TeamRoute} />

@@ -80,6 +80,13 @@ export const appRouter = router({
       if (metadataError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Organization was saved, but onboarding state could not be finalized: ${metadataError.message}` });
       return updated;
     }),
+    inviteDetails: publicProcedure.input(z.object({ token: z.string().uuid() })).query(async ({ input }) => {
+      const invite = await fleetDb.invitation.findFirst({ where: { tokenHash: input.token, acceptedAt: null, expiresAt: { gt: new Date() } } });
+      if (!invite) throw new TRPCError({ code: "NOT_FOUND", message: "This invitation is invalid, expired, or already redeemed." });
+      const org = await fleetDb.organization.findFirst({ where: { id: invite.orgId } });
+      if (!org) throw new TRPCError({ code: "NOT_FOUND", message: "The invitation organization no longer exists." });
+      return { email: invite.email, role: invite.role, organization: { id: org.id, name: org.name }, expiresAt: invite.expiresAt };
+    }),
     acceptInvite: publicProcedure.input(z.object({ token: z.string().uuid(), fullName: z.string().min(2).optional() })).mutation(async ({ ctx, input }) => {
       const authUser = await getSupabaseAuthIdentity(ctx.req);
       if (!authUser?.email) throw new TRPCError({ code: "UNAUTHORIZED", message: "A valid Supabase access token is required." });
@@ -90,6 +97,9 @@ export const appRouter = router({
         await tx.invitation.update({ where: { id: invite.id }, data: { acceptedAt: new Date() } });
         return joined;
       });
+      const inviteOrg = await fleetDb.organization.findFirst({ where: { id: invite.orgId } });
+      const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(authUser.id, { user_metadata: { ...authUser.user_metadata, fullName: user.fullName, orgId: user.orgId, orgName: inviteOrg?.name, role: user.role, needsOnboarding: false, invitationToken: undefined } });
+      if (metadataError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Organization membership was created, but the session metadata could not be finalized: ${metadataError.message}` });
       return user;
     }),
   }),
@@ -223,7 +233,7 @@ export const appRouter = router({
   team: router({
     members: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return fleetDb.user.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, select: { id: true, email: true, fullName: true, role: true, createdAt: true }, orderBy: { fullName: "asc" } }); }),
     invitations: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return fleetDb.invitation.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { createdAt: "desc" } }); }),
-    invite: fleetOpsProcedure.input(z.object({ email: z.string().email(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); await assertUserCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxUsers); const invitation = await withServerTimeout<any>(fleetDb.invitation.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, email: input.email.toLowerCase(), role: input.role, tokenHash: crypto.randomUUID(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), createdAt: new Date(), updatedAt: new Date() } }), "Invitation storage did not respond within 12 seconds. No invitation was confirmed."); return { ...(invitation as Record<string, unknown>), delivery: "MANUAL_TOKEN" as const }; }),
+    invite: fleetOpsProcedure.input(z.object({ email: z.string().email(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); await assertUserCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxUsers); const invitation = await withServerTimeout<any>(fleetDb.invitation.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, email: input.email.toLowerCase(), role: input.role, tokenHash: crypto.randomUUID(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), createdAt: new Date(), updatedAt: new Date() } }), "Invitation storage did not respond within 12 seconds. No invitation was confirmed."); const origin = String(ctx.req?.headers?.origin ?? "https://fleetops-elktaacw.manus.space"); const joinUrl = new URL(`/join/${invitation.tokenHash}`, origin).toString(); const emailResult = await supabaseAdmin.auth.admin.inviteUserByEmail(input.email.toLowerCase(), { redirectTo: joinUrl }); return { ...(invitation as Record<string, unknown>), joinUrl, delivery: emailResult.error ? "MANUAL_TOKEN" as const : "EMAIL" as const, deliveryError: emailResult.error?.message }; }),
     updateRole: fleetOpsProcedure.input(z.object({ userId: z.string().uuid(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); const member = await fleetDb.user.findFirst({ where: { id: input.userId, orgId: ctx.fleetopsUser.orgId } }); if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "Team member not found." }); return fleetDb.user.update({ where: { id: input.userId }, data: { role: input.role } }); }),
     assignVehicle: fleetOpsProcedure.input(z.object({ driverId: z.string().uuid(), vehicleId: z.string().uuid(), active: z.boolean().default(true) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const driver = await fleetDb.user.findFirst({ where: { id: input.driverId, orgId: ctx.fleetopsUser.orgId, role: "DRIVER" } }); const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } }); if (!driver || !vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Driver or vehicle not found in this organization." }); return fleetDb.vehicleAssignment.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, driverId: input.driverId, vehicleId: input.vehicleId, active: input.active, createdAt: new Date(), updatedAt: new Date() } }); }),
   }),

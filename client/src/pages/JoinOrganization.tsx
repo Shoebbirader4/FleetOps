@@ -1,0 +1,49 @@
+import { useEffect, useState } from "react";
+import { useRoute } from "wouter";
+import { Building2, CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
+import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
+import { useFleetOpsAuth } from "@/hooks/useFleetOpsAuth";
+
+const routeForRole = (role: string) => ({ FLEET_MANAGER: "/fleet-manager", INVENTORY_MANAGER: "/inventory", MECHANIC: "/mechanic", TECHNICIAN: "/mechanic", DRIVER: "/driver", ACCOUNTANT: "/accountant" }[role] ?? "/");
+
+export default function JoinOrganization() {
+  const [, params] = useRoute("/join/:token");
+  const token = params?.token ?? "";
+  const { session, loading: authLoading, signUpWithEmail, refreshSession, signOut } = useFleetOpsAuth();
+  const details = trpc.onboarding.inviteDetails.useQuery({ token }, { enabled: Boolean(token), retry: false });
+  const acceptInvite = trpc.onboarding.acceptInvite.useMutation();
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!session || !details.data || acceptInvite.isPending || submitted) return;
+    setSubmitted(true);
+    acceptInvite.mutate({ token, fullName: session.user.user_metadata?.fullName ?? (fullName || undefined) }, {
+      onSuccess: async (member) => {
+        await refreshSession();
+        toast.success("You joined the organization", { description: `Opening your ${String(member.role).replaceAll("_", " ").toLowerCase()} workspace.` });
+        window.location.href = routeForRole(member.role);
+      },
+      onError: (mutationError) => { setError(mutationError.message); setSubmitted(false); },
+    });
+  }, [session, details.data, acceptInvite.isPending, submitted, token, fullName, refreshSession, acceptInvite]);
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError("");
+    if (!details.data) return;
+    const { data, error: signUpError } = await signUpWithEmail(details.data.email, password, fullName, token);
+    if (signUpError) { setError(signUpError.message); return; }
+    if (!data.session) setError("Account created. Confirm the invitation email, then return to this link to finish joining.");
+  };
+
+  if (authLoading || details.isLoading) return <main className="auth-page"><section className="auth-card"><Loader2 className="spin" /><h1>Checking invitation…</h1><p>Validating the secure organization invitation.</p></section></main>;
+  if (details.isError || !details.data) return <main className="auth-page"><section className="auth-card"><ShieldAlert size={28} /><h1>Invitation unavailable</h1><p>{details.error?.message ?? "This invitation is invalid or expired."}</p><a className="primary-button" href="/">Return to FleetOps</a></section></main>;
+  if (session && session.user.email?.toLowerCase() !== details.data.email.toLowerCase()) return <main className="auth-page"><section className="auth-card"><ShieldAlert size={28} /><h1>Use the invited email</h1><p>This link is addressed to {details.data.email}, but the browser is signed in as {session.user.email}. Sign out, then create or sign in with the invited email.</p><button className="primary-button" onClick={() => { void signOut(); }}>Sign out and continue</button></section></main>;
+  if (session && (acceptInvite.isPending || submitted)) return <main className="auth-page"><section className="auth-card"><CheckCircle2 size={28} /><h1>Joining {details.data.organization.name}…</h1><p>Your account is being attached to the invited organization and assigned workspace.</p></section></main>;
+
+  return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">Secure organization invitation</div><h1>Join {details.data.organization.name}</h1><p>You were invited as a <strong>{details.data.role.replaceAll("_", " ")}</strong>. Your email is fixed by the invitation and cannot be changed here.</p><div className="invite-org-card"><Building2 size={18} /><div><strong>{details.data.organization.name}</strong><span>{details.data.email}</span></div></div><form className="auth-form" onSubmit={submit}><label>Full name<input required minLength={2} value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your full name" /></label><label>Email<input value={details.data.email} readOnly /></label><label>Create password<input required minLength={8} type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" /></label>{error && <div className="auth-error">{error}</div>}<button className="primary-button" disabled={!password || acceptInvite.isPending}>Create account and join organization</button></form><p className="invite-security-note">The invitation determines your organization and role. You cannot use this link to join a different organization.</p></section></main>;
+}

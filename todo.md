@@ -169,3 +169,8 @@
 - [x] Restrict Driver data to assigned vehicles and prevent non-authorized access to financial, inventory, billing, and team data.
 - [x] Make Team invitation return or fail definitively with a server timeout/error path instead of an indefinite pending request.
 - [x] Add RBAC and invitation regression tests and verify the production build.
+
+- [x] Add secure invitation join links that resolve the invitation’s organization and assigned role without allowing user-controlled overrides.
+- [x] Add an organization-bound invited-user signup screen with prefilled email and organization identity, password creation, and invitation redemption after Supabase signup.
+- [x] Route redeemed invited users automatically into separate locked workspace UIs for Fleet Manager, Inventory Manager, Mechanic, Driver, and Accountant roles.
+- [x] Add regression coverage for invitation join validation, organization binding, role routing, and workspace isolation.

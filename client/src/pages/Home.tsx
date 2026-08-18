@@ -66,10 +66,10 @@ const navItems = [
 
 const roleNavAccess: Record<string, string[]> = {
   SUPERADMIN: navItems.map((item) => item.label),
-  FLEET_MANAGER: ["Command center", "Vehicles", "Work orders", "Notifications", "Compliance vault"],
+  FLEET_MANAGER: ["Fleet manager workspace", "Command center", "Vehicles", "Work orders", "Notifications", "Compliance vault"],
   INVENTORY_MANAGER: ["Inventory", "Notifications", "Purchase orders"],
-  MECHANIC: ["Work orders", "Notifications"],
-  TECHNICIAN: ["Work orders", "Notifications"],
+  MECHANIC: ["Mechanic workspace", "Work orders", "Notifications"],
+  TECHNICIAN: ["Mechanic workspace", "Work orders", "Notifications"],
   DRIVER: ["Driver portal", "Notifications"],
   ACCOUNTANT: ["Accountant ledger", "P&L analytics", "Notifications"],
 };
