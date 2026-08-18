@@ -291,4 +291,5 @@
 - [x] Replace the Mechanic completion placeholder with an execution form and visible loading/error/success states.
 - [x] Add Vitest regression coverage for Mechanic execution controls, RBAC scope, storage upload, and persistence fields.
 - [ ] Run the updated background Mechanic and Technician lifecycle harnesses against the deployed release, including evidence and labor assertions.
-- [ ] Verify the first production Heartbeat maintenance execution log.
+- [x] Verify the first production Heartbeat maintenance execution log.
+- [x] Implement Driver Report Vehicle Issue workflow with assigned-vehicle scope, urgency, notes, optional photo evidence, Fleet Manager visibility, and regression coverage.

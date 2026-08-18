@@ -14,7 +14,7 @@ const ownerEmail = `fleetops.e2e.driver-owner.${runId}@example.com`;
 const invitedEmail = `fleetops.e2e.driver.${runId}@example.com`;
 const password = `FleetOpsDriverE2E!${runId}A`;
 const results = [];
-let ownerId, invitedId, driverDbId, orgId, invitationId, assignedVehicleId, unassignedVehicleId;
+let ownerId, invitedId, driverDbId, orgId, invitationId, assignedVehicleId, unassignedVehicleId, issueId;
 async function tRPC(path, token, input, method = "POST") {
   const query = encodeURIComponent(JSON.stringify({ 0: { json: input } }));
   const url = `${baseUrl}/api/trpc/${path}?batch=1${method === "GET" ? `&input=${query}` : ""}`;
@@ -47,9 +47,15 @@ try {
   await check("Driver can create a pre-trip inspection", () => tRPC("driver.createInspection", invitedToken, { vehicleId: assignedVehicleId, inspectionType: "PRE_TRIP", status: "PASS", notes: "All safety checks passed" }));
   await check("Driver can list fuel logs", () => tRPC("driver.fuelLogs", invitedToken, null, "GET"));
   await check("Driver can create a fuel log", () => tRPC("driver.createFuelLog", invitedToken, { vehicleId: assignedVehicleId, liters: 40, amount: 4200, odometer: 1100, station: "E2E IndianOil" }));
+  const issue = await check("Driver reports an assigned vehicle issue", () => tRPC("vehicleIssues.create", invitedToken, { vehicleId: assignedVehicleId, title: "E2E brake warning", description: "Brake warning light appeared during route inspection.", priority: "HIGH" })); issueId = issue.id;
+  const driverIssues = await check("Driver lists own vehicle issues", () => tRPC("vehicleIssues.list", invitedToken, null, "GET")); if (!driverIssues.some((row) => row.id === issueId && row.driverId === driverDbId)) throw new Error("Driver issue was not visible in driver scope");
+  const managerIssues = await check("Superadmin sees Driver vehicle issue", () => tRPC("vehicleIssues.list", ownerToken, null, "GET")); if (!managerIssues.some((row) => row.id === issueId && row.orgId === orgId)) throw new Error("Fleet issue was not visible to organization management");
+  await check("Superadmin triages Driver vehicle issue", () => tRPC("vehicleIssues.updateStatus", ownerToken, { issueId, status: "ACKNOWLEDGED" }));
   await check("Driver can update assigned vehicle odometer", () => tRPC("vehicles.updateOdometer", invitedToken, { vehicleId: assignedVehicleId, reading: 1200, source: "MANUAL_DRIVER" }));
   await forbidden("Driver cannot update an unassigned vehicle", () => tRPC("vehicles.updateOdometer", invitedToken, { vehicleId: unassignedVehicleId, reading: 600, source: "MANUAL_DRIVER" }));
   await forbidden("Driver cannot create an inspection on an unassigned vehicle", () => tRPC("driver.createInspection", invitedToken, { vehicleId: unassignedVehicleId, inspectionType: "PRE_TRIP", status: "PASS" }));
+  await forbidden("Driver cannot report an issue on an unassigned vehicle", () => tRPC("vehicleIssues.create", invitedToken, { vehicleId: unassignedVehicleId, title: "Blocked issue", description: "This must be rejected by assignment scope.", priority: "HIGH" }));
+  await forbidden("Driver cannot triage vehicle issues", () => tRPC("vehicleIssues.updateStatus", invitedToken, { issueId, status: "RESOLVED" }));
   await forbidden("Driver cannot access work orders", () => tRPC("workOrders.list", invitedToken, null, "GET"));
   await forbidden("Driver cannot access inventory", () => tRPC("inventory.list", invitedToken, null, "GET"));
   await forbidden("Driver cannot access financials", () => tRPC("financials.list", invitedToken, null, "GET"));
@@ -59,7 +65,7 @@ try {
   await check("Confirm Driver invitation is single-use", async () => { try { await tRPC("onboarding.inviteDetails", undefined, { token: invitation.tokenHash }, "GET"); } catch (error) { if (String(error).includes("NOT_FOUND") || String(error).includes("invalid")) return "rejected as expected"; throw error; } throw new Error("Redeemed invitation remained reusable"); });
 } finally {
   try {
-    if (orgId) { await pool.query(`DELETE FROM fuel_logs WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM dvir_inspections WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM odometer_logs WHERE "vehicleId" IN (SELECT id FROM vehicles WHERE "orgId" = $1)`, [orgId]); await pool.query(`DELETE FROM vehicle_assignments WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM financial_records WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM vehicles WHERE "orgId" = $1`, [orgId]); }
+    if (orgId) { await pool.query(`DELETE FROM vehicle_issues WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM fuel_logs WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM dvir_inspections WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM odometer_logs WHERE "vehicleId" IN (SELECT id FROM vehicles WHERE "orgId" = $1)`, [orgId]); await pool.query(`DELETE FROM vehicle_assignments WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM financial_records WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM vehicles WHERE "orgId" = $1`, [orgId]); }
     await pool.query(`DELETE FROM invitations WHERE id = $1 OR email IN ($2, $3)`, [invitationId ?? "00000000-0000-0000-0000-000000000000", ownerEmail, invitedEmail]);
     if (orgId) { await pool.query(`DELETE FROM users WHERE "orgId" = $1`, [orgId]); await pool.query(`DELETE FROM organizations WHERE id = $1`, [orgId]); }
     if (ownerId) await admin.auth.admin.deleteUser(ownerId); if (invitedId) await admin.auth.admin.deleteUser(invitedId);
