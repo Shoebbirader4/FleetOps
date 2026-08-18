@@ -11,7 +11,7 @@ import { Route, Switch, useRoute } from "wouter";
 
 function WorkspaceRoute() {
   const [, params] = useRoute("/workspace/:section");
-  return <Home initialSection={decodeURIComponent(params?.section ?? "Command center")} />;
+  return <GuardedWorkspaceRoute section={decodeURIComponent(params?.section ?? "Command center")} allowedRoles={["SUPERADMIN", "FLEET_MANAGER", "INVENTORY_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "ACCOUNTANT"]} />;
 }
 
 function DefaultRoute() {
@@ -28,10 +28,10 @@ function GuardedWorkspaceRoute({ section, allowedRoles }: { section: string; all
 
 function FleetManagerRoute() { return <GuardedWorkspaceRoute section="Fleet manager workspace" allowedRoles={["FLEET_MANAGER"]} />; }
 function MechanicRoute() { return <GuardedWorkspaceRoute section="Mechanic workspace" allowedRoles={["MECHANIC", "TECHNICIAN"]} />; }
-function DriverRoute() { return <GuardedWorkspaceRoute section="Driver portal" allowedRoles={["DRIVER", "SUPERADMIN"]} />; }
-function AccountantRoute() { return <GuardedWorkspaceRoute section="Accountant ledger" allowedRoles={["ACCOUNTANT", "SUPERADMIN"]} />; }
+function DriverRoute() { return <GuardedWorkspaceRoute section="Driver portal" allowedRoles={["DRIVER"]} />; }
+function AccountantRoute() { return <GuardedWorkspaceRoute section="Accountant ledger" allowedRoles={["ACCOUNTANT"]} />; }
 function TeamRoute() { return <GuardedWorkspaceRoute section="Team" allowedRoles={["SUPERADMIN"]} />; }
-function InventoryRoute() { return <GuardedWorkspaceRoute section="Inventory" allowedRoles={["INVENTORY_MANAGER", "SUPERADMIN"]} />; }
+function InventoryRoute() { return <GuardedWorkspaceRoute section="Inventory manager workspace" allowedRoles={["INVENTORY_MANAGER"]} />; }
 
 function App() {
   return (

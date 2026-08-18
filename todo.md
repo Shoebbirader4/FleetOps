@@ -259,3 +259,7 @@
 - [x] Run regression tests and publish the combined Superadmin and Technician validation result.
 - [x] Resolve or explicitly document the Technician role boundary for component creation and odometer updates; current router guards allow Mechanic but deny Technician.
 - [x] Correct the dedicated Superadmin harness to validate onboarding state before completion and rerun both role lifecycles.
+- [x] Remove legacy broad workspace navigation for authenticated members and route each role to its own workspace surface.
+- [x] Keep Superadmin on the executive organization workspace while preserving organization-wide oversight without specialist member navigation.
+- [x] Add role-routing and navigation-visibility regression coverage for Superadmin, Fleet Manager, Inventory Manager, Mechanic, Technician, Driver, and Accountant.
+- [x] Verify shared organization context remains visible and cross-role operational handoffs remain connected after workspace isolation.

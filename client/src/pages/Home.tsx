@@ -40,12 +40,14 @@ import { useFleetOpsAuth } from "@/hooks/useFleetOpsAuth";
 import { useFleetOpsRealtime } from "@/hooks/useFleetOpsRealtime";
 import FunctionalWorkspace from "@/components/FunctionalWorkspace";
 import OrganizationOnboarding from "@/components/OrganizationOnboarding";
+import { roleNavAccess } from "@/workspaceAccess";
 
 const roles = [
   { name: "Owner command center", short: "Owner", icon: LayoutDashboard },
   { name: "Fleet manager workspace", short: "Fleet manager", icon: Bus },
   { name: "Inventory manager workspace", short: "Inventory", icon: Package },
   { name: "Mechanic workspace", short: "Mechanic", icon: Wrench },
+  { name: "Technician workspace", short: "Technician", icon: Wrench },
   { name: "Driver workspace", short: "Driver", icon: ClipboardCheck },
   { name: "Accountant workspace", short: "Accountant", icon: IndianRupee },
 ];
@@ -64,16 +66,6 @@ const navItems = [
   { label: "Driver portal", icon: ClipboardCheck },
   { label: "Accountant ledger", icon: IndianRupee },
 ];
-
-const roleNavAccess: Record<string, string[]> = {
-  SUPERADMIN: navItems.map((item) => item.label),
-  FLEET_MANAGER: ["Fleet manager workspace", "Command center", "Vehicles", "Work orders", "Notifications", "Compliance vault"],
-  INVENTORY_MANAGER: ["Inventory manager workspace", "Inventory", "Notifications", "Purchase orders"],
-  MECHANIC: ["Mechanic workspace", "Work orders", "Notifications"],
-  TECHNICIAN: ["Mechanic workspace", "Work orders", "Notifications"],
-  DRIVER: ["Driver portal", "Notifications"],
-  ACCOUNTANT: ["Accountant ledger", "P&L analytics", "Notifications"],
-};
 
 const formatInr = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 
@@ -102,21 +94,26 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   }, []);
   const { data: backendSummary, isLoading: summaryLoading, isError: summaryError } = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false });
   const metadataNeedsOnboarding = session?.user.user_metadata?.needsOnboarding === true || session?.user.user_metadata?.needsOnboarding === "true";
+  const backendRole = String(backendSummary?.role ?? "");
   const operationalEnabled = Boolean(session && backendSummary && !metadataNeedsOnboarding && !backendSummary.needsOnboarding);
-  const { data: liveVehicles, isLoading: vehiclesLoading, isError: vehiclesError } = trpc.vehicles.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
-  const { data: liveOrders, isLoading: ordersLoading, isError: ordersError } = trpc.workOrders.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
-  const { data: liveInventory, isLoading: inventoryLoading, isError: inventoryError } = trpc.inventory.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const canReadVehicles = ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER"].includes(backendRole);
+  const canReadWorkOrders = ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"].includes(backendRole);
+  const canReadInventory = ["SUPERADMIN", "INVENTORY_MANAGER"].includes(backendRole);
+  const canReadFinancials = ["SUPERADMIN", "ACCOUNTANT"].includes(backendRole);
+  const { data: liveVehicles, isLoading: vehiclesLoading, isError: vehiclesError } = trpc.vehicles.list.useQuery(undefined, { enabled: operationalEnabled && canReadVehicles, retry: false });
+  const { data: liveOrders, isLoading: ordersLoading, isError: ordersError } = trpc.workOrders.list.useQuery(undefined, { enabled: operationalEnabled && canReadWorkOrders, retry: false });
+  const { data: liveInventory, isLoading: inventoryLoading, isError: inventoryError } = trpc.inventory.list.useQuery(undefined, { enabled: operationalEnabled && canReadInventory, retry: false });
   const { data: liveNotifications, isLoading: notificationsLoading, isError: notificationsError } = trpc.notifications.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
   const { data: liveActivity, isLoading: activityLoading, isError: activityError } = trpc.activity.recent.useQuery(undefined, { enabled: operationalEnabled, retry: false });
-  const { data: liveFinancials } = trpc.financials.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
-  const { data: billingStatus } = trpc.billing.status.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const { data: liveFinancials } = trpc.financials.list.useQuery(undefined, { enabled: operationalEnabled && canReadFinancials, retry: false });
+  const { data: billingStatus } = trpc.billing.status.useQuery(undefined, { enabled: operationalEnabled && backendRole === "SUPERADMIN", retry: false });
   const trpcUtils = trpc.useUtils();
   const completeWorkOrder = trpc.workOrders.complete.useMutation({ onSuccess: () => { toast.success("Work order completed", { description: "The order and inventory ledger were updated." }); void trpcUtils.workOrders.list.invalidate(); void trpcUtils.dashboard.summary.invalidate(); }, onError: (error) => toast.error("Completion failed", { description: error.message }) });
   useFleetOpsRealtime(backendSummary?.org?.id);
   const persistedVehicles = useMemo(() => liveVehicles?.map((vehicle: any) => ({ id: vehicle.licensePlate, name: `${vehicle.make} ${vehicle.model} · ${vehicle.year}`, health: vehicle.status === "ACTIVE" ? 100 : 0, status: vehicle.status === "ACTIVE" ? "On route" : "At depot", odo: `${Number(vehicle.currentOdometer).toLocaleString("en-IN")} km`, service: vehicle.nextServiceAt ? `Next service ${new Date(vehicle.nextServiceAt).toLocaleDateString("en-IN")}` : "No service date recorded", tone: vehicle.status === "ACTIVE" ? "good" : "warn" })) ?? [], [liveVehicles]);
   const persistedOrders = useMemo(() => liveOrders?.filter((order: any) => order?.id).map((order: any) => ({ id: order.id.slice(0, 8).toUpperCase(), sourceId: order.id, title: order.title ?? "Untitled work order", vehicle: order.vehicle?.licensePlate ?? "Vehicle unavailable", owner: order.assignedMechanic?.fullName ?? "Unassigned", priority: order.priority ? order.priority[0] + order.priority.slice(1).toLowerCase() : "Unspecified", due: order.status === "COMPLETED" ? "Completed" : order.dueDate ? new Date(order.dueDate).toLocaleDateString("en-IN") : "No due date", status: order.status === "COMPLETED" ? "Completed" : order.status ?? "OPEN" })) ?? [], [liveOrders]);
   const [activeNav, setActiveNav] = useState(initialSection);
-  const currentRole = String(backendSummary?.role ?? "SUPERADMIN");
+  const currentRole = backendRole || "SUPERADMIN";
   const [role, setRole] = useState(roles[0]);
   useEffect(() => {
     const matched = roles.find((item) => (currentRole === "SUPERADMIN" ? item.short === "Owner" : item.name.toUpperCase().startsWith(currentRole.replaceAll("_", " "))));
@@ -137,9 +134,10 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   const searchInputRef = useRef<HTMLInputElement>(null);
   const allowedNavLabels = roleNavAccess[currentRole] ?? roleNavAccess.SUPERADMIN;
   const allowedNavItems = navItems.filter((item) => allowedNavLabels.includes(item.label));
+  const roleMenuOptions = currentRole === "SUPERADMIN" ? roles.filter((item) => item.short === "Owner") : roles.filter((item) => item.short === role.short);
   useEffect(() => {
     if (session && !allowedNavLabels.includes(activeNav)) setActiveNav(allowedNavLabels[0] ?? "Command center");
-    if (session && window.localStorage.getItem("fleetops.openTeam") === "1") { window.localStorage.removeItem("fleetops.openTeam"); setActiveNav("Team"); }
+    if (session && currentRole === "SUPERADMIN" && window.localStorage.getItem("fleetops.openTeam") === "1") { window.localStorage.removeItem("fleetops.openTeam"); setActiveNav("Team"); }
   }, [activeNav, allowedNavLabels, session]);
 
   const handleSignIn = async (event: React.FormEvent) => {
@@ -202,11 +200,11 @@ export default function Home({ initialSection = "Command center" }: { initialSec
 
   const chooseRole = (nextRole: typeof role) => {
     setShowRoleMenu(false);
-    if (nextRole.name !== "Owner command center") { toast.info("Role switching is disabled", { description: "FleetOps opens the workspace assigned to your authenticated account." }); return; }
+    if (currentRole !== "SUPERADMIN" || nextRole.name !== "Owner command center") { toast.info("Role switching is disabled", { description: "FleetOps opens the workspace assigned to your authenticated account." }); return; }
     setActiveNav("Command center");
   };
 
-  if (activeNav !== "Command center") return <div className="app-shell"><aside className={`sidebar ${showMobileNav ? "mobile-open" : ""}`}><div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div><div className="nav-caption">Workspace</div><nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => setActiveNav(item.label)}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav></aside><main className="main-canvas"><header className="topbar"><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="role-select" onClick={handleSignOut}>{session ? "Sign out" : "Sign in"}</button></div></header><section className="page-content"><FunctionalWorkspace section={activeNav} session={Boolean(session)} organizationName={backendSummary?.org?.name} onBack={() => setActiveNav("Command center")} /></section></main></div>;
+  if (activeNav !== "Command center") return <div className="app-shell"><aside className={`sidebar ${showMobileNav ? "mobile-open" : ""}`}><div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div><div className="nav-caption">Workspace</div><nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => setActiveNav(item.label)}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav></aside><main className="main-canvas"><header className="topbar"><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="role-select" onClick={handleSignOut}>{session ? "Sign out" : "Sign in"}</button></div></header><section className="page-content"><FunctionalWorkspace section={activeNav} session={Boolean(session)} organizationName={backendSummary?.org?.name} onBack={() => setActiveNav(allowedNavLabels[0] ?? "Command center")} /></section></main></div>;
 
   return (
     <div className="app-shell">
@@ -215,11 +213,11 @@ export default function Home({ initialSection = "Command center" }: { initialSec
         <div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div>
         <div className="nav-caption">Workspace</div>
         <nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => { setActiveNav(item.label); setShowMobileNav(false); }}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav>
-        <div className="sidebar-bottom"><div className="trial-card"><div className="trial-kicker"><Sparkles size={13} /> {billingStatus?.tier?.replaceAll("_", " ") ?? "Subscription"} <span>{billingStatus ? `${billingStatus.daysRemaining} days` : "—"}</span></div><strong>{vehicleCount} of {billingStatus?.maxVehicles ?? "—"} vehicles used</strong><div className="trial-progress"><span style={{ width: `${billingStatus?.maxVehicles ? Math.min(100, (vehicleCount / billingStatus.maxVehicles) * 100) : 0}%` }} /></div><button onClick={() => setActiveNav("Billing")}>Review upgrade <SquareArrowOutUpRight size={13} /></button></div><button className="nav-item" onClick={() => setActiveNav("Billing")}><Settings2 size={17} /><span>Workspace settings</span></button><div className="user-chip"><div className="user-avatar">{operatorInitials}</div><div><strong>{operatorName}</strong><span>Authenticated operator</span></div><MoreHorizontal size={16} /></div></div>
+        <div className="sidebar-bottom">{currentRole === "SUPERADMIN" && <><div className="trial-card"><div className="trial-kicker"><Sparkles size={13} /> {billingStatus?.tier?.replaceAll("_", " ") ?? "Subscription"} <span>{billingStatus ? `${billingStatus.daysRemaining} days` : "—"}</span></div><strong>{vehicleCount} of {billingStatus?.maxVehicles ?? "—"} vehicles used</strong><div className="trial-progress"><span style={{ width: `${billingStatus?.maxVehicles ? Math.min(100, (vehicleCount / billingStatus.maxVehicles) * 100) : 0}%` }} /></div><button onClick={() => setActiveNav("Billing")}>Review upgrade <SquareArrowOutUpRight size={13} /></button></div><button className="nav-item" onClick={() => setActiveNav("Billing")}><Settings2 size={17} /><span>Workspace settings</span></button></>}<div className="user-chip"><div className="user-avatar">{operatorInitials}</div><div><strong>{operatorName}</strong><span>Authenticated operator</span></div><MoreHorizontal size={16} /></div></div>
       </aside>
 
       <main className="main-canvas">
-        <header className="topbar"><button className="mobile-menu" onClick={() => setShowMobileNav(true)} aria-label="Open navigation"><Menu size={19} /></button><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="command-button" onClick={() => { setQuickFindOpen((open) => !open); setQuery(""); }}><Command size={15} /> <span>Quick find</span><kbd>⌘ K</kbd></button><button className="notification-button" onClick={() => setActiveNav("Notifications")} aria-label="Notifications"><Bell size={18} />{liveNotifications?.filter((item: any) => !item.isRead).length ? <i>{liveNotifications.filter((item: any) => !item.isRead).length}</i> : null}</button><div className="role-select-wrap"><button className="role-select" onClick={() => setShowRoleMenu(!showRoleMenu)}><span className="role-dot" /><span>{role.short}</span><ChevronDown size={14} /></button>{showRoleMenu && <div className="role-menu">{roles.map((item: any) => <button key={item.name} onClick={() => chooseRole(item)}><item.icon size={15} /><span>{item.name}</span>{role.name === item.name && <Check size={14} />}</button>)}<button className="role-menu-auth" onClick={() => session ? void handleSignOut() : toast.info("Supabase Auth required", { description: "Sign in with your FleetOps Supabase account to sync this workspace." })}>{session ? "Sign out" : "Sign in to sync"}</button></div>}</div></div></header>
+        <header className="topbar"><button className="mobile-menu" onClick={() => setShowMobileNav(true)} aria-label="Open navigation"><Menu size={19} /></button><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions">{currentRole === "SUPERADMIN" && <button className="command-button" onClick={() => { setQuickFindOpen((open) => !open); setQuery(""); }}><Command size={15} /> <span>Quick find</span><kbd>⌘ K</kbd></button>}<button className="notification-button" onClick={() => setActiveNav("Notifications")} aria-label="Notifications"><Bell size={18} />{liveNotifications?.filter((item: any) => !item.isRead).length ? <i>{liveNotifications.filter((item: any) => !item.isRead).length}</i> : null}</button><div className="role-select-wrap"><button className="role-select" onClick={() => { if (currentRole === "SUPERADMIN") setShowRoleMenu(!showRoleMenu); }} aria-haspopup={currentRole === "SUPERADMIN"} aria-expanded={currentRole === "SUPERADMIN" ? showRoleMenu : undefined}><span className="role-dot" /><span>{role.short}</span>{currentRole === "SUPERADMIN" && <ChevronDown size={14} />}</button>{showRoleMenu && <div className="role-menu">{roleMenuOptions.map((item: any) => <button key={item.name} onClick={() => chooseRole(item)}><item.icon size={15} /><span>{item.name}</span>{role.name === item.name && <Check size={14} />}</button>)}<button className="role-menu-auth" onClick={() => session ? void handleSignOut() : toast.info("Supabase Auth required", { description: "Sign in with your FleetOps Supabase account to sync this workspace." })}>{session ? "Sign out" : "Sign in to sync"}</button></div>}</div></div></header>
 
         {quickFindOpen && <div className="quick-find-panel"><div className="quick-find-head"><div><div className="panel-kicker">Command search</div><strong>Find a vehicle or work order</strong></div><button className="icon-button" onClick={() => setQuickFindOpen(false)} aria-label="Close search"><X size={16} /></button></div><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Registration, route, order, mechanic…" />{query && <div className="quick-find-results">{quickFindResults.length ? quickFindResults.map((result) => <button key={`${result.type}-${result.id}`} onClick={() => { setQuickFindOpen(false); setActiveNav(result.type === "Vehicle" ? "Vehicles" : "Work orders"); }}><span className="quick-find-type">{result.type}</span><span><strong>{result.title}</strong><small>{result.detail}</small></span><ArrowUpRight size={14} /></button>) : <div className="quick-find-empty">No vehicle or work order matches “{query}”.</div>}</div>}</div>}
 
