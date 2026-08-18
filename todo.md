@@ -145,3 +145,11 @@
 
 - [ ] Verify Team navigation with the real Superadmin account after publishing the 401 refresh fix.
 - [ ] If Team still fails, inspect the production Team procedure response without signing the user out.
+
+- [x] Diagnose why Team invitation submission produces no visible result and no delivered email.
+- [x] Ensure invitation creation returns a persisted token/status and explicit UI success or error feedback.
+- [x] Configure or clearly surface the absence of an email provider for invitation delivery without claiming an email was sent.
+- [ ] Verify the Team invitation flow in production with a real Superadmin account.
+
+- [ ] Verify the published Team invitation flow with the real Superadmin account and confirm the token appears after submission.
+- [ ] If email delivery is required, obtain and configure an approved transactional email provider separately; do not represent manual-token delivery as email delivery.
