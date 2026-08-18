@@ -117,3 +117,10 @@
 - [x] Capture the exact second-attempt production signup error and identify the remaining live Supabase failure.
 - [x] Verify live organization and user schema defaults/constraints against the Auth trigger and provisioning path.
 - [x] Apply and integration-test the definitive signup fix before republishing.
+
+- [x] Fix Superadmin login redirect into organization onboarding for provisioned accounts.
+- [x] Fix organization creation completion and refresh of onboarding metadata after setup.
+- [ ] Verify login, organization creation, and Team handoff with the real production Superadmin account.
+
+- [x] Refresh the Supabase Auth session metadata after successful organization onboarding completion.
+- [ ] Verify with the real Superadmin account that onboarding exits into Team or Command Center without a stale-session loop.

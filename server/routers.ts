@@ -53,7 +53,10 @@ export const appRouter = router({
         const org = await tx.organization.update({ where: { id: ctx.fleetopsUser.orgId }, data: { name: input.orgName } });
         return { user, org };
       });
-      await supabaseAdmin.auth.admin.updateUserById(ctx.fleetopsUser.authUserId, { user_metadata: { ...ctx.fleetopsUser, fullName: input.fullName, orgName: input.orgName, needsOnboarding: false } });
+      const authUser = await getSupabaseAuthIdentity(ctx.req);
+      if (!authUser) throw new TRPCError({ code: "UNAUTHORIZED", message: "Your Supabase session expired. Sign in again to finish onboarding." });
+      const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(authUser.id, { user_metadata: { ...authUser.user_metadata, fullName: input.fullName, orgName: input.orgName, needsOnboarding: false } });
+      if (metadataError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Organization was saved, but onboarding state could not be finalized: ${metadataError.message}` });
       return updated;
     }),
     acceptInvite: publicProcedure.input(z.object({ token: z.string().uuid(), fullName: z.string().min(2).optional() })).mutation(async ({ ctx, input }) => {
@@ -79,7 +82,10 @@ export const appRouter = router({
         fleetDb.notification.count({ where: { orgId, recipientId: ctx.fleetopsUser.id, isRead: false } }),
         fleetDb.financialRecord.aggregate({ where: { orgId, type: "EXPENSE" }, _sum: { amount: true } }),
       ]);
-      return { org: ctx.fleetopsUser.org, role: ctx.fleetopsUser.role, vehicles, openWorkOrders, inventoryAlerts, unreadNotifications, monthlyExpense: spend._sum.amount ?? 0 };
+      const authUser = await getSupabaseAuthIdentity(ctx.req);
+      const defaultOrgName = `${ctx.fleetopsUser.fullName}'s Fleet`;
+      const needsOnboarding = authUser?.user_metadata?.needsOnboarding === true || authUser?.user_metadata?.needsOnboarding === "true" || ctx.fleetopsUser.org.name === defaultOrgName;
+      return { org: ctx.fleetopsUser.org, role: ctx.fleetopsUser.role, needsOnboarding, vehicles, openWorkOrders, inventoryAlerts, unreadNotifications, monthlyExpense: spend._sum.amount ?? 0 };
     }),
   }),
   components: router({

@@ -3,7 +3,7 @@ import { Building2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
-type Props = { initialName?: string; initialOrganization?: string; onComplete: () => void };
+type Props = { initialName?: string; initialOrganization?: string; onComplete: () => void | Promise<void> };
 
 export default function OrganizationOnboarding({ initialName = "", initialOrganization = "", onComplete }: Props) {
   const [fullName, setFullName] = useState(initialName);
