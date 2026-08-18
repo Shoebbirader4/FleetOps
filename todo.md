@@ -234,3 +234,11 @@
 - [x] Run and publish the Driver lifecycle validation with the full test suite and report any production-edge limitations.
 - [x] Fix the Driver fuel-log transaction failure (`fn is not a function`) discovered by the lifecycle harness and add regression coverage before rerunning.
 - [x] Fix Driver odometer maintenance evaluation when a vehicle has no loaded components and add regression coverage before rerunning.
+- [x] Add a Mechanic background lifecycle covering invitation creation, organization-bound profile completion, role routing, assigned work-order handling, inventory consumption, component operations, denial checks, single-use rejection, and cleanup.
+- [x] Add regression coverage for Mechanic invitation binding, work-order assignment isolation, completion/inventory mutations, workspace permissions, and cleanup.
+- [x] Run and publish the Mechanic lifecycle validation with the full test suite and report any production-edge limitations.
+- [x] Fix Mechanic odometer authorization incorrectly applying Driver assignment isolation and add regression coverage before rerunning.
+- [x] Fix Mechanic work-order completion when inserting work-order parts requires an explicit ID and add regression coverage before rerunning.
+- [x] Fix Mechanic work-order completion notification handling when nested vehicle includes are unavailable and add regression coverage before rerunning.
+- [x] Fix Mechanic activity-feed rendering when nested vehicle relations are unavailable and add regression coverage before rerunning.
+- [x] Fix Mechanic activity-feed sorting when database timestamps arrive as strings and add regression coverage before rerunning.

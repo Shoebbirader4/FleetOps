@@ -46,7 +46,7 @@ async function assignedVehicleIds(ctx: any): Promise<string[]> {
 }
 
 async function assertDriverVehicle(ctx: any, vehicleId: string) {
-  if (ctx.fleetopsUser.role === "SUPERADMIN") return;
+  if (ctx.fleetopsUser.role !== "DRIVER") return;
   const assigned = await fleetDb.vehicleAssignment.findFirst({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id, vehicleId, active: true } });
   if (!assigned) throw new TRPCError({ code: "FORBIDDEN", message: "Drivers may only access their currently assigned vehicle." });
 }
@@ -180,11 +180,11 @@ export const appRouter = router({
           if (!part || part.quantityOnHand < requested.qtyUsed) throw new TRPCError({ code: "BAD_REQUEST", message: "Insufficient inventory for one or more parts." });
           partsCost += Number(part.unitCost) * requested.qtyUsed;
           await tx.inventoryPart.update({ where: { id: part.id }, data: { quantityOnHand: { decrement: requested.qtyUsed } } });
-          await tx.workOrderPart.create({ data: { workOrderId: order.id, partId: part.id, qtyUsed: requested.qtyUsed, unitPrice: part.unitCost } });
+          await tx.workOrderPart.create({ data: { id: crypto.randomUUID(), workOrderId: order.id, partId: part.id, qtyUsed: requested.qtyUsed, unitPrice: part.unitCost } });
         }
         const completed = await tx.workOrder.update({ where: { id: order.id }, data: { status: WorkOrderStatus.COMPLETED, completedAt: new Date() } });
         const admins = await tx.user.findMany({ where: { orgId: ctx.fleetopsUser.orgId, role: "SUPERADMIN" } });
-        if (admins.length) await tx.notification.createMany({ data: admins.map((admin: any) => ({ id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, recipientId: admin.id, title: "Work order completed", message: `${order.vehicle.licensePlate} repair completed. Parts cost: ₹${partsCost.toLocaleString("en-IN")}.`, type: "WORK_ORDER_COMPLETE", referenceId: order.id, isRead: false, createdAt: new Date() })) });
+        if (admins.length) await tx.notification.createMany({ data: admins.map((admin: any) => ({ id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, recipientId: admin.id, title: "Work order completed", message: `${order.vehicle?.licensePlate ?? order.vehicleId} repair completed. Parts cost: ₹${partsCost.toLocaleString("en-IN")}.`, type: "WORK_ORDER_COMPLETE", referenceId: order.id, isRead: false, createdAt: new Date() })) });
         return { completed, partsCost };
       });
       await evaluateLowInventory(ctx.fleetopsUser.orgId);
@@ -276,10 +276,10 @@ export const appRouter = router({
         fleetDb.odometerLog.findMany({ where: ctx.fleetopsUser.role === "DRIVER" ? { vehicle: { orgId: ctx.fleetopsUser.orgId }, driverId: ctx.fleetopsUser.id } : { vehicle: { orgId: ctx.fleetopsUser.orgId } }, include: { vehicle: true }, orderBy: { createdAt: "desc" }, take: 10 }),
       ]);
       return [
-        ...orders.map((order: any) => ({ id: order.id, kind: "work_order", title: order.title, detail: `${order.vehicle.licensePlate} · ${order.status}`, createdAt: order.createdAt })),
+        ...orders.map((order: any) => ({ id: order.id, kind: "work_order", title: order.title, detail: `${order.vehicle?.licensePlate ?? order.vehicleId} · ${order.status}`, createdAt: order.createdAt })),
         ...alerts.map((alert: any) => ({ id: alert.id, kind: "notification", title: alert.title, detail: alert.message, createdAt: alert.createdAt })),
-        ...odometers.map((log: any) => ({ id: log.id, kind: "odometer", title: `Odometer updated · ${log.vehicle.licensePlate}`, detail: `${Number(log.reading).toLocaleString("en-IN")} km${log.isFlagged ? " · flagged" : ""}`, createdAt: log.createdAt })),
-      ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 20);
+        ...odometers.map((log: any) => ({ id: log.id, kind: "odometer", title: `Odometer updated · ${log.vehicle?.licensePlate ?? log.vehicleId}`, detail: `${Number(log.reading).toLocaleString("en-IN")} km${log.isFlagged ? " · flagged" : ""}`, createdAt: log.createdAt })),
+      ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 20);
     }),
   }),
   notifications: router({
