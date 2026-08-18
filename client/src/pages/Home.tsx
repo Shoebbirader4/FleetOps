@@ -29,6 +29,7 @@ import {
   Sparkles,
   SquareArrowOutUpRight,
   TrendingUp,
+  RefreshCw,
   Users,
   Wrench,
   X,
@@ -99,13 +100,15 @@ export default function Home({ initialSection = "Command center" }: { initialSec
     return () => window.removeEventListener("fleetops-session-expired", onExpired);
   }, []);
   const { data: backendSummary, isLoading: summaryLoading, isError: summaryError } = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false });
-  const { data: liveVehicles, isLoading: vehiclesLoading, isError: vehiclesError } = trpc.vehicles.list.useQuery(undefined, { enabled: Boolean(session), retry: false });
-  const { data: liveOrders, isLoading: ordersLoading, isError: ordersError } = trpc.workOrders.list.useQuery(undefined, { enabled: Boolean(session), retry: false });
-  const { data: liveInventory, isLoading: inventoryLoading, isError: inventoryError } = trpc.inventory.list.useQuery(undefined, { enabled: Boolean(session), retry: false });
-  const { data: liveNotifications, isLoading: notificationsLoading, isError: notificationsError } = trpc.notifications.list.useQuery(undefined, { enabled: Boolean(session), retry: false });
-  const { data: liveActivity, isLoading: activityLoading, isError: activityError } = trpc.activity.recent.useQuery(undefined, { enabled: Boolean(session), retry: false });
-  const { data: liveFinancials } = trpc.financials.list.useQuery(undefined, { enabled: Boolean(session), retry: false });
-  const { data: billingStatus } = trpc.billing.status.useQuery(undefined, { enabled: Boolean(session), retry: false });
+  const metadataNeedsOnboarding = session?.user.user_metadata?.needsOnboarding === true || session?.user.user_metadata?.needsOnboarding === "true";
+  const operationalEnabled = Boolean(session && backendSummary && !metadataNeedsOnboarding && !backendSummary.needsOnboarding);
+  const { data: liveVehicles, isLoading: vehiclesLoading, isError: vehiclesError } = trpc.vehicles.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const { data: liveOrders, isLoading: ordersLoading, isError: ordersError } = trpc.workOrders.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const { data: liveInventory, isLoading: inventoryLoading, isError: inventoryError } = trpc.inventory.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const { data: liveNotifications, isLoading: notificationsLoading, isError: notificationsError } = trpc.notifications.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const { data: liveActivity, isLoading: activityLoading, isError: activityError } = trpc.activity.recent.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const { data: liveFinancials } = trpc.financials.list.useQuery(undefined, { enabled: operationalEnabled, retry: false });
+  const { data: billingStatus } = trpc.billing.status.useQuery(undefined, { enabled: operationalEnabled, retry: false });
   const trpcUtils = trpc.useUtils();
   const completeWorkOrder = trpc.workOrders.complete.useMutation({ onSuccess: () => { toast.success("Work order completed", { description: "The order and inventory ledger were updated." }); void trpcUtils.workOrders.list.invalidate(); void trpcUtils.dashboard.summary.invalidate(); }, onError: (error) => toast.error("Completion failed", { description: error.message }) });
   useFleetOpsRealtime(backendSummary?.org?.id);
@@ -170,7 +173,9 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   const operatorName = session?.user.user_metadata?.fullName ?? session?.user.email ?? "";
   const operatorInitials = operatorName.slice(0, 2).toUpperCase();
 
-  if (session && (session.user.user_metadata?.needsOnboarding || backendSummary?.needsOnboarding)) return <OrganizationOnboarding initialName={String(session.user.user_metadata?.fullName ?? backendSummary?.org?.name ?? "")} initialOrganization={String(session.user.user_metadata?.orgName ?? "")} onComplete={async () => { const { error } = await refreshSession(); if (error) { toast.error("Session refresh failed", { description: error.message }); return; } window.localStorage.setItem("fleetops.openTeam", "1"); window.location.reload(); }} />;
+  if (session && (metadataNeedsOnboarding || backendSummary?.needsOnboarding)) return <OrganizationOnboarding initialName={String(session.user.user_metadata?.fullName ?? backendSummary?.org?.name ?? "")} initialOrganization={String(session.user.user_metadata?.orgName ?? "")} onComplete={async () => { const { error } = await refreshSession(); if (error) { toast.error("Session refresh failed", { description: error.message }); return; } window.localStorage.setItem("fleetops.openTeam", "1"); window.location.reload(); }} />;
+  if (session && !backendSummary && summaryError) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>We could not load your workspace.</h1><p>Your Supabase session is active, but the organization summary did not respond. Refresh the page to retry without losing your session.</p><button className="primary-button" onClick={() => window.location.reload()}>Retry workspace load</button></section></main>;
+  if (session && !backendSummary && summaryLoading) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>Loading your workspace.</h1><p>We are checking your organization and role before opening operational data.</p><div className="workspace-state"><RefreshCw className="spin" size={18} /> Connecting to Supabase…</div></section></main>;
   if (!authLoading && !session) return <div className="auth-page"><div className="auth-card"><div className="brand-lockup auth-brand"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div></div><div className="panel-kicker">Fleet operations workspace</div><h1>{authMode === "signup" ? "Create your Superadmin account." : "Sign in to your fleet ledger."}</h1><p>{authMode === "signup" ? "Start with your name and a secure Supabase Auth account. Organization setup comes immediately after signup." : "Use your Supabase Auth account to access vehicles, work orders, inventory, team access, and financial records."}</p><form onSubmit={authMode === "signup" ? handleSignUp : handleSignIn} className="auth-form">{authMode === "signup" && <label>Full name<input required minLength={2} value={authFullName} onChange={(event) => setAuthFullName(event.target.value)} placeholder="Your full name" /></label>}<label>Email<input required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@company.com" /></label><label>Password<input required minLength={8} type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? authMode === "signup" ? "Creating account…" : "Signing in…" : authMode === "signup" ? "Create Superadmin account" : "Sign in to FleetOps"}</button></form><button className="auth-switch" onClick={() => { setAuthMode(authMode === "signup" ? "signin" : "signup"); setAuthError(""); }}>{authMode === "signup" ? "Already have an account? Sign in" : "New to FleetOps? Create the first Superadmin account"}</button></div></div>;
 
   const completeOrder = (id?: string) => {

@@ -134,3 +134,7 @@
 
 - [x] Add null-safe guards for procurement and generic resource-row mappings that assume row or order ids exist.
 - [ ] Reproduce the authenticated production flow after republishing and confirm the undefined.id crash is eliminated before final verification.
+
+- [x] Diagnose slow authenticated production loading and identify blocking queries or render gates.
+- [x] Add a fast, explicit authenticated loading/onboarding state with independent query failures.
+- [ ] Verify production load time and Superadmin onboarding responsiveness after republishing.
