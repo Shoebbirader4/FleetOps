@@ -65,6 +65,6 @@ describe("RBAC and invitation procedures", () => {
     mocks.invitation.create.mockResolvedValue({ id: "inv-1", email: "driver@example.com", role: "DRIVER", tokenHash: "token-1" });
     const result = await appRouter.createCaller(baseContext).team.invite({ email: "driver@example.com", role: "DRIVER" });
     expect(result).toMatchObject({ id: "inv-1", delivery: "EMAIL", joinUrl: expect.stringContaining("/join/") });
-    expect(mocks.invitation.create).toHaveBeenCalledWith({ data: expect.objectContaining({ id: expect.any(String), createdAt: expect.any(Date), updatedAt: expect.any(Date), tokenHash: expect.any(String) }) });
+    expect(mocks.invitation.create).toHaveBeenCalledWith({ data: expect.objectContaining({ id: expect.any(String), createdAt: expect.any(Date), tokenHash: expect.any(String) }) });
   });
 });

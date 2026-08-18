@@ -194,11 +194,13 @@
 
 - [x] Create and deliver a comprehensive implementation summary covering FleetOps from initial frontend through current published release, validation, deferred Razorpay scope, and remaining real-account verification.
 
-- [ ] Verify the reported `index-DPlPMMp2.js` asset is not the current release asset and compare it with the latest HTML mapping.
-- [ ] Force a fresh published asset revision containing the current tRPC Authorization header fix and verify the live mapping.
+- [x] Verify the reported `index-DPlPMMp2.js` asset is not the current release asset and compare it with the latest HTML mapping.
+- [x] Force a fresh published asset revision containing the current tRPC Authorization header fix and verify the live mapping.
 
-- [ ] Run a controlled background end-to-end test with temporary Superadmin and invited-user identities, covering organization provisioning, invitation redemption, and protected RBAC procedures.
-- [ ] Clean up all temporary test identities and records and document browser-only verification limits.
+- [x] Run a controlled background end-to-end test with temporary Superadmin and invited-user identities, covering organization provisioning, invitation redemption, and protected RBAC procedures.
+- [x] Clean up all temporary test identities and records and document browser-only verification limits.
 
-- [ ] Normalize organization date fields returned from PostgreSQL before role, billing, and invitation procedures call Date methods.
-- [ ] Rerun the background invitation workflow after date normalization and confirm the temporary data cleanup succeeds.
+- [x] Normalize organization date fields returned from PostgreSQL before role, billing, and invitation procedures call Date methods.
+- [x] Rerun the background invitation workflow after date normalization and confirm the temporary data cleanup succeeds.
+
+- [x] Diagnose the invitation INSERT failure revealed by the background test and align the Drizzle invitation mapping with the live PostgreSQL schema.

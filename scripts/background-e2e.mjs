@@ -45,7 +45,7 @@ async function signIn(email) {
 async function check(name, fn) {
   try {
     const value = await fn();
-    results.push({ name, status: "PASS", detail: typeof value === "string" ? value : "completed" });
+    results.push({ name, status: "PASS", detail: typeof value === "string" && value.length > 80 ? "credential obtained" : typeof value === "string" ? value : "completed" });
     return value;
   } catch (error) {
     results.push({ name, status: "FAIL", detail: error instanceof Error ? error.message : String(error) });
@@ -83,7 +83,7 @@ try {
   const joined = await check("Redeem invitation as invited user", () => tRPC("onboarding.acceptInvite", invitedToken, { token: invitation.tokenHash, fullName: "FleetOps E2E Driver" }));
   if (joined.role !== "DRIVER" || joined.orgId !== orgId) throw new Error("Redeemed user role or organization mismatch");
   await check("Confirm invited user cannot access Superadmin billing", async () => {
-    try { await tRPC("billing.status", invitedToken, null); } catch (error) { if (String(error).includes("FORBIDDEN") || String(error).includes("FORBIDDEN")) return "denied as expected"; throw error; }
+    try { await tRPC("billing.status", invitedToken, null, "GET"); } catch (error) { if (String(error).includes("FORBIDDEN") || String(error).includes("FORBIDDEN")) return "denied as expected"; throw error; }
     throw new Error("Driver was allowed to access billing");
   });
   await check("Confirm invitation is no longer reusable", async () => {
@@ -91,14 +91,25 @@ try {
     throw new Error("Redeemed invitation remained reusable");
   });
 } finally {
-  await pool.query(`DELETE FROM invitations WHERE id = $1 OR email IN ($2, $3)`, [invitationId ?? "00000000-0000-0000-0000-000000000000", ownerEmail, invitedEmail]).catch(() => {});
-  if (orgId) {
-    await pool.query(`DELETE FROM users WHERE org_id = $1`, [orgId]).catch(() => {});
-    await pool.query(`DELETE FROM organizations WHERE id = $1`, [orgId]).catch(() => {});
+  try {
+    await pool.query(`DELETE FROM invitations WHERE id = $1 OR email IN ($2, $3)`, [invitationId ?? "00000000-0000-0000-0000-000000000000", ownerEmail, invitedEmail]);
+    if (orgId) {
+      await pool.query(`DELETE FROM users WHERE "orgId" = $1`, [orgId]);
+      await pool.query(`DELETE FROM organizations WHERE id = $1`, [orgId]);
+    }
+    if (ownerId) await admin.auth.admin.deleteUser(ownerId);
+    if (invitedId) await admin.auth.admin.deleteUser(invitedId);
+    const invitationCount = await pool.query(`SELECT COUNT(*)::int AS count FROM invitations WHERE email IN ($1, $2)`, [ownerEmail, invitedEmail]);
+    const userCount = await pool.query(`SELECT COUNT(*)::int AS count FROM users WHERE email IN ($1, $2)`, [ownerEmail, invitedEmail]);
+    const orgCount = orgId ? await pool.query(`SELECT COUNT(*)::int AS count FROM organizations WHERE id = $1`, [orgId]) : { rows: [{ count: 0 }] };
+    const remaining = Number(invitationCount.rows[0].count) + Number(userCount.rows[0].count) + Number(orgCount.rows[0].count);
+    if (remaining > 0) throw new Error(`Cleanup verification found ${remaining} temporary rows remaining`);
+    results.push({ name: "Verify temporary data cleanup", status: "PASS", detail: "temporary Auth users, invitations, users, and organization rows removed" });
+  } catch (error) {
+    results.push({ name: "Verify temporary data cleanup", status: "FAIL", detail: error instanceof Error ? error.message : String(error) });
+  } finally {
+    await pool.end().catch(() => {});
   }
-  if (ownerId) await admin.auth.admin.deleteUser(ownerId).catch(() => {});
-  if (invitedId) await admin.auth.admin.deleteUser(invitedId).catch(() => {});
-  await pool.end().catch(() => {});
 }
 
 console.log(JSON.stringify({ runId, ownerEmail, invitedEmail, results }, null, 2));
