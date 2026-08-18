@@ -124,3 +124,13 @@
 
 - [x] Refresh the Supabase Auth session metadata after successful organization onboarding completion.
 - [ ] Verify with the real Superadmin account that onboarding exits into Team or Command Center without a stale-session loop.
+
+- [x] Diagnose the production undefined.id crash in authenticated onboarding/dashboard rendering.
+- [x] Add null-safe data guards for organization, vehicle, work-order, and role-dependent render paths.
+- [ ] Verify the corrected authenticated production flow after republishing.
+
+- [x] Add and verify null-safe guards for vehicle-derived UI mappings and remaining role/workspace render branches.
+- [ ] Reproduce the authenticated production flow with the real Superadmin account after republishing to confirm the undefined.id crash is eliminated.
+
+- [x] Add null-safe guards for procurement and generic resource-row mappings that assume row or order ids exist.
+- [ ] Reproduce the authenticated production flow after republishing and confirm the undefined.id crash is eliminated before final verification.
