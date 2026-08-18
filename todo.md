@@ -254,3 +254,8 @@
 - [x] Upgrade the Accountant workspace with INR ledger entry, per-vehicle P&L, CPK/TCO metrics, and financial-only navigation.
 - [x] Enforce shared organization context with role-specific record visibility and server-side procedure isolation across all upgraded workspaces.
 - [x] Add workspace regression tests, responsive visual verification, and publish the enhanced workspace checkpoint.
+- [x] Run a dedicated Superadmin/Owner lifecycle covering bootstrap, organization governance, team invitations, fleet/compliance/financial oversight, billing visibility, and cleanup.
+- [x] Run a dedicated Technician lifecycle covering invitation/profile redemption, assigned work-order visibility, component and odometer work, completion behavior, denials, single-use rejection, and cleanup.
+- [x] Run regression tests and publish the combined Superadmin and Technician validation result.
+- [x] Resolve or explicitly document the Technician role boundary for component creation and odometer updates; current router guards allow Mechanic but deny Technician.
+- [x] Correct the dedicated Superadmin harness to validate onboarding state before completion and rerun both role lifecycles.
