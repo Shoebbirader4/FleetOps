@@ -29,6 +29,27 @@ export function requireRole(role: string, allowed: string[]) {
   if (!allowed.includes(role)) throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot perform this action." });
 }
 
+const INVITATION_TIMEOUT_MS = 12_000;
+async function withServerTimeout<T>(promise: Promise<T>, message: string, timeoutMs = INVITATION_TIMEOUT_MS): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    return await Promise.race([promise, new Promise<T>((_, reject) => { timer = setTimeout(() => reject(new TRPCError({ code: "TIMEOUT", message })), timeoutMs); })]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function assignedVehicleIds(ctx: any): Promise<string[]> {
+  const rows = await fleetDb.vehicleAssignment.findMany({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id, active: true } });
+  return rows.map((row: any) => row.vehicleId).filter(Boolean);
+}
+
+async function assertDriverVehicle(ctx: any, vehicleId: string) {
+  if (ctx.fleetopsUser.role === "SUPERADMIN") return;
+  const assigned = await fleetDb.vehicleAssignment.findFirst({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id, vehicleId, active: true } });
+  if (!assigned) throw new TRPCError({ code: "FORBIDDEN", message: "Drivers may only access their currently assigned vehicle." });
+}
+
 export function validateOdometerReading(current: number, reading: number, elapsedDays = 1) {
   if (reading < current) throw new TRPCError({ code: "BAD_REQUEST", message: "Odometer readings cannot move backwards." });
   if (reading - current > Math.max(1, elapsedDays) * 1000) throw new TRPCError({ code: "BAD_REQUEST", message: `Odometer increase exceeds the ${Math.max(1, elapsedDays) * 1000} km limit for the elapsed period.` });
@@ -95,7 +116,11 @@ export const appRouter = router({
     remove: fleetOpsProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const component = await fleetDb.component.findFirst({ where: { id: input.id, vehicle: { orgId: ctx.fleetopsUser.orgId } } }); if (!component) throw new TRPCError({ code: "NOT_FOUND", message: "Component not found." }); return fleetDb.component.delete({ where: { id: input.id } }); }),
   }),
   vehicles: router({
-    list: fleetOpsProcedure.query(({ ctx }) => fleetDb.vehicle.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { components: true }, orderBy: { updatedAt: "desc" } })),
+    list: fleetOpsProcedure.query(async ({ ctx }) => {
+      requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER"]);
+      const where = ctx.fleetopsUser.role === "DRIVER" ? { orgId: ctx.fleetopsUser.orgId, id: { in: await assignedVehicleIds(ctx) } } : { orgId: ctx.fleetopsUser.orgId };
+      return fleetDb.vehicle.findMany({ where, include: { components: true }, orderBy: { updatedAt: "desc" } });
+    }),
     create: fleetOpsProcedure.input(z.object({ vin: z.string().min(5), licensePlate: z.string().min(3), make: z.string().min(2), model: z.string().min(2), year: z.number().int().min(1980).max(2100), currentOdometer: z.number().min(0).default(0) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]);
       assertWritable(ctx.fleetopsUser.org);
@@ -106,6 +131,8 @@ export const appRouter = router({
     }),
     updateOdometer: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), reading: z.number().min(0), source: z.enum(["MANUAL_DRIVER", "GPS_API", "MECHANIC"]) })).mutation(async ({ ctx, input }) => {
       assertWritable(ctx.fleetopsUser.org);
+      requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER"]);
+      await assertDriverVehicle(ctx, input.vehicleId);
       const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } });
       if (!vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Vehicle not found." });
       const current = Number(vehicle.currentOdometer);
@@ -122,7 +149,7 @@ export const appRouter = router({
     }),
   }),
   workOrders: router({
-    list: fleetOpsProcedure.query(({ ctx }) => fleetDb.workOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true, assignedMechanic: true, partsUsed: { include: { part: true } } }, orderBy: { createdAt: "desc" } })),
+    list: fleetOpsProcedure.query(async ({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"]); const where = ["MECHANIC", "TECHNICIAN"].includes(ctx.fleetopsUser.role) ? { orgId: ctx.fleetopsUser.orgId, assignedMechanicId: ctx.fleetopsUser.id } : { orgId: ctx.fleetopsUser.orgId }; return fleetDb.workOrder.findMany({ where, include: { vehicle: true, assignedMechanic: true, partsUsed: { include: { part: true } } }, orderBy: { createdAt: "desc" } }); }),
     create: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), title: z.string().min(3), description: z.string().optional(), priority: z.nativeEnum(Priority).default(Priority.MEDIUM), assignedMechanicId: z.string().uuid().optional() })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"]);
       assertWritable(ctx.fleetopsUser.org);
@@ -154,14 +181,15 @@ export const appRouter = router({
     }),
   }),
   inventory: router({
-    list: fleetOpsProcedure.query(({ ctx }) => fleetDb.inventoryPart.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { name: "asc" } })),
+    list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); return fleetDb.inventoryPart.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { name: "asc" } }); }),
     create: fleetOpsProcedure.input(z.object({ sku: z.string().min(1), name: z.string().min(2), binLocation: z.string().optional(), quantityOnHand: z.number().int().nonnegative(), minReorderLevel: z.number().int().nonnegative().default(5), unitCost: z.number().nonnegative() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const part = await fleetDb.inventoryPart.create({ data: { ...input, orgId: ctx.fleetopsUser.orgId } }); await evaluateLowInventory(ctx.fleetopsUser.orgId); return part; }),
   }),
   driver: router({
     inspections: fleetOpsProcedure.query(async ({ ctx }) => fleetDb.dvirInspection.findMany({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id }, orderBy: { createdAt: "desc" }, take: 50 })),
     createInspection: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), inspectionType: z.enum(["PRE_TRIP", "POST_TRIP"]), status: z.enum(["PASS", "FAIL"]), notes: z.string().max(2000).optional(), photoData: z.string().max(2_000_000).optional(), photoContentType: z.string().optional() })).mutation(async ({ ctx, input }) => {
-      requireRole(ctx.fleetopsUser.role, ["DRIVER", "SUPERADMIN", "FLEET_MANAGER"]);
+      requireRole(ctx.fleetopsUser.role, ["DRIVER", "SUPERADMIN"]);
       assertWritable(ctx.fleetopsUser.org);
+      await assertDriverVehicle(ctx, input.vehicleId);
       const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } });
       if (!vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Vehicle not found." });
       let photoUrl: string | undefined;
@@ -175,8 +203,9 @@ export const appRouter = router({
     }),
     fuelLogs: fleetOpsProcedure.query(({ ctx }) => fleetDb.fuelLog.findMany({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id }, orderBy: { createdAt: "desc" }, take: 50 })),
     createFuelLog: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), liters: z.number().positive(), amount: z.number().nonnegative(), odometer: z.number().nonnegative(), station: z.string().max(200).optional(), receiptData: z.string().max(2_000_000).optional(), receiptContentType: z.string().optional() })).mutation(async ({ ctx, input }) => {
-      requireRole(ctx.fleetopsUser.role, ["DRIVER", "SUPERADMIN", "FLEET_MANAGER"]);
+      requireRole(ctx.fleetopsUser.role, ["DRIVER", "SUPERADMIN"]);
       assertWritable(ctx.fleetopsUser.org);
+      await assertDriverVehicle(ctx, input.vehicleId);
       const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } });
       if (!vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Vehicle not found." });
       const previousLog = await fleetDb.odometerLog.findFirst({ where: { vehicleId: vehicle.id }, orderBy: { createdAt: "desc" } });
@@ -192,22 +221,24 @@ export const appRouter = router({
     evaluate: fleetOpsProcedure.mutation(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return evaluateAllOrganizations(); }),
   }),
   team: router({
-    members: fleetOpsProcedure.query(({ ctx }) => fleetDb.user.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, select: { id: true, email: true, fullName: true, role: true, createdAt: true }, orderBy: { fullName: "asc" } })),
-    invitations: fleetOpsProcedure.query(({ ctx }) => fleetDb.invitation.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { createdAt: "desc" } })),
-    invite: fleetOpsProcedure.input(z.object({ email: z.string().email(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); await assertUserCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxUsers); const invitation = await fleetDb.invitation.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, email: input.email, role: input.role, tokenHash: crypto.randomUUID(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), createdAt: new Date() } }); return { ...invitation, delivery: "MANUAL_TOKEN" as const }; }),
+    members: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return fleetDb.user.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, select: { id: true, email: true, fullName: true, role: true, createdAt: true }, orderBy: { fullName: "asc" } }); }),
+    invitations: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return fleetDb.invitation.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { createdAt: "desc" } }); }),
+    invite: fleetOpsProcedure.input(z.object({ email: z.string().email(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); await assertUserCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxUsers); const invitation = await withServerTimeout<any>(fleetDb.invitation.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, email: input.email.toLowerCase(), role: input.role, tokenHash: crypto.randomUUID(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), createdAt: new Date(), updatedAt: new Date() } }), "Invitation storage did not respond within 12 seconds. No invitation was confirmed."); return { ...(invitation as Record<string, unknown>), delivery: "MANUAL_TOKEN" as const }; }),
+    updateRole: fleetOpsProcedure.input(z.object({ userId: z.string().uuid(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); const member = await fleetDb.user.findFirst({ where: { id: input.userId, orgId: ctx.fleetopsUser.orgId } }); if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "Team member not found." }); return fleetDb.user.update({ where: { id: input.userId }, data: { role: input.role } }); }),
+    assignVehicle: fleetOpsProcedure.input(z.object({ driverId: z.string().uuid(), vehicleId: z.string().uuid(), active: z.boolean().default(true) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const driver = await fleetDb.user.findFirst({ where: { id: input.driverId, orgId: ctx.fleetopsUser.orgId, role: "DRIVER" } }); const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } }); if (!driver || !vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Driver or vehicle not found in this organization." }); return fleetDb.vehicleAssignment.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, driverId: input.driverId, vehicleId: input.vehicleId, active: input.active, createdAt: new Date(), updatedAt: new Date() } }); }),
   }),
   purchaseOrders: router({
-    list: fleetOpsProcedure.query(({ ctx }) => fleetDb.purchaseOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vendor: true }, orderBy: { createdAt: "desc" } })),
+    list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); return fleetDb.purchaseOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vendor: true }, orderBy: { createdAt: "desc" } }); }),
     create: fleetOpsProcedure.input(z.object({ vendorId: z.string().uuid(), totalCost: z.number().nonnegative() })).mutation(({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); assertWritable(ctx.fleetopsUser.org); return fleetDb.purchaseOrder.create({ data: { ...input, totalCost: input.totalCost, orgId: ctx.fleetopsUser.orgId } }); }),
   }),
   documents: router({
-    list: fleetOpsProcedure.query(({ ctx }) => fleetDb.document.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { expiryDate: "asc" } })),
+    list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); return fleetDb.document.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { expiryDate: "asc" } }); }),
     create: fleetOpsProcedure.input(z.object({ title: z.string().min(2), docType: z.string().min(2), fileUrl: z.string().url().optional(), fileKey: z.string().optional(), fileData: z.string().max(4_000_000).optional(), fileContentType: z.string().optional(), expiryDate: z.coerce.date(), vehicleId: z.string().uuid().optional() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const { fileData, fileContentType, ...data } = input; let fileUrl = data.fileUrl; let fileKey = data.fileKey; if (fileData) { const uploaded = await storagePut(`fleetops/documents/${ctx.fleetopsUser.orgId}/${input.title}`, Buffer.from(fileData.replace(/^data:[^;]+;base64,/, "")), fileContentType ?? "application/octet-stream"); fileUrl = uploaded.url; fileKey = uploaded.key; } if (!fileUrl) throw new TRPCError({ code: "BAD_REQUEST", message: "A document file is required." }); return fleetDb.document.create({ data: { ...data, fileUrl, fileKey, orgId: ctx.fleetopsUser.orgId } }); }),
     update: fleetOpsProcedure.input(z.object({ id: z.string().uuid(), title: z.string().min(2).optional(), expiryDate: z.coerce.date().optional(), fileData: z.string().max(4_000_000).optional(), fileContentType: z.string().optional() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const existing = await fleetDb.document.findFirst({ where: { id: input.id, orgId: ctx.fleetopsUser.orgId } }); if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Document not found." }); const { id, fileData, fileContentType, ...data } = input; let updateData: any = { ...data }; if (fileData) { const uploaded = await storagePut(`fleetops/documents/${ctx.fleetopsUser.orgId}/${existing.title}`, Buffer.from(fileData.replace(/^data:[^;]+;base64,/, "")), fileContentType ?? "application/octet-stream"); updateData = { ...updateData, fileUrl: uploaded.url, fileKey: uploaded.key }; } return fleetDb.document.update({ where: { id }, data: updateData }); }),
   }),
   financials: router({
-    list: fleetOpsProcedure.query(({ ctx }) => fleetDb.financialRecord.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { transactionDate: "desc" } })),
-    metrics: fleetOpsProcedure.query(async ({ ctx }) => {
+    list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "ACCOUNTANT"]); return fleetDb.financialRecord.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { transactionDate: "desc" } }); }),
+    metrics: fleetOpsProcedure.query(async ({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "ACCOUNTANT"]);
       const [records, odometers, vehicles] = await Promise.all([
         fleetDb.financialRecord.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { transactionDate: "desc" } }),
         fleetDb.odometerLog.findMany({ where: { vehicle: { orgId: ctx.fleetopsUser.orgId } }, orderBy: { createdAt: "asc" } }),
@@ -223,14 +254,15 @@ export const appRouter = router({
     create: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), type: z.enum(["REVENUE", "EXPENSE"]), category: z.string().min(2), amount: z.number().nonnegative(), transactionDate: z.coerce.date() })).mutation(({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "ACCOUNTANT"]); assertWritable(ctx.fleetopsUser.org); return fleetDb.financialRecord.create({ data: { ...input, amount: input.amount, orgId: ctx.fleetopsUser.orgId } }); }),
   }),
   billing: router({
-    status: fleetOpsProcedure.query(({ ctx }) => ({ tier: ctx.fleetopsUser.org.subscriptionTier, trialEndsAt: ctx.fleetopsUser.org.trialEndsAt, daysRemaining: Math.max(0, Math.ceil((ctx.fleetopsUser.org.trialEndsAt.getTime() - Date.now()) / 86_400_000)), maxVehicles: ctx.fleetopsUser.org.maxVehicles, maxUsers: ctx.fleetopsUser.org.maxUsers, writeLocked: ctx.fleetopsUser.org.subscriptionTier === "TRIAL_FREE" && ctx.fleetopsUser.org.trialEndsAt.getTime() < Date.now() })),
+    status: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return ({ tier: ctx.fleetopsUser.org.subscriptionTier, trialEndsAt: ctx.fleetopsUser.org.trialEndsAt, daysRemaining: Math.max(0, Math.ceil((ctx.fleetopsUser.org.trialEndsAt.getTime() - Date.now()) / 86_400_000)), maxVehicles: ctx.fleetopsUser.org.maxVehicles, maxUsers: ctx.fleetopsUser.org.maxUsers, writeLocked: ctx.fleetopsUser.org.subscriptionTier === "TRIAL_FREE" && ctx.fleetopsUser.org.trialEndsAt.getTime() < Date.now() }); }),
   }),
   activity: router({
     recent: fleetOpsProcedure.query(async ({ ctx }) => {
+      requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER"]);
       const [orders, alerts, odometers] = await Promise.all([
-        fleetDb.workOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { createdAt: "desc" }, take: 10 }),
+        fleetDb.workOrder.findMany({ where: ["MECHANIC", "TECHNICIAN"].includes(ctx.fleetopsUser.role) ? { orgId: ctx.fleetopsUser.orgId, assignedMechanicId: ctx.fleetopsUser.id } : { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { createdAt: "desc" }, take: 10 }),
         fleetDb.notification.findMany({ where: { orgId: ctx.fleetopsUser.orgId, recipientId: ctx.fleetopsUser.id }, orderBy: { createdAt: "desc" }, take: 10 }),
-        fleetDb.odometerLog.findMany({ where: { vehicle: { orgId: ctx.fleetopsUser.orgId } }, include: { vehicle: true }, orderBy: { createdAt: "desc" }, take: 10 }),
+        fleetDb.odometerLog.findMany({ where: ctx.fleetopsUser.role === "DRIVER" ? { vehicle: { orgId: ctx.fleetopsUser.orgId }, driverId: ctx.fleetopsUser.id } : { vehicle: { orgId: ctx.fleetopsUser.orgId } }, include: { vehicle: true }, orderBy: { createdAt: "desc" }, take: 10 }),
       ]);
       return [
         ...orders.map((order: any) => ({ id: order.id, kind: "work_order", title: order.title, detail: `${order.vehicle.licensePlate} · ${order.status}`, createdAt: order.createdAt })),

@@ -66,12 +66,12 @@ const navItems = [
 
 const roleNavAccess: Record<string, string[]> = {
   SUPERADMIN: navItems.map((item) => item.label),
-  FLEET_MANAGER: ["Command center", "Vehicles", "Work orders", "Notifications", "Compliance vault", "Purchase orders", "Team", "Billing"],
-  INVENTORY_MANAGER: ["Command center", "Inventory", "Notifications", "Purchase orders", "Compliance vault"],
-  MECHANIC: ["Command center", "Work orders", "Notifications", "Vehicles"],
-  TECHNICIAN: ["Command center", "Work orders", "Notifications", "Vehicles"],
-  DRIVER: ["Command center", "Driver portal", "Notifications", "Vehicles"],
-  ACCOUNTANT: ["Command center", "Accountant ledger", "P&L analytics", "Notifications", "Compliance vault"],
+  FLEET_MANAGER: ["Command center", "Vehicles", "Work orders", "Notifications", "Compliance vault"],
+  INVENTORY_MANAGER: ["Inventory", "Notifications", "Purchase orders"],
+  MECHANIC: ["Work orders", "Notifications"],
+  TECHNICIAN: ["Work orders", "Notifications"],
+  DRIVER: ["Driver portal", "Notifications"],
+  ACCOUNTANT: ["Accountant ledger", "P&L analytics", "Notifications"],
 };
 
 const formatInr = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
@@ -129,10 +129,11 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const allowedNavLabels = roleNavAccess[String(backendSummary?.role ?? "SUPERADMIN")] ?? roleNavAccess.SUPERADMIN;
+  const currentRole = String(backendSummary?.role ?? "SUPERADMIN");
+  const allowedNavLabels = roleNavAccess[currentRole] ?? roleNavAccess.SUPERADMIN;
   const allowedNavItems = navItems.filter((item) => allowedNavLabels.includes(item.label));
   useEffect(() => {
-    if (session && !allowedNavLabels.includes(activeNav)) setActiveNav("Command center");
+    if (session && !allowedNavLabels.includes(activeNav)) setActiveNav(allowedNavLabels[0] ?? "Command center");
     if (session && window.localStorage.getItem("fleetops.openTeam") === "1") { window.localStorage.removeItem("fleetops.openTeam"); setActiveNav("Team"); }
   }, [activeNav, allowedNavLabels, session]);
 
@@ -190,10 +191,9 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   };
 
   const chooseRole = (nextRole: typeof role) => {
-    setRole(nextRole);
     setShowRoleMenu(false);
-    const destination = nextRole.short === "Inventory" ? "Inventory" : nextRole.short === "Mechanic" ? "Work orders" : nextRole.short === "Accountant" ? "Accountant ledger" : nextRole.short === "Driver" ? "Driver portal" : nextRole.short === "Fleet manager" ? "Vehicles" : "Command center";
-    setActiveNav(destination);
+    if (nextRole.name !== "Owner command center") { toast.info("Role switching is disabled", { description: "FleetOps opens the workspace assigned to your authenticated account." }); return; }
+    setActiveNav("Command center");
   };
 
   if (activeNav !== "Command center") return <div className="app-shell"><aside className={`sidebar ${showMobileNav ? "mobile-open" : ""}`}><div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div><div className="nav-caption">Workspace</div><nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => setActiveNav(item.label)}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav></aside><main className="main-canvas"><header className="topbar"><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="role-select" onClick={handleSignOut}>{session ? "Sign out" : "Sign in"}</button></div></header><section className="page-content"><FunctionalWorkspace section={activeNav} session={Boolean(session)} onBack={() => setActiveNav("Command center")} /></section></main></div>;

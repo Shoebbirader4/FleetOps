@@ -159,3 +159,13 @@
 - [ ] Verify the invitation request returns a visible success or error in production.
 
 - [ ] Verify the published invitation request completes with the real Superadmin account and shows either a token or a timeout/error state.
+
+- [ ] Verify the published checkpoint asset contains the invitation timeout/result code.
+- [ ] Capture the exact Team invitation tRPC request, status, and response in the authenticated production session.
+- [ ] Fix any stale asset, route, or server mismatch found and verify the invitation flow again.
+
+- [x] Enforce the requested Superadmin, Fleet Manager, Inventory Manager, Mechanic, Driver, and Accountant workspace matrix in direct routes and navigation.
+- [x] Enforce role-specific procedure permissions and prevent cross-workspace data access at the server boundary.
+- [x] Restrict Driver data to assigned vehicles and prevent non-authorized access to financial, inventory, billing, and team data.
+- [x] Make Team invitation return or fail definitively with a server timeout/error path instead of an indefinite pending request.
+- [x] Add RBAC and invitation regression tests and verify the production build.

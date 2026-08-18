@@ -25,9 +25,9 @@ function GuardedWorkspaceRoute({ section, allowedRoles }: { section: string; all
   return <Home initialSection={section} />;
 }
 
-function DriverRoute() { return <GuardedWorkspaceRoute section="Driver portal" allowedRoles={["DRIVER", "SUPERADMIN", "FLEET_MANAGER"]} />; }
+function DriverRoute() { return <GuardedWorkspaceRoute section="Driver portal" allowedRoles={["DRIVER", "SUPERADMIN"]} />; }
 function AccountantRoute() { return <GuardedWorkspaceRoute section="Accountant ledger" allowedRoles={["ACCOUNTANT", "SUPERADMIN"]} />; }
-function TeamRoute() { return <GuardedWorkspaceRoute section="Team" allowedRoles={["SUPERADMIN", "FLEET_MANAGER"]} />; }
+function TeamRoute() { return <GuardedWorkspaceRoute section="Team" allowedRoles={["SUPERADMIN"]} />; }
 function InventoryRoute() { return <GuardedWorkspaceRoute section="Inventory" allowedRoles={["INVENTORY_MANAGER", "SUPERADMIN"]} />; }
 
 function App() {
