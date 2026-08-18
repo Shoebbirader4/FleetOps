@@ -225,3 +225,7 @@
 - [ ] Force the public HTML release marker to the Fleet Manager checkpoint and verify the domain serves the current Fleet Manager revision; latest edge check remains one revision behind.
 - [x] Mount a cron-authenticated `/api/scheduled/maintenance` callback that runs tenant-scoped maintenance automation and add callback regression tests.
 - [x] Register the project-level 15-minute maintenance Heartbeat for `/api/scheduled/maintenance` and record its task UID.
+- [x] Add an Inventory Manager background lifecycle covering invitation creation, organization-bound profile completion, role routing, assigned inventory/procurement operations, denial checks, single-use rejection, and cleanup.
+- [x] Add regression coverage for Inventory Manager invitation binding, workspace permissions, inventory mutations, procurement mutations, and cleanup.
+- [x] Run and publish the Inventory Manager lifecycle validation with the full test suite and report any production-edge limitations.
+- [x] Fix the live-schema failure discovered by Inventory Manager inventory.create and add regression coverage before rerunning the lifecycle.

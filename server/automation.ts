@@ -2,7 +2,7 @@ import { fleetDb } from "./db";
 
 async function notifyRoles(orgId: string, roles: string[], title: string, message: string, type: string, referenceId?: string) {
   const recipients = await fleetDb.user.findMany({ where: { orgId, role: { in: roles } } });
-  if (recipients.length) await fleetDb.notification.createMany({ data: recipients.map((recipient: any) => ({ orgId, recipientId: recipient.id, title, message, type, referenceId })) });
+  if (recipients.length) await fleetDb.notification.createMany({ data: recipients.map((recipient: any) => ({ id: crypto.randomUUID(), orgId, recipientId: recipient.id, title, message, type, referenceId, isRead: false, createdAt: new Date() })) });
   return recipients.length;
 }
 
@@ -28,12 +28,12 @@ export async function evaluateLowInventory(orgId: string) {
   if (!lowStock.length) return { lowStock: 0, draftPurchaseOrders: 0 };
   let draftPurchaseOrders = 0;
   let vendor = await fleetDb.vendor.findFirst({ where: { orgId, name: "FleetOps auto-reorder queue" } });
-  if (!vendor) vendor = await fleetDb.vendor.create({ data: { orgId, name: "FleetOps auto-reorder queue", phone: "SYSTEM" } });
+  if (!vendor) vendor = await fleetDb.vendor.create({ data: { id: crypto.randomUUID(), orgId, name: "FleetOps auto-reorder queue", phone: "SYSTEM", createdAt: new Date() } });
   for (const part of lowStock) {
     const alreadyNotified = await fleetDb.notification.findFirst({ where: { orgId, referenceId: part.id, type: "INVENTORY_LOW", createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } });
     if (alreadyNotified) continue;
     const suggestedQty = Math.max(Number(part.minReorderLevel) * 2 - Number(part.quantityOnHand), 1);
-    const purchaseOrder = await fleetDb.purchaseOrder.create({ data: { orgId, vendorId: vendor.id, status: "DRAFT", totalCost: suggestedQty * Number(part.unitCost) } });
+    const purchaseOrder = await fleetDb.purchaseOrder.create({ data: { id: crypto.randomUUID(), orgId, vendorId: vendor.id, status: "DRAFT", totalCost: suggestedQty * Number(part.unitCost), createdAt: new Date() } });
     await notifyRoles(orgId, ["SUPERADMIN", "INVENTORY_MANAGER"], "Inventory below reorder level", `${part.name} (${part.sku}) has ${part.quantityOnHand} units remaining. Draft PO created for ${suggestedQty} units.`, "INVENTORY_LOW", part.id);
     await notifyRoles(orgId, ["SUPERADMIN", "INVENTORY_MANAGER"], "Draft purchase order created", `Draft PO ${purchaseOrder.id.slice(0, 8).toUpperCase()} was created for ${part.name}.`, "PURCHASE_ORDER_DRAFT", purchaseOrder.id);
     draftPurchaseOrders += 1;

@@ -184,7 +184,7 @@ export const appRouter = router({
         }
         const completed = await tx.workOrder.update({ where: { id: order.id }, data: { status: WorkOrderStatus.COMPLETED, completedAt: new Date() } });
         const admins = await tx.user.findMany({ where: { orgId: ctx.fleetopsUser.orgId, role: "SUPERADMIN" } });
-        if (admins.length) await tx.notification.createMany({ data: admins.map((admin: any) => ({ orgId: ctx.fleetopsUser.orgId, recipientId: admin.id, title: "Work order completed", message: `${order.vehicle.licensePlate} repair completed. Parts cost: ₹${partsCost.toLocaleString("en-IN")}.`, type: "WORK_ORDER_COMPLETE", referenceId: order.id })) });
+        if (admins.length) await tx.notification.createMany({ data: admins.map((admin: any) => ({ id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, recipientId: admin.id, title: "Work order completed", message: `${order.vehicle.licensePlate} repair completed. Parts cost: ₹${partsCost.toLocaleString("en-IN")}.`, type: "WORK_ORDER_COMPLETE", referenceId: order.id, isRead: false, createdAt: new Date() })) });
         return { completed, partsCost };
       });
       await evaluateLowInventory(ctx.fleetopsUser.orgId);
@@ -193,7 +193,7 @@ export const appRouter = router({
   }),
   inventory: router({
     list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); return fleetDb.inventoryPart.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { name: "asc" } }); }),
-    create: fleetOpsProcedure.input(z.object({ sku: z.string().min(1), name: z.string().min(2), binLocation: z.string().optional(), quantityOnHand: z.number().int().nonnegative(), minReorderLevel: z.number().int().nonnegative().default(5), unitCost: z.number().nonnegative() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const part = await fleetDb.inventoryPart.create({ data: { ...input, orgId: ctx.fleetopsUser.orgId } }); await evaluateLowInventory(ctx.fleetopsUser.orgId); return part; }),
+    create: fleetOpsProcedure.input(z.object({ sku: z.string().min(1), name: z.string().min(2), binLocation: z.string().optional(), quantityOnHand: z.number().int().nonnegative(), minReorderLevel: z.number().int().nonnegative().default(5), unitCost: z.number().nonnegative() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const part = await fleetDb.inventoryPart.create({ data: { id: crypto.randomUUID(), ...input, orgId: ctx.fleetopsUser.orgId } }); await evaluateLowInventory(ctx.fleetopsUser.orgId); return part; }),
   }),
   driver: router({
     inspections: fleetOpsProcedure.query(async ({ ctx }) => fleetDb.dvirInspection.findMany({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id }, orderBy: { createdAt: "desc" }, take: 50 })),
@@ -240,7 +240,7 @@ export const appRouter = router({
   }),
   purchaseOrders: router({
     list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); return fleetDb.purchaseOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vendor: true }, orderBy: { createdAt: "desc" } }); }),
-    create: fleetOpsProcedure.input(z.object({ vendorId: z.string().uuid(), totalCost: z.number().nonnegative() })).mutation(({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); assertWritable(ctx.fleetopsUser.org); return fleetDb.purchaseOrder.create({ data: { ...input, totalCost: input.totalCost, orgId: ctx.fleetopsUser.orgId } }); }),
+    create: fleetOpsProcedure.input(z.object({ vendorId: z.string().uuid(), totalCost: z.number().nonnegative() })).mutation(({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); assertWritable(ctx.fleetopsUser.org); return fleetDb.purchaseOrder.create({ data: { id: crypto.randomUUID(), ...input, status: "DRAFT", totalCost: input.totalCost, orgId: ctx.fleetopsUser.orgId, createdAt: new Date() } }); }),
   }),
   documents: router({
     list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); return fleetDb.document.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { expiryDate: "asc" } }); }),
