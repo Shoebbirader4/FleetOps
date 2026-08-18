@@ -165,6 +165,12 @@ The background workflow also exposed and resolved two live-schema mismatches: Po
 
 This automated test validates the production API and server workflow without using the user’s existing browser session. Gmail delivery, the visual Team success panel in the user’s browser, and the existing Superadmin account’s local session storage remain browser-only checks.
 
+## Fleet Manager Lifecycle Coverage
+
+The dedicated Fleet Manager harness now covers the invited member’s lifecycle after acceptance. It creates and signs in a temporary Fleet Manager, resolves organization-bound invitation metadata, redeems the invitation, verifies the Fleet Manager role and organization identity, lists and creates vehicles, creates and updates vehicle components, creates and lists work orders, lists and creates compliance documents, updates a compliance document, and verifies denial of team governance, invitation creation, financial records, inventory, purchase orders, and billing. It also confirms single-use invitation behavior and removes temporary Auth, organization, invitation, vehicle, component, work-order, and document records.
+
+During this lifecycle, the test found and corrected live-schema mismatches in vehicle status and audit timestamps, component primary-key creation and update audit handling, work-order identity/status creation, and compliance-document identity/creation fields. These corrections are now covered by the server and adapter regression suite.
+
 ## References
 
 [1]: https://fleetops-elktaacw.manus.space/ "FleetOps published application"

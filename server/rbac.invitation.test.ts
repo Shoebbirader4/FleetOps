@@ -5,6 +5,8 @@ const mocks = vi.hoisted(() => ({
   invitation: { create: vi.fn(), findFirst: vi.fn() },
   organization: { findFirst: vi.fn() },
   vehicleAssignment: { findFirst: vi.fn() },
+  vehicle: { count: vi.fn(), create: vi.fn(), findFirst: vi.fn() },
+  workOrder: { create: vi.fn() },
   inventoryPart: { findMany: vi.fn() },
 }));
 
@@ -58,6 +60,23 @@ describe("RBAC and invitation procedures", () => {
   it("denies an Accountant from inventory pricing data", async () => {
     const accountantContext = { ...baseContext, fleetopsUser: { ...baseContext.fleetopsUser!, role: "ACCOUNTANT" } } as TrpcContext;
     await expect(appRouter.createCaller(accountantContext).inventory.list()).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("supplies a live-schema status when Fleet Manager creates a vehicle", async () => {
+    mocks.user.count.mockResolvedValue(1);
+    mocks.vehicle.count.mockResolvedValue(0);
+    mocks.vehicle.create.mockResolvedValue({ id: "vehicle-1", status: "ACTIVE" });
+    const fleetManagerContext = { ...baseContext, fleetopsUser: { ...baseContext.fleetopsUser!, role: "FLEET_MANAGER" } } as TrpcContext;
+    await appRouter.createCaller(fleetManagerContext).vehicles.create({ vin: "E2E12345VIN", licensePlate: "E2E-123", make: "Tata", model: "Prima", year: 2024, currentOdometer: 1000 });
+    expect(mocks.vehicle.create).toHaveBeenCalledWith({ data: expect.objectContaining({ status: "ACTIVE", orgId: baseContext.fleetopsUser!.orgId }) });
+  });
+
+  it("supplies live-schema fields when Fleet Manager creates a work order", async () => {
+    mocks.vehicle.findFirst.mockResolvedValue({ id: "vehicle-1", orgId: baseContext.fleetopsUser!.orgId });
+    mocks.workOrder.create.mockResolvedValue({ id: "work-order-1", status: "OPEN" });
+    const fleetManagerContext = { ...baseContext, fleetopsUser: { ...baseContext.fleetopsUser!, role: "FLEET_MANAGER" } } as TrpcContext;
+    await appRouter.createCaller(fleetManagerContext).workOrders.create({ vehicleId: "00000000-0000-4000-8000-000000000003", title: "E2E service", description: "Test", priority: "MEDIUM" as any });
+    expect(mocks.workOrder.create).toHaveBeenCalledWith({ data: expect.objectContaining({ id: expect.any(String), status: "OPEN", createdAt: expect.any(Date), orgId: baseContext.fleetopsUser!.orgId }) });
   });
 
   it("returns a persisted manual-token invitation with explicit audit fields", async () => {
