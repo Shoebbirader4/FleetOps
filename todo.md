@@ -263,3 +263,5 @@
 - [x] Keep Superadmin on the executive organization workspace while preserving organization-wide oversight without specialist member navigation.
 - [x] Add role-routing and navigation-visibility regression coverage for Superadmin, Fleet Manager, Inventory Manager, Mechanic, Technician, Driver, and Accountant.
 - [x] Verify shared organization context remains visible and cross-role operational handoffs remain connected after workspace isolation.
+- [x] Run an end-to-end Fleet Manager-to-Mechanic handoff covering shared organization setup, vehicle/inventory preparation, dispatch, assigned-order visibility, completion, inventory deduction, notification/shared-state verification, RBAC isolation, and cleanup.
+- [x] Re-run regression tests and publish the verified handoff result or document any concrete defect found.
