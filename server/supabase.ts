@@ -44,7 +44,12 @@ export async function getFleetOpsUserFromRequest(req: Request) {
   if (!user) return null;
   const org = await fleetDb.organization.findFirst({ where: { id: user.orgId } });
   if (!org) return null;
-  return { ...user, org, name: user.fullName };
+  const normalizedOrg = {
+    ...org,
+    trialEndsAt: org.trialEndsAt instanceof Date ? org.trialEndsAt : new Date(String(org.trialEndsAt)),
+    updatedAt: org.updatedAt instanceof Date ? org.updatedAt : new Date(String(org.updatedAt)),
+  };
+  return { ...user, org: normalizedOrg, name: user.fullName };
 }
 
 export async function provisionFleetOpsUser(input: {
