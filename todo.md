@@ -177,6 +177,6 @@
 
 - [ ] Re-verify the actual production Team invitation flow with a real Superadmin account after the stale-asset fix, confirming email/join-link success or a bounded visible error.
 
-- [ ] Diagnose the published white-screen runtime failure using browser console, network, and production bundle evidence.
-- [ ] Fix the white-screen root cause and add a regression guard.
-- [ ] Republish and verify the FleetOps app shell, Join Organization route, and public invalid-invitation state.
+- [x] Diagnose the published white-screen runtime failure using browser console, network, and production bundle evidence.
+- [x] Fix the white-screen root cause and add a regression guard.
+- [x] Republish and verify the FleetOps app shell, Join Organization route, and public invalid-invitation state.
