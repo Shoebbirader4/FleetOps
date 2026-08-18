@@ -229,3 +229,8 @@
 - [x] Add regression coverage for Inventory Manager invitation binding, workspace permissions, inventory mutations, procurement mutations, and cleanup.
 - [x] Run and publish the Inventory Manager lifecycle validation with the full test suite and report any production-edge limitations.
 - [x] Fix the live-schema failure discovered by Inventory Manager inventory.create and add regression coverage before rerunning the lifecycle.
+- [x] Add a Driver background lifecycle covering invitation creation, organization-bound profile completion, role routing, vehicle assignment, inspections, fuel logs, odometer updates, denial checks, single-use rejection, and cleanup.
+- [x] Add regression coverage for Driver invitation binding, assignment isolation, operational mutations, workspace permissions, and cleanup.
+- [x] Run and publish the Driver lifecycle validation with the full test suite and report any production-edge limitations.
+- [x] Fix the Driver fuel-log transaction failure (`fn is not a function`) discovered by the lifecycle harness and add regression coverage before rerunning.
+- [x] Fix Driver odometer maintenance evaluation when a vehicle has no loaded components and add regression coverage before rerunning.

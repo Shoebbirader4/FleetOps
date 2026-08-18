@@ -10,7 +10,8 @@ export async function evaluateVehicleMaintenance(vehicleId: string, orgId: strin
   const vehicle = await fleetDb.vehicle.findFirst({ where: { id: vehicleId, orgId }, include: { components: true } });
   if (!vehicle) return { createdWorkOrders: 0 };
   let createdWorkOrders = 0;
-  for (const component of vehicle.components) {
+  const components = Array.isArray((vehicle as any).components) ? (vehicle as any).components : [];
+  for (const component of components) {
     const consumed = Number(vehicle.currentOdometer) - Number(component.lastServicedOdometer);
     if (consumed < Number(component.alertThresholdKm)) continue;
     const existing = await fleetDb.workOrder.findFirst({ where: { orgId, vehicleId, status: { in: ["OPEN", "IN_PROGRESS"] }, title: { contains: component.name } } });

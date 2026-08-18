@@ -70,7 +70,7 @@ function model(modelName: string) {
 }
 
 export const fleetDb = new Proxy({}, { get: (_target, property) => property === "$transaction" ? transaction : model(String(property)) }) as any;
-export async function transaction<T>(fn: (tx: any) => Promise<T>): Promise<T> { return fn(fleetDb); }
+export async function transaction<T>(fn: ((tx: any) => Promise<T>) | Promise<T>[]): Promise<T | unknown[]> { if (Array.isArray(fn)) return Promise.all(fn); return fn(fleetDb); }
 
 export async function getUserByOpenId(openId: string) {
   return fleetDb.user.findFirst({ where: { authUserId: openId } });

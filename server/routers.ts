@@ -153,7 +153,7 @@ export const appRouter = router({
       const isFlagged = false;
       const result = await fleetDb.$transaction([
         fleetDb.vehicle.update({ where: { id: vehicle.id }, data: { currentOdometer: input.reading } }),
-        fleetDb.odometerLog.create({ data: { vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, reading: input.reading, source: input.source, isFlagged } }),
+        fleetDb.odometerLog.create({ data: { id: crypto.randomUUID(), vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, reading: input.reading, source: input.source, isFlagged, createdAt: new Date() } }),
       ]);
       await evaluateVehicleMaintenance(vehicle.id, ctx.fleetopsUser.orgId);
       return result;
@@ -210,7 +210,7 @@ export const appRouter = router({
         const uploaded = await storagePut(`fleetops/dvir/${ctx.fleetopsUser.orgId}/${vehicle.id}.jpg`, Buffer.from(raw, "base64"), input.photoContentType ?? "image/jpeg");
         photoUrl = uploaded.url; photoKey = uploaded.key;
       }
-      return fleetDb.dvirInspection.create({ data: { orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, inspectionType: input.inspectionType, status: input.status, notes: input.notes, photoUrl, photoKey } });
+      return fleetDb.dvirInspection.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, inspectionType: input.inspectionType, status: input.status, notes: input.notes, photoUrl, photoKey, createdAt: new Date() } });
     }),
     fuelLogs: fleetOpsProcedure.query(({ ctx }) => fleetDb.fuelLog.findMany({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id }, orderBy: { createdAt: "desc" }, take: 50 })),
     createFuelLog: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), liters: z.number().positive(), amount: z.number().nonnegative(), odometer: z.number().nonnegative(), station: z.string().max(200).optional(), receiptData: z.string().max(2_000_000).optional(), receiptContentType: z.string().optional() })).mutation(async ({ ctx, input }) => {
@@ -224,7 +224,7 @@ export const appRouter = router({
       validateOdometerReading(previousLog ? Number(previousLog.reading) : Number(vehicle.currentOdometer), input.odometer, elapsedDays);
       let receiptUrl: string | undefined;
       if (input.receiptData) receiptUrl = (await storagePut(`fleetops/fuel/${ctx.fleetopsUser.orgId}/${vehicle.id}.jpg`, Buffer.from(input.receiptData.replace(/^data:[^;]+;base64,/, ""), "base64"), input.receiptContentType ?? "image/jpeg")).url;
-      const [log] = await fleetDb.$transaction([fleetDb.fuelLog.create({ data: { orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, liters: input.liters, amount: input.amount, odometer: input.odometer, station: input.station, receiptUrl } }), fleetDb.financialRecord.create({ data: { orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, type: "EXPENSE", category: "FUEL", amount: input.amount, transactionDate: new Date() } }), fleetDb.odometerLog.create({ data: { vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, reading: input.odometer, source: "MANUAL_DRIVER", isFlagged: false } }), fleetDb.vehicle.update({ where: { id: vehicle.id }, data: { currentOdometer: input.odometer } })]);
+      const [log] = await fleetDb.$transaction([fleetDb.fuelLog.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, liters: input.liters, amount: input.amount, odometer: input.odometer, station: input.station, receiptUrl, createdAt: new Date(), updatedAt: new Date() } }), fleetDb.financialRecord.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, type: "EXPENSE", category: "FUEL", amount: input.amount, transactionDate: new Date() } }), fleetDb.odometerLog.create({ data: { id: crypto.randomUUID(), vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, reading: input.odometer, source: "MANUAL_DRIVER", isFlagged: false, createdAt: new Date() } }), fleetDb.vehicle.update({ where: { id: vehicle.id }, data: { currentOdometer: input.odometer } })]);
       return log;
     }),
   }),
