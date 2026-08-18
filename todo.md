@@ -153,3 +153,9 @@
 
 - [ ] Verify the published Team invitation flow with the real Superadmin account and confirm the token appears after submission.
 - [ ] If email delivery is required, obtain and configure an approved transactional email provider separately; do not represent manual-token delivery as email delivery.
+
+- [x] Diagnose why the Team invitation mutation remains in Creating state without returning.
+- [x] Add a bounded client mutation timeout and identify/fix the blocking backend or database path.
+- [ ] Verify the invitation request returns a visible success or error in production.
+
+- [ ] Verify the published invitation request completes with the real Superadmin account and shows either a token or a timeout/error state.
