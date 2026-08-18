@@ -205,10 +205,10 @@
 
 - [x] Diagnose the invitation INSERT failure revealed by the background test and align the Drizzle invitation mapping with the live PostgreSQL schema.
 
-- [ ] Extend the background workflow to create and redeem a Fleet Manager invitation, complete the invited profile, and verify Fleet Manager workspace routing.
-- [ ] Exercise Fleet Manager permitted operations across vehicles, work orders, compliance, and vehicle assignment governance.
-- [ ] Verify Fleet Manager denial of Superadmin, Accountant, Driver-only, Inventory-only, billing-sensitive, and team-governance operations.
-- [ ] Verify cleanup of Fleet Manager temporary Auth, organization, invitation, and operational records and report the lifecycle results.
+- [x] Extend the background workflow to create and redeem a Fleet Manager invitation, complete the invited profile, and verify Fleet Manager workspace routing.
+- [x] Exercise Fleet Manager permitted operations across vehicles, work orders, compliance, and vehicle assignment governance.
+- [x] Verify Fleet Manager denial of Superadmin, Accountant, Driver-only, Inventory-only, billing-sensitive, and team-governance operations.
+- [x] Verify cleanup of Fleet Manager temporary Auth, organization, invitation, and operational records and report the lifecycle results.
 
 - [x] Fix vehicles.create to provide the required live-schema vehicle status and add regression coverage for Fleet Manager vehicle creation.
 
@@ -222,4 +222,4 @@
 
 - [x] Align documents.create with the live PostgreSQL schema by supplying required identity and audit fields, with regression coverage.
 
-- [ ] Force the public HTML release marker to the Fleet Manager checkpoint and verify the domain no longer serves the older session-transport document.
+- [ ] Force the public HTML release marker to the Fleet Manager checkpoint and verify the domain serves the current Fleet Manager revision; latest edge check remains one revision behind.
