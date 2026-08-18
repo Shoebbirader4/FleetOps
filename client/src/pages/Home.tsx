@@ -54,6 +54,7 @@ const navItems = [
   { label: "Command center", icon: LayoutDashboard },
   { label: "Vehicles", icon: Bus },
   { label: "Work orders", icon: Wrench },
+  { label: "Inventory manager workspace", icon: Package },
   { label: "Inventory", icon: Package },
   { label: "Notifications", icon: Bell },
   { label: "Compliance vault", icon: FileText },
@@ -67,7 +68,7 @@ const navItems = [
 const roleNavAccess: Record<string, string[]> = {
   SUPERADMIN: navItems.map((item) => item.label),
   FLEET_MANAGER: ["Fleet manager workspace", "Command center", "Vehicles", "Work orders", "Notifications", "Compliance vault"],
-  INVENTORY_MANAGER: ["Inventory", "Notifications", "Purchase orders"],
+  INVENTORY_MANAGER: ["Inventory manager workspace", "Inventory", "Notifications", "Purchase orders"],
   MECHANIC: ["Mechanic workspace", "Work orders", "Notifications"],
   TECHNICIAN: ["Mechanic workspace", "Work orders", "Notifications"],
   DRIVER: ["Driver portal", "Notifications"],
@@ -115,7 +116,12 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   const persistedVehicles = useMemo(() => liveVehicles?.map((vehicle: any) => ({ id: vehicle.licensePlate, name: `${vehicle.make} ${vehicle.model} · ${vehicle.year}`, health: vehicle.status === "ACTIVE" ? 100 : 0, status: vehicle.status === "ACTIVE" ? "On route" : "At depot", odo: `${Number(vehicle.currentOdometer).toLocaleString("en-IN")} km`, service: vehicle.nextServiceAt ? `Next service ${new Date(vehicle.nextServiceAt).toLocaleDateString("en-IN")}` : "No service date recorded", tone: vehicle.status === "ACTIVE" ? "good" : "warn" })) ?? [], [liveVehicles]);
   const persistedOrders = useMemo(() => liveOrders?.filter((order: any) => order?.id).map((order: any) => ({ id: order.id.slice(0, 8).toUpperCase(), sourceId: order.id, title: order.title ?? "Untitled work order", vehicle: order.vehicle?.licensePlate ?? "Vehicle unavailable", owner: order.assignedMechanic?.fullName ?? "Unassigned", priority: order.priority ? order.priority[0] + order.priority.slice(1).toLowerCase() : "Unspecified", due: order.status === "COMPLETED" ? "Completed" : order.dueDate ? new Date(order.dueDate).toLocaleDateString("en-IN") : "No due date", status: order.status === "COMPLETED" ? "Completed" : order.status ?? "OPEN" })) ?? [], [liveOrders]);
   const [activeNav, setActiveNav] = useState(initialSection);
+  const currentRole = String(backendSummary?.role ?? "SUPERADMIN");
   const [role, setRole] = useState(roles[0]);
+  useEffect(() => {
+    const matched = roles.find((item) => (currentRole === "SUPERADMIN" ? item.short === "Owner" : item.name.toUpperCase().startsWith(currentRole.replaceAll("_", " "))));
+    if (matched) setRole(matched);
+  }, [currentRole]);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [quickFindOpen, setQuickFindOpen] = useState(false);
   const [showAllOrders, setShowAllOrders] = useState(false);
@@ -129,7 +135,6 @@ export default function Home({ initialSection = "Command center" }: { initialSec
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const currentRole = String(backendSummary?.role ?? "SUPERADMIN");
   const allowedNavLabels = roleNavAccess[currentRole] ?? roleNavAccess.SUPERADMIN;
   const allowedNavItems = navItems.filter((item) => allowedNavLabels.includes(item.label));
   useEffect(() => {
@@ -201,7 +206,7 @@ export default function Home({ initialSection = "Command center" }: { initialSec
     setActiveNav("Command center");
   };
 
-  if (activeNav !== "Command center") return <div className="app-shell"><aside className={`sidebar ${showMobileNav ? "mobile-open" : ""}`}><div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div><div className="nav-caption">Workspace</div><nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => setActiveNav(item.label)}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav></aside><main className="main-canvas"><header className="topbar"><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="role-select" onClick={handleSignOut}>{session ? "Sign out" : "Sign in"}</button></div></header><section className="page-content"><FunctionalWorkspace section={activeNav} session={Boolean(session)} onBack={() => setActiveNav("Command center")} /></section></main></div>;
+  if (activeNav !== "Command center") return <div className="app-shell"><aside className={`sidebar ${showMobileNav ? "mobile-open" : ""}`}><div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div><div className="nav-caption">Workspace</div><nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => setActiveNav(item.label)}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav></aside><main className="main-canvas"><header className="topbar"><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="role-select" onClick={handleSignOut}>{session ? "Sign out" : "Sign in"}</button></div></header><section className="page-content"><FunctionalWorkspace section={activeNav} session={Boolean(session)} organizationName={backendSummary?.org?.name} onBack={() => setActiveNav("Command center")} /></section></main></div>;
 
   return (
     <div className="app-shell">

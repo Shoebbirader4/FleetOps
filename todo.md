@@ -246,3 +246,11 @@
 - [x] Add regression coverage for Accountant invitation binding, financial mutations/metrics, workspace permissions, and cleanup.
 - [x] Run and publish the Accountant lifecycle validation with the full test suite and report any production-edge limitations.
 - [x] Fix Accountant financial-record creation when the live table requires an explicit ID and add regression coverage before rerunning.
+- [x] Upgrade the Superadmin command workspace with organization-wide oversight, trial/billing status, team governance, compliance, and alert summaries.
+- [x] Upgrade the Fleet Manager workspace with vehicle onboarding, telemetry/odometer, predictive maintenance, work-order dispatch, and driver assignment surfaces.
+- [x] Upgrade the Inventory Manager workspace with SKU/bin/cost stock control, reorder monitoring, vendors, and purchase-order status workflow.
+- [x] Upgrade the Mechanic/Technician workspace with assigned task queue, notifications, work execution, labor/parts logging, and completion flow.
+- [x] Upgrade the Driver workspace with assigned-vehicle-only DVIR, odometer, fuel/issue reporting, and active-trip context.
+- [x] Upgrade the Accountant workspace with INR ledger entry, per-vehicle P&L, CPK/TCO metrics, and financial-only navigation.
+- [x] Enforce shared organization context with role-specific record visibility and server-side procedure isolation across all upgraded workspaces.
+- [x] Add workspace regression tests, responsive visual verification, and publish the enhanced workspace checkpoint.

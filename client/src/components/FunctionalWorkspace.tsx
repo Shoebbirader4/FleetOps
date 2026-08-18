@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Copy, Gauge, Mail, Plus, RefreshCw, ShieldCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { AccountantRoleWorkspace, DriverRoleWorkspace, FleetManagerWorkspace, InventoryManagerWorkspace, MechanicWorkspace, OwnerWorkspace } from "@/components/RoleWorkspaces";
 
 const roleOptions = ["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"] as const;
-type Props = { section: string; session: boolean; onBack: () => void };
+type Props = { section: string; session: boolean; onBack: () => void; organizationName?: string };
 
 function State({ loading, error, empty, children }: { loading?: boolean; error?: boolean; empty?: boolean; children: React.ReactNode }) {
   if (loading) return <div className="workspace-state"><RefreshCw className="spin" size={18} /> Loading live FleetOps data…</div>;
@@ -131,7 +132,7 @@ function ResourceWorkspace({ section }: { section: string }) {
   return <section className="panel workspace-table"><div className="panel-heading"><div><div className="panel-kicker">Persisted Supabase records</div><h2>{labels[section]}</h2></div><span className="signal-chip good"><Check size={13} /> Live query</span></div><State loading={query.isLoading} error={query.isError} empty={!query.isLoading && !query.isError && !rows.length}><div className="resource-list">{rows.map((row) => <div className="resource-row" key={row.id}><div><strong>{row.name ?? row.title ?? row.licensePlate ?? row.sku ?? row.email ?? row.category ?? "Fleet record"}</strong><span>{row.description ?? row.message ?? row.make ? `${row.make ?? ""} ${row.model ?? ""}` : row.status ?? row.role ?? row.docType ?? row.type ?? "Persisted record"}</span></div><span className="resource-meta">{row.status ?? row.quantityOnHand ?? row.amount ?? row.expiresAt ? String(row.status ?? row.quantityOnHand ?? row.amount ?? row.expiresAt) : "—"}</span></div>)}</div></State></section>;
 }
 
-export default function FunctionalWorkspace({ section, session, onBack }: Props) {
+export default function FunctionalWorkspace({ section, session, onBack, organizationName }: Props) {
   if (!session) return <section className="panel auth-gate"><Mail size={24} /><h2>Sign in to open {section}</h2><p>This workspace is connected to Supabase and does not show demo records while signed out.</p><button className="primary-button" onClick={() => toast.info("Use your Supabase Auth sign-in flow to continue.")}><Plus size={16} /> Sign in to sync</button></section>;
-  return <div className="functional-workspace"><button className="back-link" onClick={onBack}><ArrowLeft size={15} /> Back to command center</button>{section === "Team" ? <TeamWorkspace /> : <ResourceWorkspace section={section} />}</div>;
+  return <div className="functional-workspace"><button className="back-link" onClick={onBack}><ArrowLeft size={15} /> Back to command center</button>{section === "Team" ? <TeamWorkspace /> : session && section === "Command center" ? <OwnerWorkspace organizationName={organizationName} /> : session && section === "Fleet manager workspace" ? <FleetManagerWorkspace organizationName={organizationName} /> : session && section === "Inventory manager workspace" ? <InventoryManagerWorkspace organizationName={organizationName} /> : session && (section === "Mechanic workspace" || section === "Mechanic / Technician workspace") ? <MechanicWorkspace organizationName={organizationName} /> : session && section === "Accountant ledger" ? <AccountantRoleWorkspace organizationName={organizationName}><AccountantWorkspace /></AccountantRoleWorkspace> : session && section === "Driver portal" ? <DriverRoleWorkspace organizationName={organizationName}><DriverWorkspace /></DriverRoleWorkspace> : <ResourceWorkspace section={section} />}</div>;
 }

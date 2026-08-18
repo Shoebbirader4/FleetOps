@@ -77,3 +77,22 @@ nav { display: grid; gap: 3px; }
 .invite-result span { color: var(--muted); font-size: .82rem; }
 .invite-token-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 .invite-token-row code { flex: 1 1 18rem; min-width: 0; padding: .55rem .65rem; overflow-wrap: anywhere; border-radius: .5rem; background: var(--ivory); color: var(--ink); font-size: .78rem; }
+
+/* Role-specific workshop surfaces */
+.role-workspace { display: grid; gap: 20px; }
+.role-workspace-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 4px 0 2px; }
+.role-workspace-header h1 { font: 600 clamp(28px, 3vw, 42px)/1.08 "Space Grotesk", sans-serif; letter-spacing: -.055em; margin: 12px 0 8px; }
+.role-workspace-badge { min-width: 170px; display: grid; grid-template-columns: 24px 1fr; column-gap: 9px; align-items: center; border: 1px solid var(--line); background: var(--paper); border-radius: 7px; padding: 11px 12px; color: var(--green); }
+.role-workspace-badge span { color: var(--ink); font-size: 11px; font-weight: 700; }
+.role-workspace-badge small { grid-column: 2; color: var(--muted); font-size: 9px; margin-top: 2px; }
+.workspace-kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.workspace-kpi { position: relative; overflow: hidden; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 15px; display: grid; gap: 6px; }
+.workspace-kpi::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--orange); }
+.workspace-kpi.green::before { background: var(--green); }.workspace-kpi.blue::before { background: var(--blue); }.workspace-kpi.red::before { background: var(--red); }
+.workspace-kpi span, .workspace-kpi small { color: var(--muted); font-size: 10px; }.workspace-kpi strong { font: 600 25px/1 "Space Grotesk", sans-serif; letter-spacing: -.04em; }
+.role-grid { display: grid; gap: 20px; }.role-grid.two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }.role-panel { min-width: 0; }
+.scope-list { display: grid; gap: 0; }.scope-list > div { display: grid; gap: 4px; padding: 12px 0; border-top: 1px solid #eee9df; }.scope-list > div:first-child { border-top: 0; padding-top: 0; }.scope-list strong { font-size: 12px; }.scope-list span { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.compact-summary { margin-top: 6px; }.compact-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }.compact-form input, .compact-form select { min-width: 0; height: 36px; border: 1px solid var(--line); background: #fcfaf5; border-radius: 5px; padding: 0 10px; color: var(--ink); font-size: 11px; }.compact-form .primary-button { grid-column: 1 / -1; justify-content: center; }.form-note { display: flex; align-items: center; gap: 6px; color: var(--green); font-size: 10px; margin-top: 11px; }
+.status-label.accepted { color: var(--green); background: var(--green-soft); }.status-label.pending { color: #9a6b27; background: #fff2dc; }.status-label.expired { color: var(--red); background: var(--red-soft); }
+@media (max-width: 900px) { .role-workspace-header { align-items: flex-start; flex-direction: column; }.role-workspace-badge { width: 100%; }.workspace-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.role-grid.two-col { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .workspace-kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }.workspace-kpi { padding: 12px 10px; }.workspace-kpi strong { font-size: 20px; }.compact-form { grid-template-columns: 1fr; }.compact-form .primary-button { grid-column: auto; }.role-workspace-header h1 { font-size: 29px; } }
