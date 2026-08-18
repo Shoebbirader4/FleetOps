@@ -14,10 +14,10 @@ function State({ loading, error, empty, children }: { loading?: boolean; error?:
   return <>{children}</>;
 }
 
-function TeamWorkspace() {
+function TeamWorkspace({ enabled }: { enabled: boolean }) {
   const utils = trpc.useUtils();
-  const members = trpc.team.members.useQuery(undefined, { retry: false });
-  const invitations = trpc.team.invitations.useQuery(undefined, { retry: false });
+  const members = trpc.team.members.useQuery(undefined, { enabled, retry: false });
+  const invitations = trpc.team.invitations.useQuery(undefined, { enabled, retry: false });
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<(typeof roleOptions)[number]>("FLEET_MANAGER");
   const [lastInvitation, setLastInvitation] = useState<any>(null);
@@ -134,5 +134,5 @@ function ResourceWorkspace({ section }: { section: string }) {
 
 export default function FunctionalWorkspace({ section, session, onBack, organizationName }: Props) {
   if (!session) return <section className="panel auth-gate"><Mail size={24} /><h2>Sign in to open {section}</h2><p>This workspace is connected to Supabase and does not show demo records while signed out.</p><button className="primary-button" onClick={() => toast.info("Use your Supabase Auth sign-in flow to continue.")}><Plus size={16} /> Sign in to sync</button></section>;
-  return <div className="functional-workspace"><button className="back-link" onClick={onBack}><ArrowLeft size={15} /> Back to command center</button>{section === "Team" ? <TeamWorkspace /> : session && section === "Command center" ? <OwnerWorkspace organizationName={organizationName} /> : session && section === "Fleet manager workspace" ? <FleetManagerWorkspace organizationName={organizationName} /> : session && section === "Inventory manager workspace" ? <InventoryManagerWorkspace organizationName={organizationName} /> : session && (section === "Mechanic workspace" || section === "Mechanic / Technician workspace") ? <MechanicWorkspace organizationName={organizationName} role="MECHANIC" /> : session && section === "Technician workspace" ? <MechanicWorkspace organizationName={organizationName} role="TECHNICIAN" /> : session && section === "Accountant ledger" ? <AccountantRoleWorkspace organizationName={organizationName}><AccountantWorkspace /></AccountantRoleWorkspace> : session && section === "Driver portal" ? <DriverRoleWorkspace organizationName={organizationName}><DriverWorkspace /></DriverRoleWorkspace> : <ResourceWorkspace section={section} />}</div>;
+  return <div className="functional-workspace"><button className="back-link" onClick={onBack}><ArrowLeft size={15} /> Back to command center</button>{section === "Team" ? <TeamWorkspace enabled={session} /> : session && section === "Command center" ? <OwnerWorkspace organizationName={organizationName} /> : session && section === "Fleet manager workspace" ? <FleetManagerWorkspace organizationName={organizationName} /> : session && section === "Inventory manager workspace" ? <InventoryManagerWorkspace organizationName={organizationName} /> : session && (section === "Mechanic workspace" || section === "Mechanic / Technician workspace") ? <MechanicWorkspace organizationName={organizationName} role="MECHANIC" /> : session && section === "Technician workspace" ? <MechanicWorkspace organizationName={organizationName} role="TECHNICIAN" /> : session && section === "Accountant ledger" ? <AccountantRoleWorkspace organizationName={organizationName}><AccountantWorkspace /></AccountantRoleWorkspace> : session && section === "Driver portal" ? <DriverRoleWorkspace organizationName={organizationName}><DriverWorkspace /></DriverRoleWorkspace> : <ResourceWorkspace section={section} />}</div>;
 }

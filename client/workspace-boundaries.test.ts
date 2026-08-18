@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { canAccessWorkspace, dedicatedWorkspaceByRole, getAllowedWorkspace, roleNavAccess } from "./src/workspaceAccess";
 
 describe("role workspace boundaries", () => {
@@ -29,6 +31,15 @@ describe("role workspace boundaries", () => {
       expect(getAllowedWorkspace(role, "Command center")).toBe(workspace);
       expect(getAllowedWorkspace(role, "Billing")).toBe(workspace);
     }
+  });
+
+  it("removes static tenant labels and unauthorized owner actions from the authenticated shell", () => {
+    const homeSource = readFileSync(resolve(process.cwd(), "client/src/pages/Home.tsx"), "utf8");
+    const teamSource = readFileSync(resolve(process.cwd(), "client/src/components/FunctionalWorkspace.tsx"), "utf8");
+    expect(homeSource).not.toContain("Avani Transit");
+    expect(homeSource).not.toContain('onClick={() => setActiveNav("Work orders")}>New work order');
+    expect(teamSource).toContain('team.members.useQuery(undefined, { enabled, retry: false })');
+    expect(teamSource).toContain('team.invitations.useQuery(undefined, { enabled, retry: false })');
   });
 
   it("allows only the matching named specialist route", () => {

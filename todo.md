@@ -265,3 +265,8 @@
 - [x] Verify shared organization context remains visible and cross-role operational handoffs remain connected after workspace isolation.
 - [x] Run an end-to-end Fleet Manager-to-Mechanic handoff covering shared organization setup, vehicle/inventory preparation, dispatch, assigned-order visibility, completion, inventory deduction, notification/shared-state verification, RBAC isolation, and cleanup.
 - [x] Re-run regression tests and publish the verified handoff result or document any concrete defect found.
+- [x] Remove Superadmin work-order creation from the left navigation while retaining owner read-only oversight of work-order status and alerts.
+- [x] Replace all static organization labels and placeholder tenant text in authenticated workspace shells with the live organization name, including breadcrumbs and headers.
+- [x] Prevent Team members/invitations queries from running without an authenticated session and verify no avoidable 401 requests occur during valid workspace loading.
+- [x] Add regression coverage for organization-label rendering inputs, Superadmin action boundaries, and authenticated Team query enablement.
+- [x] Run full regression/build and publish the corrected workspace release.
