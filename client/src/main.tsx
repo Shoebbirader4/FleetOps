@@ -9,6 +9,7 @@ import "./index.css";
 
 const queryClient = new QueryClient();
 const API_TIMEOUT_MS = 15_000;
+const RELEASE_TAG = "rbac-8d1aced2";
 
 const trpcClient = trpc.createClient({
   links: [
@@ -28,7 +29,7 @@ const trpcClient = trpc.createClient({
             return await globalThis.fetch(input, { ...(init ?? {}), headers, credentials: "include", signal: controller.signal });
           } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
-              throw new Error(`FleetOps API request timed out after ${API_TIMEOUT_MS / 1000} seconds.`);
+              throw new Error(`FleetOps API request timed out after ${API_TIMEOUT_MS / 1000} seconds. Release ${RELEASE_TAG}.`);
             }
             throw error;
           } finally {
