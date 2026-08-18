@@ -278,3 +278,17 @@
 - [x] Add compliance document list/create/update and expiry-management surfaces for fleet and drivers.
 - [x] Add detailed operational alerts and action links for maintenance, odometer, compliance, and assignment events.
 - [x] Add Fleet Manager regression coverage, run the full suite/build, capture the completed workspace, and publish the release.
+- [x] Create a temporary Mechanic test identity, capture its authenticated workspace screenshot, and clean up the temporary account and organization data afterward.
+- [ ] Add a visible Mechanic Start Work action that transitions only assigned orders into IN_PROGRESS.
+- [ ] Add organization-scoped Mechanic labor-hour logging and repair-note persistence on assigned work orders.
+- [ ] Add secure Mechanic photo/evidence attachment upload and work-order attachment display using project storage helpers.
+- [ ] Extend Mechanic completion to include labor, notes, and attachments while preserving inventory deduction and RBAC isolation.
+- [ ] Add Mechanic regression tests, rerun the cross-role handoff, run the full suite/build, and publish the completed workflow.
+
+- [x] Add Mechanic/Technician Start Work action scoped to assigned work orders.
+- [x] Persist work-order start time, labor hours, and repair notes in the Drizzle/Supabase schema.
+- [x] Upload and persist tenant-scoped Mechanic photo/evidence attachments through storagePut.
+- [x] Replace the Mechanic completion placeholder with an execution form and visible loading/error/success states.
+- [x] Add Vitest regression coverage for Mechanic execution controls, RBAC scope, storage upload, and persistence fields.
+- [ ] Run the updated background Mechanic and Technician lifecycle harnesses against the deployed release, including evidence and labor assertions.
+- [ ] Verify the first production Heartbeat maintenance execution log.
