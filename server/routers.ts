@@ -7,6 +7,11 @@ import { getSupabaseAuthIdentity, provisionFleetOpsUser, supabaseAdmin } from ".
 import { storagePut } from "./storage";
 const Priority = { LOW: "LOW", MEDIUM: "MEDIUM", HIGH: "HIGH", CRITICAL: "CRITICAL" } as const;
 const WorkOrderStatus = { OPEN: "OPEN", IN_PROGRESS: "IN_PROGRESS", COMPLETED: "COMPLETED", CANCELLED: "CANCELLED" } as const;
+export const CITY_BUS_MAINTENANCE_TEMPLATE = [
+  { name: "Engine Oil", expectedLifeKm: 10000, alertThresholdKm: 8000 },
+  { name: "Brakes", expectedLifeKm: 50000, alertThresholdKm: 40000 },
+  { name: "Tires", expectedLifeKm: 60000, alertThresholdKm: 50000 },
+] as const;
 import { evaluateAllOrganizations, evaluateLowInventory, evaluateVehicleMaintenance } from "./automation";
 
 export function assertWritable(org: { subscriptionTier: string; trialEndsAt: Date }) {
@@ -132,14 +137,21 @@ export const appRouter = router({
       const where = ctx.fleetopsUser.role === "DRIVER" ? { orgId: ctx.fleetopsUser.orgId, id: { in: await assignedVehicleIds(ctx) } } : { orgId: ctx.fleetopsUser.orgId };
       return fleetDb.vehicle.findMany({ where, include: { components: true }, orderBy: { updatedAt: "desc" } });
     }),
-    create: fleetOpsProcedure.input(z.object({ vin: z.string().min(5), licensePlate: z.string().min(3), make: z.string().min(2), model: z.string().min(2), year: z.number().int().min(1980).max(2100), currentOdometer: z.number().min(0).default(0) })).mutation(async ({ ctx, input }) => {
+    create: fleetOpsProcedure.input(z.object({ vin: z.string().min(5), licensePlate: z.string().min(3), make: z.string().min(2), model: z.string().min(2), year: z.number().int().min(1980).max(2100), currentOdometer: z.number().min(0).default(0), maintenanceTemplate: z.enum(["NONE", "CITY_BUS"]).default("NONE") })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]);
       assertWritable(ctx.fleetopsUser.org);
       await assertVehicleCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxVehicles);
       const count = await fleetDb.vehicle.count({ where: { orgId: ctx.fleetopsUser.orgId } });
       if (ctx.fleetopsUser.org.subscriptionTier === "TRIAL_FREE" && count >= ctx.fleetopsUser.org.maxVehicles) throw new TRPCError({ code: "FORBIDDEN", message: "Trial limit reached: maximum 3 vehicles." });
-      return fleetDb.vehicle.create({ data: { id: crypto.randomUUID(), ...input, status: "ACTIVE", orgId: ctx.fleetopsUser.orgId, createdAt: new Date(), updatedAt: new Date() } });
+      const { maintenanceTemplate, ...vehicleInput } = input;
+      const vehicle = await fleetDb.vehicle.create({ data: { id: crypto.randomUUID(), ...vehicleInput, status: "ACTIVE", orgId: ctx.fleetopsUser.orgId, createdAt: new Date(), updatedAt: new Date() } });
+      if (maintenanceTemplate === "CITY_BUS") {
+        const odometer = Number(input.currentOdometer ?? 0);
+        await Promise.all(CITY_BUS_MAINTENANCE_TEMPLATE.map((template) => fleetDb.component.create({ data: { id: crypto.randomUUID(), vehicleId: vehicle.id, name: template.name, expectedLifeKm: template.expectedLifeKm, lastServicedOdometer: odometer, alertThresholdKm: template.alertThresholdKm } })));
+      }
+      return { ...vehicle, maintenanceTemplate };
     }),
+    odometerHistory: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["FLEET_MANAGER"]); return fleetDb.odometerLog.findMany({ where: { vehicle: { orgId: ctx.fleetopsUser.orgId } }, include: { vehicle: true }, orderBy: { createdAt: "desc" }, take: 100 }); }),
     updateOdometer: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), reading: z.number().min(0), source: z.enum(["MANUAL_DRIVER", "GPS_API", "MECHANIC"]) })).mutation(async ({ ctx, input }) => {
       assertWritable(ctx.fleetopsUser.org);
       requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER"]);
@@ -161,11 +173,16 @@ export const appRouter = router({
   }),
   workOrders: router({
     list: fleetOpsProcedure.query(async ({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"]); const where = ["MECHANIC", "TECHNICIAN"].includes(ctx.fleetopsUser.role) ? { orgId: ctx.fleetopsUser.orgId, assignedMechanicId: ctx.fleetopsUser.id } : { orgId: ctx.fleetopsUser.orgId }; return fleetDb.workOrder.findMany({ where, include: { vehicle: true, assignedMechanic: true, partsUsed: { include: { part: true } } }, orderBy: { createdAt: "desc" } }); }),
+    updateStatus: fleetOpsProcedure.input(z.object({ workOrderId: z.string().uuid(), status: z.enum(["OPEN", "IN_PROGRESS"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["FLEET_MANAGER", "MECHANIC", "TECHNICIAN"]); assertWritable(ctx.fleetopsUser.org); const order = await fleetDb.workOrder.findFirst({ where: { id: input.workOrderId, orgId: ctx.fleetopsUser.orgId, ...(["MECHANIC", "TECHNICIAN"].includes(ctx.fleetopsUser.role) ? { assignedMechanicId: ctx.fleetopsUser.id } : {}) } }); if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Work order not found in your organization scope." }); return fleetDb.workOrder.update({ where: { id: order.id }, data: { status: input.status } }); }),
     create: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), title: z.string().min(3), description: z.string().optional(), priority: z.nativeEnum(Priority).default(Priority.MEDIUM), assignedMechanicId: z.string().uuid().optional() })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"]);
       assertWritable(ctx.fleetopsUser.org);
       const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } });
       if (!vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Vehicle not found." });
+      if (input.assignedMechanicId) {
+        const assignee = await fleetDb.user.findFirst({ where: { id: input.assignedMechanicId, orgId: ctx.fleetopsUser.orgId, role: { in: ["MECHANIC", "TECHNICIAN"] } } });
+        if (!assignee) throw new TRPCError({ code: "BAD_REQUEST", message: "Mechanic or Technician must belong to this organization." });
+      }
       return fleetDb.workOrder.create({ data: { id: crypto.randomUUID(), ...input, status: "OPEN", orgId: ctx.fleetopsUser.orgId, createdAt: new Date() } });
     }),
     complete: fleetOpsProcedure.input(z.object({ workOrderId: z.string().uuid(), parts: z.array(z.object({ partId: z.string().uuid(), qtyUsed: z.number().int().positive() })).default([]) })).mutation(async ({ ctx, input }) => {
@@ -236,7 +253,8 @@ export const appRouter = router({
     invitations: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return fleetDb.invitation.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { createdAt: "desc" } }); }),
     invite: fleetOpsProcedure.input(z.object({ email: z.string().email(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); await assertUserCapacity(ctx.fleetopsUser.orgId, ctx.fleetopsUser.org.maxUsers); const invitation = await withServerTimeout<any>(fleetDb.invitation.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, email: input.email.toLowerCase(), role: input.role, tokenHash: crypto.randomUUID(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), createdAt: new Date() } }), "Invitation storage did not respond within 12 seconds. No invitation was confirmed."); const origin = String(ctx.req?.headers?.origin ?? "https://fleetops-elktaacw.manus.space"); const joinUrl = new URL(`/join/${invitation.tokenHash}`, origin).toString(); const emailResult = await supabaseAdmin.auth.admin.inviteUserByEmail(input.email.toLowerCase(), { redirectTo: joinUrl }); return { ...(invitation as Record<string, unknown>), joinUrl, delivery: emailResult.error ? "MANUAL_TOKEN" as const : "EMAIL" as const, deliveryError: emailResult.error?.message, serverRelease: FLEETOPS_SERVER_RELEASE }; }),
     updateRole: fleetOpsProcedure.input(z.object({ userId: z.string().uuid(), role: z.enum(["FLEET_MANAGER", "MECHANIC", "TECHNICIAN", "DRIVER", "INVENTORY_MANAGER", "ACCOUNTANT"]) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); const member = await fleetDb.user.findFirst({ where: { id: input.userId, orgId: ctx.fleetopsUser.orgId } }); if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "Team member not found." }); return fleetDb.user.update({ where: { id: input.userId }, data: { role: input.role } }); }),
-    assignVehicle: fleetOpsProcedure.input(z.object({ driverId: z.string().uuid(), vehicleId: z.string().uuid(), active: z.boolean().default(true) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const driver = await fleetDb.user.findFirst({ where: { id: input.driverId, orgId: ctx.fleetopsUser.orgId, role: "DRIVER" } }); const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } }); if (!driver || !vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Driver or vehicle not found in this organization." }); return fleetDb.vehicleAssignment.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, driverId: input.driverId, vehicleId: input.vehicleId, active: input.active, createdAt: new Date(), updatedAt: new Date() } }); }),
+    operationalRoster: fleetOpsProcedure.query(async ({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["FLEET_MANAGER"]); const [members, assignments] = await Promise.all([fleetDb.user.findMany({ where: { orgId: ctx.fleetopsUser.orgId, role: { in: ["DRIVER", "MECHANIC", "TECHNICIAN"] } }, select: { id: true, fullName: true, email: true, role: true }, orderBy: { fullName: "asc" } }), fleetDb.vehicleAssignment.findMany({ where: { orgId: ctx.fleetopsUser.orgId, active: true }, orderBy: { updatedAt: "desc" } })]); return { members, assignments }; }),
+    assignVehicle: fleetOpsProcedure.input(z.object({ driverId: z.string().uuid(), vehicleId: z.string().uuid(), active: z.boolean().default(true) })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const driver = await fleetDb.user.findFirst({ where: { id: input.driverId, orgId: ctx.fleetopsUser.orgId, role: "DRIVER" } }); const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } }); if (!driver || !vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Driver or vehicle not found in this organization." }); return fleetDb.vehicleAssignment.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, vehicleId: input.vehicleId, driverId: input.driverId, active: input.active, createdAt: new Date(), updatedAt: new Date() } }); }),
   }),
   purchaseOrders: router({
     list: fleetOpsProcedure.query(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); return fleetDb.purchaseOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vendor: true }, orderBy: { createdAt: "desc" } }); }),

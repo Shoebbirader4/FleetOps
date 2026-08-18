@@ -270,3 +270,11 @@
 - [x] Prevent Team members/invitations queries from running without an authenticated session and verify no avoidable 401 requests occur during valid workspace loading.
 - [x] Add regression coverage for organization-label rendering inputs, Superadmin action boundaries, and authenticated Team query enablement.
 - [x] Run full regression/build and publish the corrected workspace release.
+- [x] Create a temporary Fleet Manager test identity, capture its authenticated workspace screenshot, and clean up the temporary account and organization data afterward.
+- [x] Add Fleet Manager maintenance-template selection and component schedule creation during vehicle onboarding.
+- [x] Add mechanic/technician assignment to work-order dispatch plus a live dispatch queue with status, priority, assignee, and completion state.
+- [x] Add odometer history, telemetry/source visibility, anomaly flags, and predictive-maintenance signals to the Fleet Manager workspace.
+- [x] Add Fleet Manager driver-to-vehicle assignment and resource coordination controls.
+- [x] Add compliance document list/create/update and expiry-management surfaces for fleet and drivers.
+- [x] Add detailed operational alerts and action links for maintenance, odometer, compliance, and assignment events.
+- [x] Add Fleet Manager regression coverage, run the full suite/build, capture the completed workspace, and publish the release.
