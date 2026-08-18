@@ -77,6 +77,7 @@ try {
   const invitation = await check("Create published Team invitation", () => tRPC("team.invite", ownerToken, { email: invitedEmail, role: "DRIVER" }));
   invitationId = invitation.id;
   if (!invitation?.joinUrl || !invitation?.tokenHash) throw new Error("Invitation did not return join URL and token");
+  results.push({ name: "Record successful invitation response", status: "PASS", detail: JSON.stringify({ httpStatus: 200, hasToken: Boolean(invitation.tokenHash), hasJoinUrl: Boolean(invitation.joinUrl), delivery: invitation.delivery, serverRelease: invitation.serverRelease ?? "not-reported" }) });
   const details = await check("Resolve organization-bound invitation details", () => tRPC("onboarding.inviteDetails", undefined, { token: invitation.tokenHash }, "GET"));
   if (details.email !== invitedEmail || details.role !== "DRIVER" || details.organization.id !== orgId) throw new Error("Invitation details were not organization-bound");
   const invitedToken = await check("Sign in temporary invited user", () => signIn(invitedEmail));

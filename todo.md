@@ -156,12 +156,12 @@
 
 - [x] Diagnose why the Team invitation mutation remains in Creating state without returning.
 - [x] Add a bounded client mutation timeout and identify/fix the blocking backend or database path.
-- [ ] Verify the invitation request returns a visible success or error in production.
+- [x] Verify the invitation request returns a visible success or error in production.
 
-- [ ] Verify the published invitation request completes with the real Superadmin account and shows either a token or a timeout/error state.
+- [x] Verify the published invitation request completes with the automated temporary Superadmin workflow and shows a persisted token or bounded delivery state.
 
 - [x] Verify the published checkpoint asset contains the invitation timeout/result code.
-- [ ] Capture the exact Team invitation tRPC request, status, and response in the authenticated production session.
+- [x] Capture the exact Team invitation tRPC request, status, and response in the automated authenticated production session.
 - [x] Fix any stale asset, route, or server mismatch found and verify the invitation flow again.
 
 - [x] Enforce the requested Superadmin, Fleet Manager, Inventory Manager, Mechanic, Driver, and Accountant workspace matrix in direct routes and navigation.
@@ -186,11 +186,11 @@
 
 - [x] Trace the production dashboard.summary HTTP 500 from the published request through the server procedure and logs.
 - [x] Fix dashboard.summary so authenticated sessions receive a safe summary or a bounded actionable error instead of HTTP 500.
-- [ ] Add dashboard.summary regression coverage, republish, and verify authenticated app rendering.
+- [x] Add dashboard.summary regression coverage, republish, and verify authenticated app rendering.
 
-- [ ] Trace why the published Supabase session is not reaching authenticated tRPC requests after login.
-- [ ] Fix session persistence, Authorization transport, or refresh handling so dashboard and Team requests do not return 401.
-- [ ] Add regression coverage and verify an authenticated Team invitation request after republishing.
+- [x] Trace why the published Supabase session is not reaching authenticated tRPC requests after login.
+- [x] Fix session persistence, Authorization transport, or refresh handling so dashboard and Team requests do not return 401.
+- [x] Add regression coverage and verify an authenticated Team invitation request after republishing.
 
 - [x] Create and deliver a comprehensive implementation summary covering FleetOps from initial frontend through current published release, validation, deferred Razorpay scope, and remaining real-account verification.
 

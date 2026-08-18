@@ -157,6 +157,14 @@ The remaining product verification is account-dependent rather than an unimpleme
 
 FleetOps is a published, full-stack product implementation with multi-tenant persistence, Supabase Auth, role and workspace isolation, operational fleet modules, automation, INR financial workflows, organization-bound invitations, and production resilience fixes. The application is not represented as payment-complete because Razorpay remains deferred, and the final live-account walkthrough is intentionally kept open until the real Superadmin and invited-user sessions are exercised end to end.
 
+## Automated Production Verification Update
+
+A controlled background workflow was subsequently run against the published production API using temporary Supabase Auth identities. The workflow passed temporary Superadmin creation and sign-in, organization bootstrap and onboarding, protected dashboard summary access, Team invitation creation with HTTP 200, persisted token and Join Organization URL presence, organization-bound invitation detail resolution, invited-user sign-in, invitation redemption, Driver denial of Superadmin billing, single-use invitation rejection, and verified cleanup of temporary Auth users, invitations, FleetOps users, and organization rows. The successful invitation result used manual-token delivery because no transactional email provider was configured; the application therefore did not claim that an email was sent.
+
+The background workflow also exposed and resolved two live-schema mismatches: PostgreSQL did not contain `invitations.updatedAt`, and the generic adapter attempted to write that column during invitation creation and redemption. The Drizzle table definition, invitation procedure, and adapter are now aligned with the inspected live table. A second issue in which organization timestamps arrived as strings was resolved by normalizing `trialEndsAt` and `updatedAt` during authenticated user hydration. The standard suite now contains **26 passing tests**, including a client regression test for the authenticated tRPC Authorization and refresh transport.
+
+This automated test validates the production API and server workflow without using the user’s existing browser session. Gmail delivery, the visual Team success panel in the user’s browser, and the existing Superadmin account’s local session storage remain browser-only checks.
+
 ## References
 
 [1]: https://fleetops-elktaacw.manus.space/ "FleetOps published application"
