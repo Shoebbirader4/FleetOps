@@ -187,3 +187,7 @@
 - [x] Trace the production dashboard.summary HTTP 500 from the published request through the server procedure and logs.
 - [x] Fix dashboard.summary so authenticated sessions receive a safe summary or a bounded actionable error instead of HTTP 500.
 - [ ] Add dashboard.summary regression coverage, republish, and verify authenticated app rendering.
+
+- [ ] Trace why the published Supabase session is not reaching authenticated tRPC requests after login.
+- [ ] Fix session persistence, Authorization transport, or refresh handling so dashboard and Team requests do not return 401.
+- [ ] Add regression coverage and verify an authenticated Team invitation request after republishing.

@@ -141,9 +141,14 @@ export default function Home({ initialSection = "Command center" }: { initialSec
     event.preventDefault();
     setAuthError("");
     setAuthSubmitting(true);
-    const { error } = await signInWithEmail(authEmail, authPassword);
-    setAuthSubmitting(false);
+    const { data, error } = await signInWithEmail(authEmail, authPassword);
     if (error) setAuthError(error.message);
+    else if (!data.session) setAuthError("Supabase did not return an active session. Please try signing in again.");
+    else {
+      const refreshed = await refreshSession();
+      if (refreshed.error) setAuthError(`Session setup failed: ${refreshed.error.message}`);
+    }
+    setAuthSubmitting(false);
   };
   const handleSignUp = async (event: React.FormEvent) => {
     event.preventDefault();

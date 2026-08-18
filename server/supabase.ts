@@ -16,17 +16,23 @@ export const supabaseAdmin = createClient(
 );
 
 function getBearerToken(req: Request): string | null {
-  const header = req.headers.authorization;
-  if (header?.startsWith("Bearer ")) return header.slice("Bearer ".length);
-  const cookieToken = req.cookies?.["sb-access-token"] ?? req.cookies?.["supabase-auth-token"];
+  const header = req?.headers?.authorization ?? (typeof req?.get === "function" ? req.get("authorization") : undefined);
+  if (typeof header === "string" && header.toLowerCase().startsWith("bearer ")) return header.slice("bearer ".length).trim();
+  const cookieToken = req?.cookies?.["sb-access-token"] ?? req?.cookies?.["supabase-auth-token"];
   return typeof cookieToken === "string" ? cookieToken : null;
 }
 
 export async function getSupabaseAuthIdentity(req: Request) {
   const token = getBearerToken(req);
-  if (!token) return null;
+  if (!token) {
+    console.warn("[Supabase] No bearer token on protected request", { path: req?.path ?? req?.url ?? "unknown" });
+    return null;
+  }
   const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !data.user) return null;
+  if (error || !data.user) {
+    console.warn("[Supabase] Bearer token rejected", { path: req?.path ?? req?.url ?? "unknown", reason: error?.message ?? "user_not_found" });
+    return null;
+  }
   return data.user;
 }
 
