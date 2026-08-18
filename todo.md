@@ -180,3 +180,10 @@
 - [x] Diagnose the published white-screen runtime failure using browser console, network, and production bundle evidence.
 - [x] Fix the white-screen root cause and add a regression guard.
 - [x] Republish and verify the FleetOps app shell, Join Organization route, and public invalid-invitation state.
+
+- [x] Compare the user-visible white screen with a clean live-domain response after the 5344cc05 release.
+- [x] Resolve any remaining live asset-delivery, cache, or boot timing issue and verify the domain renders for a clean request.
+
+- [x] Trace the production dashboard.summary HTTP 500 from the published request through the server procedure and logs.
+- [x] Fix dashboard.summary so authenticated sessions receive a safe summary or a bounded actionable error instead of HTTP 500.
+- [ ] Add dashboard.summary regression coverage, republish, and verify authenticated app rendering.
