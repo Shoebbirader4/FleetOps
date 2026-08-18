@@ -3,7 +3,8 @@ import { z } from "zod";
 import { fleetOpsProcedure, publicProcedure, router } from "./_core/trpc";
 import { systemRouter } from "./_core/systemRouter";
 import { fleetDb } from "./db";
-import { getSupabaseAuthIdentity, provisionFleetOpsUser } from "./supabase";
+import { getSupabaseAuthIdentity, provisionFleetOpsUser, supabaseAdmin } from "./supabase";
+import { storagePut } from "./storage";
 const Priority = { LOW: "LOW", MEDIUM: "MEDIUM", HIGH: "HIGH", CRITICAL: "CRITICAL" } as const;
 const WorkOrderStatus = { OPEN: "OPEN", IN_PROGRESS: "IN_PROGRESS", COMPLETED: "COMPLETED", CANCELLED: "CANCELLED" } as const;
 import { evaluateAllOrganizations, evaluateLowInventory, evaluateVehicleMaintenance } from "./automation";
@@ -28,6 +29,11 @@ export function requireRole(role: string, allowed: string[]) {
   if (!allowed.includes(role)) throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot perform this action." });
 }
 
+export function validateOdometerReading(current: number, reading: number, elapsedDays = 1) {
+  if (reading < current) throw new TRPCError({ code: "BAD_REQUEST", message: "Odometer readings cannot move backwards." });
+  if (reading - current > Math.max(1, elapsedDays) * 1000) throw new TRPCError({ code: "BAD_REQUEST", message: `Odometer increase exceeds the ${Math.max(1, elapsedDays) * 1000} km limit for the elapsed period.` });
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -39,6 +45,16 @@ export const appRouter = router({
       const authUser = await getSupabaseAuthIdentity(ctx.req);
       if (!authUser?.email) throw new TRPCError({ code: "UNAUTHORIZED", message: "A valid Supabase access token is required." });
       return provisionFleetOpsUser({ authUserId: authUser.id, email: authUser.email, fullName: input.fullName ?? String(authUser.user_metadata?.fullName ?? authUser.email.split("@")[0]), orgName: input.orgName ?? String(authUser.user_metadata?.orgName ?? "Avani Transit") });
+    }),
+    complete: fleetOpsProcedure.input(z.object({ orgName: z.string().min(2), fullName: z.string().min(2) })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]);
+      const updated = await fleetDb.$transaction(async (tx: any) => {
+        const user = await tx.user.update({ where: { id: ctx.fleetopsUser.id }, data: { fullName: input.fullName } });
+        const org = await tx.organization.update({ where: { id: ctx.fleetopsUser.orgId }, data: { name: input.orgName } });
+        return { user, org };
+      });
+      await supabaseAdmin.auth.admin.updateUserById(ctx.fleetopsUser.authUserId, { user_metadata: { ...ctx.fleetopsUser, fullName: input.fullName, orgName: input.orgName, needsOnboarding: false } });
+      return updated;
     }),
     acceptInvite: publicProcedure.input(z.object({ token: z.string().uuid(), fullName: z.string().min(2).optional() })).mutation(async ({ ctx, input }) => {
       const authUser = await getSupabaseAuthIdentity(ctx.req);
@@ -63,7 +79,7 @@ export const appRouter = router({
         fleetDb.notification.count({ where: { orgId, recipientId: ctx.fleetopsUser.id, isRead: false } }),
         fleetDb.financialRecord.aggregate({ where: { orgId, type: "EXPENSE" }, _sum: { amount: true } }),
       ]);
-      return { org: ctx.fleetopsUser.org, vehicles, openWorkOrders, inventoryAlerts, unreadNotifications, monthlyExpense: spend._sum.amount ?? 0 };
+      return { org: ctx.fleetopsUser.org, role: ctx.fleetopsUser.role, vehicles, openWorkOrders, inventoryAlerts, unreadNotifications, monthlyExpense: spend._sum.amount ?? 0 };
     }),
   }),
   components: router({
@@ -87,7 +103,10 @@ export const appRouter = router({
       const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } });
       if (!vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Vehicle not found." });
       const current = Number(vehicle.currentOdometer);
-      const isFlagged = input.reading < current || input.reading - current > 1000;
+      const previousLog = await fleetDb.odometerLog.findFirst({ where: { vehicleId: vehicle.id }, orderBy: { createdAt: "desc" } });
+      const elapsedDays = previousLog?.createdAt ? Math.max(1, Math.ceil((Date.now() - new Date(previousLog.createdAt).getTime()) / 86_400_000)) : 1;
+      validateOdometerReading(previousLog ? Number(previousLog.reading) : current, input.reading, elapsedDays);
+      const isFlagged = false;
       const result = await fleetDb.$transaction([
         fleetDb.vehicle.update({ where: { id: vehicle.id }, data: { currentOdometer: input.reading } }),
         fleetDb.odometerLog.create({ data: { vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, reading: input.reading, source: input.source, isFlagged } }),
@@ -132,6 +151,37 @@ export const appRouter = router({
     list: fleetOpsProcedure.query(({ ctx }) => fleetDb.inventoryPart.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, orderBy: { name: "asc" } })),
     create: fleetOpsProcedure.input(z.object({ sku: z.string().min(1), name: z.string().min(2), binLocation: z.string().optional(), quantityOnHand: z.number().int().nonnegative(), minReorderLevel: z.number().int().nonnegative().default(5), unitCost: z.number().nonnegative() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "INVENTORY_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const part = await fleetDb.inventoryPart.create({ data: { ...input, orgId: ctx.fleetopsUser.orgId } }); await evaluateLowInventory(ctx.fleetopsUser.orgId); return part; }),
   }),
+  driver: router({
+    inspections: fleetOpsProcedure.query(async ({ ctx }) => fleetDb.dvirInspection.findMany({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id }, orderBy: { createdAt: "desc" }, take: 50 })),
+    createInspection: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), inspectionType: z.enum(["PRE_TRIP", "POST_TRIP"]), status: z.enum(["PASS", "FAIL"]), notes: z.string().max(2000).optional(), photoData: z.string().max(2_000_000).optional(), photoContentType: z.string().optional() })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.fleetopsUser.role, ["DRIVER", "SUPERADMIN", "FLEET_MANAGER"]);
+      assertWritable(ctx.fleetopsUser.org);
+      const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } });
+      if (!vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Vehicle not found." });
+      let photoUrl: string | undefined;
+      let photoKey: string | undefined;
+      if (input.photoData) {
+        const raw = input.photoData.replace(/^data:[^;]+;base64,/, "");
+        const uploaded = await storagePut(`fleetops/dvir/${ctx.fleetopsUser.orgId}/${vehicle.id}.jpg`, Buffer.from(raw, "base64"), input.photoContentType ?? "image/jpeg");
+        photoUrl = uploaded.url; photoKey = uploaded.key;
+      }
+      return fleetDb.dvirInspection.create({ data: { orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, inspectionType: input.inspectionType, status: input.status, notes: input.notes, photoUrl, photoKey } });
+    }),
+    fuelLogs: fleetOpsProcedure.query(({ ctx }) => fleetDb.fuelLog.findMany({ where: { orgId: ctx.fleetopsUser.orgId, driverId: ctx.fleetopsUser.id }, orderBy: { createdAt: "desc" }, take: 50 })),
+    createFuelLog: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), liters: z.number().positive(), amount: z.number().nonnegative(), odometer: z.number().nonnegative(), station: z.string().max(200).optional(), receiptData: z.string().max(2_000_000).optional(), receiptContentType: z.string().optional() })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.fleetopsUser.role, ["DRIVER", "SUPERADMIN", "FLEET_MANAGER"]);
+      assertWritable(ctx.fleetopsUser.org);
+      const vehicle = await fleetDb.vehicle.findFirst({ where: { id: input.vehicleId, orgId: ctx.fleetopsUser.orgId } });
+      if (!vehicle) throw new TRPCError({ code: "NOT_FOUND", message: "Vehicle not found." });
+      const previousLog = await fleetDb.odometerLog.findFirst({ where: { vehicleId: vehicle.id }, orderBy: { createdAt: "desc" } });
+      const elapsedDays = previousLog?.createdAt ? Math.max(1, Math.ceil((Date.now() - new Date(previousLog.createdAt).getTime()) / 86_400_000)) : 1;
+      validateOdometerReading(previousLog ? Number(previousLog.reading) : Number(vehicle.currentOdometer), input.odometer, elapsedDays);
+      let receiptUrl: string | undefined;
+      if (input.receiptData) receiptUrl = (await storagePut(`fleetops/fuel/${ctx.fleetopsUser.orgId}/${vehicle.id}.jpg`, Buffer.from(input.receiptData.replace(/^data:[^;]+;base64,/, ""), "base64"), input.receiptContentType ?? "image/jpeg")).url;
+      const [log] = await fleetDb.$transaction([fleetDb.fuelLog.create({ data: { orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, liters: input.liters, amount: input.amount, odometer: input.odometer, station: input.station, receiptUrl } }), fleetDb.financialRecord.create({ data: { orgId: ctx.fleetopsUser.orgId, vehicleId: vehicle.id, type: "EXPENSE", category: "FUEL", amount: input.amount, transactionDate: new Date() } }), fleetDb.odometerLog.create({ data: { vehicleId: vehicle.id, driverId: ctx.fleetopsUser.id, reading: input.odometer, source: "MANUAL_DRIVER", isFlagged: false } }), fleetDb.vehicle.update({ where: { id: vehicle.id }, data: { currentOdometer: input.odometer } })]);
+      return log;
+    }),
+  }),
   automation: router({
     evaluate: fleetOpsProcedure.mutation(({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); return evaluateAllOrganizations(); }),
   }),
@@ -146,10 +196,24 @@ export const appRouter = router({
   }),
   documents: router({
     list: fleetOpsProcedure.query(({ ctx }) => fleetDb.document.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { expiryDate: "asc" } })),
-    create: fleetOpsProcedure.input(z.object({ title: z.string().min(2), docType: z.string().min(2), fileUrl: z.string().url(), fileKey: z.string().optional(), expiryDate: z.coerce.date(), vehicleId: z.string().uuid().optional() })).mutation(({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); return fleetDb.document.create({ data: { ...input, orgId: ctx.fleetopsUser.orgId } }); }),
+    create: fleetOpsProcedure.input(z.object({ title: z.string().min(2), docType: z.string().min(2), fileUrl: z.string().url().optional(), fileKey: z.string().optional(), fileData: z.string().max(4_000_000).optional(), fileContentType: z.string().optional(), expiryDate: z.coerce.date(), vehicleId: z.string().uuid().optional() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const { fileData, fileContentType, ...data } = input; let fileUrl = data.fileUrl; let fileKey = data.fileKey; if (fileData) { const uploaded = await storagePut(`fleetops/documents/${ctx.fleetopsUser.orgId}/${input.title}`, Buffer.from(fileData.replace(/^data:[^;]+;base64,/, "")), fileContentType ?? "application/octet-stream"); fileUrl = uploaded.url; fileKey = uploaded.key; } if (!fileUrl) throw new TRPCError({ code: "BAD_REQUEST", message: "A document file is required." }); return fleetDb.document.create({ data: { ...data, fileUrl, fileKey, orgId: ctx.fleetopsUser.orgId } }); }),
+    update: fleetOpsProcedure.input(z.object({ id: z.string().uuid(), title: z.string().min(2).optional(), expiryDate: z.coerce.date().optional(), fileData: z.string().max(4_000_000).optional(), fileContentType: z.string().optional() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]); assertWritable(ctx.fleetopsUser.org); const existing = await fleetDb.document.findFirst({ where: { id: input.id, orgId: ctx.fleetopsUser.orgId } }); if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Document not found." }); const { id, fileData, fileContentType, ...data } = input; let updateData: any = { ...data }; if (fileData) { const uploaded = await storagePut(`fleetops/documents/${ctx.fleetopsUser.orgId}/${existing.title}`, Buffer.from(fileData.replace(/^data:[^;]+;base64,/, "")), fileContentType ?? "application/octet-stream"); updateData = { ...updateData, fileUrl: uploaded.url, fileKey: uploaded.key }; } return fleetDb.document.update({ where: { id }, data: updateData }); }),
   }),
   financials: router({
     list: fleetOpsProcedure.query(({ ctx }) => fleetDb.financialRecord.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { transactionDate: "desc" } })),
+    metrics: fleetOpsProcedure.query(async ({ ctx }) => {
+      const [records, odometers, vehicles] = await Promise.all([
+        fleetDb.financialRecord.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { transactionDate: "desc" } }),
+        fleetDb.odometerLog.findMany({ where: { vehicle: { orgId: ctx.fleetopsUser.orgId } }, orderBy: { createdAt: "asc" } }),
+        fleetDb.vehicle.findMany({ where: { orgId: ctx.fleetopsUser.orgId } }),
+      ]);
+      const byVehicle = new Map<string, { vehicleId: string; vehicle: string; revenue: number; expenses: number; firstOdometer: number | null; lastOdometer: number | null }>();
+      for (const vehicle of vehicles as any[]) byVehicle.set(vehicle.id, { vehicleId: vehicle.id, vehicle: vehicle.licensePlate, revenue: 0, expenses: 0, firstOdometer: null, lastOdometer: null });
+      for (const record of records as any[]) { const row = byVehicle.get(record.vehicleId); if (!row) continue; if (record.type === "REVENUE") row.revenue += Number(record.amount); else row.expenses += Number(record.amount); }
+      for (const log of odometers as any[]) { const row = byVehicle.get(log.vehicleId); if (!row) continue; const reading = Number(log.reading); if (row.firstOdometer === null) row.firstOdometer = reading; row.lastOdometer = reading; }
+      const rows = Array.from(byVehicle.values()).map((row) => { const distanceKm = row.firstOdometer !== null && row.lastOdometer !== null ? Math.max(0, row.lastOdometer - row.firstOdometer) : 0; return { ...row, distanceKm, profit: row.revenue - row.expenses, cpk: distanceKm > 0 ? row.expenses / distanceKm : 0 }; });
+      return { rows, totals: { revenue: rows.reduce((s, r) => s + r.revenue, 0), expenses: rows.reduce((s, r) => s + r.expenses, 0), profit: rows.reduce((s, r) => s + r.profit, 0), cpk: rows.reduce((s, r) => s + r.expenses, 0) / Math.max(1, rows.reduce((s, r) => s + r.distanceKm, 0)) } };
+    }),
     create: fleetOpsProcedure.input(z.object({ vehicleId: z.string().uuid(), type: z.enum(["REVENUE", "EXPENSE"]), category: z.string().min(2), amount: z.number().nonnegative(), transactionDate: z.coerce.date() })).mutation(({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "ACCOUNTANT"]); assertWritable(ctx.fleetopsUser.org); return fleetDb.financialRecord.create({ data: { ...input, amount: input.amount, orgId: ctx.fleetopsUser.orgId } }); }),
   }),
   billing: router({

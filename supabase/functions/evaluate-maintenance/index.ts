@@ -43,15 +43,34 @@ Deno.serve(async (request) => {
         }
       }
 
-      const { data: parts, error: partsError } = await supabase.from("inventory_parts").select("id, sku, name, quantityOnHand, minReorderLevel").eq("orgId", organization.id);
+      const { data: parts, error: partsError } = await supabase.from("inventory_parts").select("id, sku, name, quantityOnHand, minReorderLevel, unitCost").eq("orgId", organization.id);
       if (partsError) throw partsError;
+      const { data: existingVendors } = await supabase.from("vendors").select("id").eq("orgId", organization.id).eq("name", "FleetOps auto-reorder queue").limit(1);
+      let reorderVendorId = existingVendors?.[0]?.id;
+      if (!reorderVendorId) {
+        const { data: createdVendor, error: vendorError } = await supabase.from("vendors").insert({ orgId: organization.id, name: "FleetOps auto-reorder queue", phone: "SYSTEM" }).select("id").single();
+        if (vendorError) throw vendorError;
+        reorderVendorId = createdVendor.id;
+      }
       for (const part of parts ?? []) {
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const { data: existingAlert } = await supabase.from("notifications").select("id").eq("orgId", organization.id).eq("referenceId", part.id).eq("type", "INVENTORY_LOW").gte("createdAt", since).limit(1);
         if (existingAlert?.length || !admins?.length || Number(part.quantityOnHand) > Number(part.minReorderLevel)) continue;
-        const { error: notificationError } = await supabase.from("notifications").insert(admins.map((admin) => ({ orgId: organization.id, recipientId: admin.id, title: "Inventory below reorder level", message: `${part.name} (${part.sku}) has ${part.quantityOnHand} units remaining.`, type: "INVENTORY_LOW", referenceId: part.id })));
+        const suggestedQty = Math.max(Number(part.minReorderLevel) * 2 - Number(part.quantityOnHand), 1);
+        const { data: purchaseOrder, error: purchaseOrderError } = await supabase.from("purchase_orders").insert({ orgId: organization.id, vendorId: reorderVendorId, status: "DRAFT", totalCost: suggestedQty * Number(part.unitCost) }).select("id").single();
+        if (purchaseOrderError) throw purchaseOrderError;
+        const { error: notificationError } = await supabase.from("notifications").insert(admins.flatMap((admin) => [{ orgId: organization.id, recipientId: admin.id, title: "Inventory below reorder level", message: `${part.name} (${part.sku}) has ${part.quantityOnHand} units remaining. Draft PO created for ${suggestedQty} units.`, type: "INVENTORY_LOW", referenceId: part.id }, { orgId: organization.id, recipientId: admin.id, title: "Draft purchase order created", message: `Draft PO ${purchaseOrder.id.slice(0, 8).toUpperCase()} was created for ${part.name}.`, type: "PURCHASE_ORDER_DRAFT", referenceId: purchaseOrder.id }]));
         if (notificationError) throw notificationError;
         lowStockAlerts += 1;
+      }
+
+      const { data: documents, error: documentError } = await supabase.from("documents").select("id, title, expiryDate").eq("orgId", organization.id).lte("expiryDate", new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
+      if (documentError) throw documentError;
+      for (const document of documents ?? []) {
+        const { data: existingDocumentAlert } = await supabase.from("notifications").select("id").eq("orgId", organization.id).eq("referenceId", document.id).eq("type", "DOCUMENT_EXPIRY").gte("createdAt", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).limit(1);
+        if (existingDocumentAlert?.length || !admins?.length) continue;
+        const { error: documentNotificationError } = await supabase.from("notifications").insert(admins.map((admin) => ({ orgId: organization.id, recipientId: admin.id, title: "Compliance document expiring", message: `${document.title} expires on ${new Date(document.expiryDate).toLocaleDateString("en-IN")}.`, type: "DOCUMENT_EXPIRY", referenceId: document.id })));
+        if (documentNotificationError) throw documentNotificationError;
       }
     }
 

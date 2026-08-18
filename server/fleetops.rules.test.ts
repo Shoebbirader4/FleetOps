@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { assertWritable, requireRole } from "./routers";
+import { assertWritable, requireRole, validateOdometerReading } from "./routers";
 
 describe("FleetOps rules", () => {
   it("allows writes during an active trial", () => {
@@ -14,5 +14,16 @@ describe("FleetOps rules", () => {
   it("allows only explicitly granted roles", () => {
     expect(() => requireRole("MECHANIC", ["MECHANIC", "TECHNICIAN"])).not.toThrow();
     expect(() => requireRole("DRIVER", ["MECHANIC", "TECHNICIAN"])).toThrowError(TRPCError);
+  });
+
+  it("restricts organization onboarding completion to Superadmins", () => {
+    expect(() => requireRole("SUPERADMIN", ["SUPERADMIN"])).not.toThrow();
+    expect(() => requireRole("FLEET_MANAGER", ["SUPERADMIN"])).toThrowError(TRPCError);
+  });
+
+  it("blocks odometer rollback and unrealistic jumps", () => {
+    expect(() => validateOdometerReading(10000, 9999)).toThrowError(TRPCError);
+    expect(() => validateOdometerReading(10000, 11001)).toThrowError(TRPCError);
+    expect(() => validateOdometerReading(10000, 10500)).not.toThrow();
   });
 });

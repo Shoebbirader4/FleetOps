@@ -38,6 +38,7 @@ import { trpc } from "@/lib/trpc";
 import { useFleetOpsAuth } from "@/hooks/useFleetOpsAuth";
 import { useFleetOpsRealtime } from "@/hooks/useFleetOpsRealtime";
 import FunctionalWorkspace from "@/components/FunctionalWorkspace";
+import OrganizationOnboarding from "@/components/OrganizationOnboarding";
 
 const roles = [
   { name: "Owner command center", short: "Owner", icon: LayoutDashboard },
@@ -58,7 +59,19 @@ const navItems = [
   { label: "P&L analytics", icon: TrendingUp },
   { label: "Billing", icon: IndianRupee },
   { label: "Team", icon: Users },
+  { label: "Driver portal", icon: ClipboardCheck },
+  { label: "Accountant ledger", icon: IndianRupee },
 ];
+
+const roleNavAccess: Record<string, string[]> = {
+  SUPERADMIN: navItems.map((item) => item.label),
+  FLEET_MANAGER: ["Command center", "Vehicles", "Work orders", "Notifications", "Compliance vault", "Purchase orders", "Team", "Billing"],
+  INVENTORY_MANAGER: ["Command center", "Inventory", "Notifications", "Purchase orders", "Compliance vault"],
+  MECHANIC: ["Command center", "Work orders", "Notifications", "Vehicles"],
+  TECHNICIAN: ["Command center", "Work orders", "Notifications", "Vehicles"],
+  DRIVER: ["Command center", "Driver portal", "Notifications", "Vehicles"],
+  ACCOUNTANT: ["Command center", "Accountant ledger", "P&L analytics", "Notifications", "Compliance vault"],
+};
 
 const formatInr = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 
@@ -78,8 +91,8 @@ function HealthRing({ value }: { value: number }) {
   return <div className="health-ring" style={{ "--ring-progress": `${(value / 100) * circumference}px` } as React.CSSProperties}><svg viewBox="0 0 64 64"><circle className="ring-track" cx="32" cy="32" r={radius} /><circle className="ring-value" cx="32" cy="32" r={radius} /></svg><strong>{value}</strong></div>;
 }
 
-export default function Home() {
-  const { session, loading: authLoading, signOut, signInWithEmail } = useFleetOpsAuth();
+export default function Home({ initialSection = "Command center" }: { initialSection?: string }) {
+  const { session, loading: authLoading, signOut, signInWithEmail, signUpWithEmail } = useFleetOpsAuth();
   useEffect(() => {
     const onExpired = () => toast.warning("Supabase session expired", { description: "Sign in again to resume live FleetOps data." });
     window.addEventListener("fleetops-session-expired", onExpired);
@@ -98,7 +111,7 @@ export default function Home() {
   useFleetOpsRealtime(backendSummary?.org.id);
   const persistedVehicles = useMemo(() => liveVehicles?.map((vehicle: any) => ({ id: vehicle.licensePlate, name: `${vehicle.make} ${vehicle.model} · ${vehicle.year}`, health: vehicle.status === "ACTIVE" ? 100 : 0, status: vehicle.status === "ACTIVE" ? "On route" : "At depot", odo: `${Number(vehicle.currentOdometer).toLocaleString("en-IN")} km`, service: vehicle.nextServiceAt ? `Next service ${new Date(vehicle.nextServiceAt).toLocaleDateString("en-IN")}` : "No service date recorded", tone: vehicle.status === "ACTIVE" ? "good" : "warn" })) ?? [], [liveVehicles]);
   const persistedOrders = useMemo(() => liveOrders?.map((order: any) => ({ id: order.id.slice(0, 8).toUpperCase(), sourceId: order.id, title: order.title, vehicle: order.vehicle.licensePlate, owner: order.assignedMechanic?.fullName ?? "Unassigned", priority: order.priority[0] + order.priority.slice(1).toLowerCase(), due: order.status === "COMPLETED" ? "Completed" : order.dueDate ? new Date(order.dueDate).toLocaleDateString("en-IN") : "No due date", status: order.status === "COMPLETED" ? "Completed" : order.status })) ?? [], [liveOrders]);
-  const [activeNav, setActiveNav] = useState("Command center");
+  const [activeNav, setActiveNav] = useState(initialSection);
   const [role, setRole] = useState(roles[0]);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [quickFindOpen, setQuickFindOpen] = useState(false);
@@ -108,9 +121,17 @@ export default function Home() {
   const [filter, setFilter] = useState("All fleet");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [authFullName, setAuthFullName] = useState("");
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const allowedNavLabels = roleNavAccess[String(backendSummary?.role ?? "SUPERADMIN")] ?? roleNavAccess.SUPERADMIN;
+  const allowedNavItems = navItems.filter((item) => allowedNavLabels.includes(item.label));
+  useEffect(() => {
+    if (session && !allowedNavLabels.includes(activeNav)) setActiveNav("Command center");
+    if (session && window.localStorage.getItem("fleetops.openTeam") === "1") { window.localStorage.removeItem("fleetops.openTeam"); setActiveNav("Team"); }
+  }, [activeNav, allowedNavLabels, session]);
 
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -119,6 +140,15 @@ export default function Home() {
     const { error } = await signInWithEmail(authEmail, authPassword);
     setAuthSubmitting(false);
     if (error) setAuthError(error.message);
+  };
+  const handleSignUp = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setAuthError("");
+    setAuthSubmitting(true);
+    const { data, error } = await signUpWithEmail(authEmail, authPassword, authFullName);
+    setAuthSubmitting(false);
+    if (error) setAuthError(error.message);
+    else if (!data.session) setAuthError("Account created. Confirm your email, then sign in to continue organization setup.");
   };
 
   const visibleVehicles = useMemo(() => persistedVehicles.filter((vehicle: any) => `${vehicle.id} ${vehicle.name}`.toLowerCase().includes(query.toLowerCase()) && (filter === "All fleet" || vehicle.status === filter)), [query, filter]);
@@ -140,7 +170,8 @@ export default function Home() {
   const operatorName = session?.user.user_metadata?.fullName ?? session?.user.email ?? "";
   const operatorInitials = operatorName.slice(0, 2).toUpperCase();
 
-  if (!authLoading && !session) return <div className="auth-page"><div className="auth-card"><div className="brand-lockup auth-brand"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div></div><div className="panel-kicker">Avani Transit workspace</div><h1>Sign in to your fleet ledger.</h1><p>Use your Supabase Auth account to access vehicles, work orders, inventory, team access, and financial records.</p><form onSubmit={handleSignIn} className="auth-form"><label>Email<input required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@company.com" /></label><label>Password<input required type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="Your password" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? "Signing in…" : "Sign in to FleetOps"}</button></form></div></div>;
+  if (session && session.user.user_metadata?.needsOnboarding) return <OrganizationOnboarding initialName={String(session.user.user_metadata?.fullName ?? "")} initialOrganization={String(session.user.user_metadata?.orgName ?? "")} onComplete={() => { window.localStorage.setItem("fleetops.openTeam", "1"); window.location.reload(); }} />;
+  if (!authLoading && !session) return <div className="auth-page"><div className="auth-card"><div className="brand-lockup auth-brand"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div></div><div className="panel-kicker">Fleet operations workspace</div><h1>{authMode === "signup" ? "Create your Superadmin account." : "Sign in to your fleet ledger."}</h1><p>{authMode === "signup" ? "Start with your name and a secure Supabase Auth account. Organization setup comes immediately after signup." : "Use your Supabase Auth account to access vehicles, work orders, inventory, team access, and financial records."}</p><form onSubmit={authMode === "signup" ? handleSignUp : handleSignIn} className="auth-form">{authMode === "signup" && <label>Full name<input required minLength={2} value={authFullName} onChange={(event) => setAuthFullName(event.target.value)} placeholder="Your full name" /></label>}<label>Email<input required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@company.com" /></label><label>Password<input required minLength={8} type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? authMode === "signup" ? "Creating account…" : "Signing in…" : authMode === "signup" ? "Create Superadmin account" : "Sign in to FleetOps"}</button></form><button className="auth-switch" onClick={() => { setAuthMode(authMode === "signup" ? "signin" : "signup"); setAuthError(""); }}>{authMode === "signup" ? "Already have an account? Sign in" : "New to FleetOps? Create the first Superadmin account"}</button></div></div>;
 
   const completeOrder = (id?: string) => {
     if (!id || !session) return;
@@ -156,11 +187,11 @@ export default function Home() {
   const chooseRole = (nextRole: typeof role) => {
     setRole(nextRole);
     setShowRoleMenu(false);
-    const destination = nextRole.short === "Inventory" ? "Inventory" : nextRole.short === "Mechanic" ? "Work orders" : nextRole.short === "Accountant" ? "P&L analytics" : nextRole.short === "Driver" ? "Vehicles" : nextRole.short === "Fleet manager" ? "Vehicles" : "Command center";
+    const destination = nextRole.short === "Inventory" ? "Inventory" : nextRole.short === "Mechanic" ? "Work orders" : nextRole.short === "Accountant" ? "Accountant ledger" : nextRole.short === "Driver" ? "Driver portal" : nextRole.short === "Fleet manager" ? "Vehicles" : "Command center";
     setActiveNav(destination);
   };
 
-  if (activeNav !== "Command center") return <div className="app-shell"><aside className={`sidebar ${showMobileNav ? "mobile-open" : ""}`}><div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div><div className="nav-caption">Workspace</div><nav>{navItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => setActiveNav(item.label)}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav></aside><main className="main-canvas"><header className="topbar"><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="role-select" onClick={handleSignOut}>{session ? "Sign out" : "Sign in"}</button></div></header><section className="page-content"><FunctionalWorkspace section={activeNav} session={Boolean(session)} onBack={() => setActiveNav("Command center")} /></section></main></div>;
+  if (activeNav !== "Command center") return <div className="app-shell"><aside className={`sidebar ${showMobileNav ? "mobile-open" : ""}`}><div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div><div className="nav-caption">Workspace</div><nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => setActiveNav(item.label)}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav></aside><main className="main-canvas"><header className="topbar"><div className="breadcrumb"><span>Avani Transit</span><span>/</span><strong>{activeNav}</strong></div><div className="topbar-actions"><button className="role-select" onClick={handleSignOut}>{session ? "Sign out" : "Sign in"}</button></div></header><section className="page-content"><FunctionalWorkspace section={activeNav} session={Boolean(session)} onBack={() => setActiveNav("Command center")} /></section></main></div>;
 
   return (
     <div className="app-shell">
@@ -168,7 +199,7 @@ export default function Home() {
         <div className="brand-lockup"><div className="brand-mark"><img src="/manus-storage/fleetops-mark_7d77c5c7.png" alt="FleetOps signal mark" /></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div><button className="mobile-close" onClick={() => setShowMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div>
         <div className="org-switcher"><div className="org-avatar">AV</div><div className="org-copy"><strong>{backendSummary?.org.name ?? "Organization"}</strong><span>{vehicleCount} vehicles · Supabase</span></div><ChevronDown size={15} /></div>
         <div className="nav-caption">Workspace</div>
-        <nav>{navItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => { setActiveNav(item.label); setShowMobileNav(false); }}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav>
+        <nav>{allowedNavItems.map((item: any) => <button key={item.label} className={`nav-item ${activeNav === item.label ? "active" : ""}`} onClick={() => { setActiveNav(item.label); setShowMobileNav(false); }}><item.icon size={17} /><span>{item.label}</span>{item.count && <em>{item.count}</em>}</button>)}</nav>
         <div className="sidebar-bottom"><div className="trial-card"><div className="trial-kicker"><Sparkles size={13} /> {billingStatus?.tier?.replaceAll("_", " ") ?? "Subscription"} <span>{billingStatus ? `${billingStatus.daysRemaining} days` : "—"}</span></div><strong>{vehicleCount} of {billingStatus?.maxVehicles ?? "—"} vehicles used</strong><div className="trial-progress"><span style={{ width: `${billingStatus?.maxVehicles ? Math.min(100, (vehicleCount / billingStatus.maxVehicles) * 100) : 0}%` }} /></div><button onClick={() => setActiveNav("Billing")}>Review upgrade <SquareArrowOutUpRight size={13} /></button></div><button className="nav-item" onClick={() => setActiveNav("Billing")}><Settings2 size={17} /><span>Workspace settings</span></button><div className="user-chip"><div className="user-avatar">{operatorInitials}</div><div><strong>{operatorName}</strong><span>Authenticated operator</span></div><MoreHorizontal size={16} /></div></div>
       </aside>
 

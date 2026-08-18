@@ -33,7 +33,7 @@
 - [x] Replace the notification bell/count and inventory summary with real persisted data and explicit loading, empty, and error states.
 - [x] Implement verified Supabase session-expired handling for protected queries and sign-out.
 
-- [ ] Prepare the production Edge Function deployment and scheduler configuration without publishing from this session.
+- [x] Prepare the production Edge Function deployment and scheduler configuration without publishing from this session.
 - [ ] Validate the deployed maintenance callback after the user publishes the project.
 - [ ] Run an end-to-end Supabase owner/invited-user Auth and invitation redemption test with real accounts.
 
@@ -54,7 +54,7 @@
 - [x] Replace command-center placeholder actions with real backend-backed behavior or remove unavailable actions.
 - [x] Add pending, accepted, and expired invitation status records to Team.
 - [x] Expose dedicated Notifications and Billing workspace routes with persisted or explicit subscription state.
-- [ ] Re-verify the published UI after these functional views/actions are live and save a new checkpoint.
+- [x] Re-verify the published UI after these functional views/actions are live and save a new checkpoint.
 
 - [x] Replace Quick find navigation with an actual command-center vehicle/work-order search interaction.
 - [x] Replace the work-order completion affordance with a real persisted completion mutation and success/error state.
@@ -70,11 +70,39 @@
 
 - [x] Remove remaining authenticated command-center placeholder copy, fallback content, and hardcoded metrics.
 - [x] Complete dedicated data-backed Notifications actions and Billing capacity/status presentation.
-- [ ] Re-run typecheck, Vitest, production build, and visual verification for the live-connected frontend.
-- [ ] Save and deliver the new published frontend connection checkpoint.
+- [x] Re-run typecheck, Vitest, production build, and visual verification for the live-connected frontend.
+- [x] Save and deliver the new published frontend connection checkpoint.
 
 
 - [x] Add a real backend-backed work-order creation flow or remove the command-center CTA.
 - [x] Remove the non-persisted export action from the command center.
 - [x] Fix Billing utilization to query live vehicles and team members within the Billing view.
 - [ ] Verify the authenticated published deployment after saving this round of changes.
+
+- [x] Add a Superadmin signup entry point using Supabase Auth.
+- [x] Add first-run organization onboarding with organization name and Superadmin profile details.
+- [x] Route newly provisioned Superadmins into the authenticated Command Center and Team invitation workflow.
+- [ ] Add onboarding tests and verify the published signup-to-invitation flow.
+
+- [ ] Publish and verify Superadmin signup and organization onboarding in production.
+- [x] Add automatic draft purchase-order creation when stock falls below reorder level.
+- [x] Complete odometer validation for negative readings and jumps above 1,000 km/day.
+- [x] Complete Driver DVIR, manual odometer, fuel logging, and photo-proof workflows.
+- [x] Complete document expiry/compliance alerts and operational document workflow.
+- [x] Complete dedicated Accountant per-vehicle P&L and real-time CPK calculations.
+- [x] Strengthen role-specific workspace routing and permissions without Razorpay checkout.
+- [ ] Deploy all application and Edge Function changes, configure maintenance scheduling, and verify production workflows.
+
+- [ ] Deploy the latest non-Razorpay workflow changes and verify them on the published production site.
+- [x] Save a new checkpoint after the latest signup/onboarding, driver, compliance, accountant, and automation changes.
+- [x] Implement and verify post-onboarding navigation into the Command Center and Team invitation flow.
+- [x] Make odometer validation truly time-aware for the 1,000 km/day rule.
+- [x] Add a dedicated Driver manual odometer submission UI and expose fuel receipt/photo-proof upload in the frontend.
+- [x] Add full document create/upload/update/renew operations in the Compliance workspace.
+- [x] Correct CPK to use validated distance-traveled logic.
+- [x] Implement role-aware frontend routing and gating instead of relying only on the shared Home shell.
+
+- [ ] Verify the full Superadmin signup to onboarding to Team invitation transition with a real authenticated account after deployment.
+- [x] Record fuel-log odometer updates in the validated odometer history.
+- [x] Add visible Compliance renew/update actions wired to documents.update.
+- [x] Add explicit guarded route segments for role-specific FleetOps workspaces.

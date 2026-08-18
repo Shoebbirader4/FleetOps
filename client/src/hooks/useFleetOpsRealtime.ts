@@ -21,6 +21,24 @@ export function useFleetOpsRealtime(orgId?: string) {
         void utils.notifications.list.invalidate();
         void utils.dashboard.summary.invalidate();
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "inventory_parts", filter: `orgId=eq.${orgId}` }, () => {
+        void utils.inventory.list.invalidate();
+        void utils.dashboard.summary.invalidate();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "documents", filter: `orgId=eq.${orgId}` }, () => {
+        void utils.documents.list.invalidate();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "financial_records", filter: `orgId=eq.${orgId}` }, () => {
+        void utils.financials.list.invalidate();
+        void utils.financials.metrics.invalidate();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "dvir_inspections", filter: `orgId=eq.${orgId}` }, () => {
+        void utils.driver.inspections.invalidate();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "fuel_logs", filter: `orgId=eq.${orgId}` }, () => {
+        void utils.driver.fuelLogs.invalidate();
+        void utils.financials.metrics.invalidate();
+      })
       .subscribe();
 
     return () => {

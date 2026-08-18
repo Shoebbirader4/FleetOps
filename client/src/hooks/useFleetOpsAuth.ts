@@ -35,7 +35,7 @@ export function useFleetOpsAuth() {
     loading,
     isAuthenticated: Boolean(session),
     signInWithEmail: (email: string, password: string) => supabase.auth.signInWithPassword({ email, password }),
-    signUpWithEmail: (email: string, password: string, fullName: string, orgName: string) => supabase.auth.signUp({ email, password, options: { data: { fullName, orgName } } }),
+    signUpWithEmail: (email: string, password: string, fullName: string) => supabase.auth.signUp({ email, password, options: { data: { fullName, needsOnboarding: true } } }),
     signOut: () => supabase.auth.signOut(),
   };
 }
