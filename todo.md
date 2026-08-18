@@ -138,3 +138,10 @@
 - [x] Diagnose slow authenticated production loading and identify blocking queries or render gates.
 - [x] Add a fast, explicit authenticated loading/onboarding state with independent query failures.
 - [ ] Verify production load time and Superadmin onboarding responsiveness after republishing.
+
+- [x] Diagnose why clicking Team from the authenticated left navigation returns to the login gate.
+- [x] Preserve the active Supabase session across Team route transitions and load Team queries without auth loops.
+- [ ] Verify the published Team navigation flow with the real Superadmin account.
+
+- [ ] Verify Team navigation with the real Superadmin account after publishing the 401 refresh fix.
+- [ ] If Team still fails, inspect the production Team procedure response without signing the user out.

@@ -18,13 +18,17 @@ const trpcClient = trpc.createClient({
         return {};
       },
       async fetch(input, init) {
+        const request = async (accessToken?: string) => {
+          const headers = new Headers(init?.headers);
+          if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+          return globalThis.fetch(input, { ...(init ?? {}), headers, credentials: "include" });
+        };
         const { data } = await supabase.auth.getSession();
-        const headers = new Headers(init?.headers);
-        if (data.session?.access_token) headers.set("Authorization", `Bearer ${data.session.access_token}`);
-        const response = await globalThis.fetch(input, { ...(init ?? {}), headers, credentials: "include" });
+        let response = await request(data.session?.access_token);
         if (response.status === 401) {
-          await supabase.auth.signOut();
-          window.dispatchEvent(new CustomEvent("fleetops-session-expired"));
+          const refreshed = await supabase.auth.refreshSession();
+          if (refreshed.data.session?.access_token) response = await request(refreshed.data.session.access_token);
+          if (response.status === 401 && !refreshed.data.session) window.dispatchEvent(new CustomEvent("fleetops-session-expired"));
         }
         return response;
       },
