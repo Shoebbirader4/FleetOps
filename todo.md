@@ -160,9 +160,9 @@
 
 - [ ] Verify the published invitation request completes with the real Superadmin account and shows either a token or a timeout/error state.
 
-- [ ] Verify the published checkpoint asset contains the invitation timeout/result code.
+- [x] Verify the published checkpoint asset contains the invitation timeout/result code.
 - [ ] Capture the exact Team invitation tRPC request, status, and response in the authenticated production session.
-- [ ] Fix any stale asset, route, or server mismatch found and verify the invitation flow again.
+- [x] Fix any stale asset, route, or server mismatch found and verify the invitation flow again.
 
 - [x] Enforce the requested Superadmin, Fleet Manager, Inventory Manager, Mechanic, Driver, and Accountant workspace matrix in direct routes and navigation.
 - [x] Enforce role-specific procedure permissions and prevent cross-workspace data access at the server boundary.
@@ -174,3 +174,9 @@
 - [x] Add an organization-bound invited-user signup screen with prefilled email and organization identity, password creation, and invitation redemption after Supabase signup.
 - [x] Route redeemed invited users automatically into separate locked workspace UIs for Fleet Manager, Inventory Manager, Mechanic, Driver, and Accountant roles.
 - [x] Add regression coverage for invitation join validation, organization binding, role routing, and workspace isolation.
+
+- [ ] Re-verify the actual production Team invitation flow with a real Superadmin account after the stale-asset fix, confirming email/join-link success or a bounded visible error.
+
+- [ ] Diagnose the published white-screen runtime failure using browser console, network, and production bundle evidence.
+- [ ] Fix the white-screen root cause and add a regression guard.
+- [ ] Republish and verify the FleetOps app shell, Join Organization route, and public invalid-invitation state.
