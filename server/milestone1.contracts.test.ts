@@ -83,4 +83,13 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("Driver marked vehicle unsafe");
     expect(routersSource).toContain("active: true");
   });
+
+  it("defines tenant-scoped Accountant fuel-ledger reconciliation", () => {
+    expect(routersSource).toContain("reconcile: fleetOpsProcedure.query");
+    expect(routersSource).toContain('category: "FUEL"');
+    expect(routersSource).toContain("fuelLogged");
+    expect(routersSource).toContain("ledgerFuel");
+    expect(routersSource).toContain('status: Math.abs(difference) < 0.01 ? "MATCHED" : "MISMATCH"');
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "ACCOUNTANT"])');
+  });
 });

@@ -332,3 +332,5 @@
 - [x] P0 priority 4: add work-order parts reservation and return workflows with reserved quantities, stock protection, movement/audit records, and role-safe controls.
 - [x] P0 priority 5: add mechanic/technician execution checklists and Fleet Manager or Superadmin review approval before final work-order completion.
 - [x] P0 priority 6: add a Driver daily home with start-of-shift DVIR, odometer and fuel capture, assigned-vehicle readiness, unsafe-to-drive disposition, and Fleet Manager escalation.
+- [ ] P0 priority 7: add Superadmin organization settings for company identity, operating timezone, default odometer policy, and safety escalation contacts with tenant-scoped persistence.
+- [x] P1 accounting reconciliation: add an Accountant reconciliation query comparing fuel logs and ledger fuel expenses, with visible mismatch status and tenant-scoped audit access.
