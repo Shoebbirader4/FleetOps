@@ -353,3 +353,4 @@
 - [x] Architecture subtask: replace mechanic inventory-part and service-component map any annotations with shared InventoryPart and ServiceComponent types.
 - [x] Architecture subtask: replace owner and Fleet Manager workspace collection any annotations with shared notification, document, audit, vehicle, work-order, member, and maintenance-signal types.
 - [x] Architecture subtask: replace Fleet Manager dispatch, board, triage, issue, assignment, odometer, and template-map any annotations with shared domain types.
+- [x] Architecture subtask: replace Inventory Manager stock, purchase-order, movement, and Mechanic execution collection any annotations with shared domain types.
