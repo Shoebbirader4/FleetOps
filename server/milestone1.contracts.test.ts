@@ -51,6 +51,12 @@ describe("Milestone 1 operational contracts", () => {
     for (const state of ["WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK", "CANCELLED"]) expect(routersSource).toContain(state);
     expect(routersSource).toContain("WORK_ORDER_STATUS_CHANGED");
     expect(routersSource).toContain("Cannot move work order from");
+    expect(routersSource).toContain("updateChecklist: fleetOpsProcedure.input");
+    expect(routersSource).toContain("approve: fleetOpsProcedure.input");
+    expect(routersSource).toContain("WORK_ORDER_CHECKLIST_UPDATED");
+    expect(routersSource).toContain("Complete every execution checklist item before approval");
+    expect(routersSource).toContain("WORK_ORDER_READY_FOR_REVIEW");
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["MECHANIC", "TECHNICIAN"])');
   });
 
   it("defines tenant-scoped board and inventory movement procedures", () => {
