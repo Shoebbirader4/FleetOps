@@ -382,3 +382,5 @@
 - [x] P1 increment: add regression coverage for driver-handoff tenant scoping, role restrictions, and status aggregation.
 - [x] P1 increment: add an Inventory Manager receipt form to the live Inventory workspace using the existing inventory.receive procedure, with quantity, unit cost, reason, validation, and persisted refresh.
 - [x] P1 increment: add regression coverage for the inventory receipt UI contract and role-scoped receiving procedure.
+- [x] P1 increment: add tenant-scoped Procurement purchase-order status transitions for DRAFT, SENT, RECEIVED, and CANCELLED with audit logging and role enforcement.
+- [x] P1 increment: add regression coverage for purchase-order transition guards and Procurement workspace controls.

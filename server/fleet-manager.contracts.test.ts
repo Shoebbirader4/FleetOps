@@ -54,6 +54,14 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('orgId: ctx.fleetopsUser.orgId');
   });
 
+  it("defines guarded Procurement purchase-order lifecycle transitions", () => {
+    expect(routersSource).toContain("updateStatus: fleetOpsProcedure");
+    expect(routersSource).toContain('status: z.enum(["DRAFT", "SENT", "RECEIVED", "CANCELLED"])');
+    expect(routersSource).toContain("This purchase order changed elsewhere. Refresh before updating its status.");
+    expect(routersSource).toContain("PURCHASE_ORDER_STATUS_CHANGED");
+    expect(routersSource).toContain('where: { id: input.id, orgId: ctx.fleetopsUser.orgId }');
+  });
+
   it("defines tenant-scoped Driver handoff visibility with safety aggregation", () => {
     expect(routersSource).toContain("driverHandoffs:");
     expect(routersSource).toContain('type: "DRIVER_SAFETY_DISPOSITION"');
