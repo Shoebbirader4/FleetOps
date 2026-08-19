@@ -384,3 +384,5 @@
 - [x] P1 increment: add regression coverage for the inventory receipt UI contract and role-scoped receiving procedure.
 - [x] P1 increment: add tenant-scoped Procurement purchase-order status transitions for DRAFT, SENT, RECEIVED, and CANCELLED with audit logging and role enforcement.
 - [x] P1 increment: add regression coverage for purchase-order transition guards and Procurement workspace controls.
+- [x] P1 increment: add Accountant ledger filters by vehicle, type, category, and date range with a clear-filter action and persisted client view state.
+- [x] P1 increment: add regression coverage for the Accountant filter controls and tenant-scoped filtered rendering.

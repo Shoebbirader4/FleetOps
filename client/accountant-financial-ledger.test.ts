@@ -23,6 +23,15 @@ describe("Accountant financial ledger", () => {
     expect(ui).toContain("Export PDF");
   });
 
+  it("renders tenant-scoped ledger filters and a clear-filter action", () => {
+    expect(ui).toContain("Filter ledger vehicle");
+    expect(ui).toContain("Filter ledger type");
+    expect(ui).toContain("Filter ledger category");
+    expect(ui).toContain("Ledger date from");
+    expect(ui).toContain("Clear filters");
+    expect(ui).toContain("filteredRecords");
+  });
+
   it("keeps financial procedures restricted to Accountant and Superadmin", () => {
     expect(router).toContain("financials: router({");
     expect(router).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "ACCOUNTANT"])');
