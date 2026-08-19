@@ -376,3 +376,5 @@
 - [x] Background verification: clean up isolated test records/users where the available test harness permits safe cleanup, and document the published-role proxy timeout limitation in background-verification-report-2026-08-20.md.
 - [x] Background-test fix: correct notifications.list multi-column ordering so isolated Superadmin and role-suite tests can read recipient-scoped notifications.
 - [x] Background-test harness fix: model Mechanic completion as READY_FOR_REVIEW followed by Fleet Manager checklist approval before asserting COMPLETED.
+- [x] P1 increment: add a tenant-scoped Fleet Manager maintenance planning view with due-date signals for component mileage, expiring documents, and open work orders, including date-range filtering and actionable source references.
+- [x] P1 increment: add regression coverage for the maintenance planning query, tenant isolation, role restrictions, and Fleet Manager rendering contract.

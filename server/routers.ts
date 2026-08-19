@@ -211,6 +211,25 @@ export const appRouter = router({
       return result;
     }),
   }),
+  planning: router({
+    maintenance: fleetOpsProcedure.input(z.object({ from: z.coerce.date().optional(), to: z.coerce.date().optional() }).optional()).query(async ({ ctx, input }) => {
+      requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]);
+      const from = input?.from ?? new Date();
+      const to = input?.to ?? new Date(from.getTime() + 90 * 86_400_000);
+      if (to < from) throw new TRPCError({ code: "BAD_REQUEST", message: "The planning end date must be on or after the start date." });
+      const [vehicles, documents, workOrders] = await Promise.all([
+        fleetDb.vehicle.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { components: true }, orderBy: { licensePlate: "asc" } }),
+        fleetDb.document.findMany({ where: { orgId: ctx.fleetopsUser.orgId }, include: { vehicle: true }, orderBy: { expiryDate: "asc" } }),
+        fleetDb.workOrder.findMany({ where: { orgId: ctx.fleetopsUser.orgId, status: { in: ["OPEN", "IN_PROGRESS", "WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK"] } }, include: { vehicle: true, assignedMechanic: true }, orderBy: { updatedAt: "desc" } }),
+      ]);
+      const items = [
+        ...vehicles.flatMap((vehicle: any) => (vehicle.components ?? []).filter((component: any) => Number(vehicle.currentOdometer) - Number(component.lastServicedOdometer) >= Number(component.alertThresholdKm)).map((component: any) => ({ id: component.id, kind: "COMPONENT_DUE" as const, title: `${component.name} service due`, vehicleId: vehicle.id, vehicleLabel: vehicle.licensePlate, dueDate: new Date(), priority: "HIGH", detail: `${Math.max(0, Number(vehicle.currentOdometer) - Number(component.lastServicedOdometer)).toLocaleString("en-IN")} km since last service`, sourceId: component.id }))),
+        ...documents.filter((document: any) => { const due = new Date(document.expiryDate); return due >= from && due <= to; }).map((document: any) => ({ id: document.id, kind: "DOCUMENT_EXPIRY" as const, title: `${document.title} expires`, vehicleId: document.vehicleId ?? null, vehicleLabel: document.vehicle?.licensePlate ?? "Organization document", dueDate: new Date(document.expiryDate), priority: new Date(document.expiryDate).getTime() < Date.now() + 30 * 86_400_000 ? "CRITICAL" : "MEDIUM", detail: `${document.docType ?? "Document"} renewal required`, sourceId: document.id })),
+        ...workOrders.filter((order: any) => { const due = new Date(order.updatedAt ?? order.createdAt); return due >= from && due <= to; }).map((order: any) => ({ id: order.id, kind: "WORK_ORDER" as const, title: order.title, vehicleId: order.vehicleId, vehicleLabel: order.vehicle?.licensePlate ?? order.vehicleId, dueDate: new Date(order.updatedAt ?? order.createdAt), priority: order.priority, detail: `${order.status} · ${order.assignedMechanic?.fullName ?? "Unassigned"}`, sourceId: order.id })),
+      ].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+      return { from, to, items, counts: { total: items.length, components: items.filter((item) => item.kind === "COMPONENT_DUE").length, documents: items.filter((item) => item.kind === "DOCUMENT_EXPIRY").length, workOrders: items.filter((item) => item.kind === "WORK_ORDER").length } };
+    }),
+  }),
   workOrders: router({
     list: fleetOpsProcedure.query(async ({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"]); const where = ["MECHANIC", "TECHNICIAN"].includes(ctx.fleetopsUser.role) ? { orgId: ctx.fleetopsUser.orgId, assignedMechanicId: ctx.fleetopsUser.id } : { orgId: ctx.fleetopsUser.orgId }; return fleetDb.workOrder.findMany({ where, include: { vehicle: true, assignedMechanic: true, partsUsed: { include: { part: true } } }, orderBy: { createdAt: "desc" } }); }),
     board: fleetOpsProcedure.query(async ({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"]); const where = ["MECHANIC", "TECHNICIAN"].includes(ctx.fleetopsUser.role) ? { orgId: ctx.fleetopsUser.orgId, assignedMechanicId: ctx.fleetopsUser.id } : { orgId: ctx.fleetopsUser.orgId }; const orders = await fleetDb.workOrder.findMany({ where, include: { vehicle: true, assignedMechanic: true }, orderBy: { updatedAt: "desc" } }); return { columns: ["OPEN", "IN_PROGRESS", "WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK", "COMPLETED", "CANCELLED"].map((status) => ({ status, items: orders.filter((order: any) => order.status === status) })), totals: { all: orders.length, open: orders.filter((order: any) => order.status === "OPEN").length, inProgress: orders.filter((order: any) => order.status === "IN_PROGRESS").length, completed: orders.filter((order: any) => order.status === "COMPLETED").length } }; }),

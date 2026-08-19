@@ -26,3 +26,4 @@ export type FuelLogRow = { id: string; liters: number | string; amount: number |
 export type ProcurementOrderRow = { id: string; status: string; totalCost: number | string; vendor?: { name: string } | null };
 export type WorkspaceMember = { id: string; role: string; email?: string; name?: string | null; fullName?: string | null };
 export type FleetMaintenanceSignal = ServiceComponent & { vehicleLabel: string; wear: number; due: boolean };
+export type MaintenancePlanItem = { id: string; kind: "COMPONENT_DUE" | "DOCUMENT_EXPIRY" | "WORK_ORDER"; title: string; vehicleId?: string | null; vehicleLabel: string; dueDate: string | Date; priority: string; detail: string; sourceId: string };

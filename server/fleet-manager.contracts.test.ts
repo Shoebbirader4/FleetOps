@@ -43,6 +43,17 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('code: "CONFLICT"');
   });
 
+  it("defines tenant-scoped maintenance planning with bounded date validation", () => {
+    expect(routersSource).toContain("planning: router({");
+    expect(routersSource).toContain("maintenance: fleetOpsProcedure");
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
+    expect(routersSource).toContain("The planning end date must be on or after the start date.");
+    expect(routersSource).toContain('kind: "COMPONENT_DUE"');
+    expect(routersSource).toContain('kind: "DOCUMENT_EXPIRY"');
+    expect(routersSource).toContain('kind: "WORK_ORDER"');
+    expect(routersSource).toContain('orgId: ctx.fleetopsUser.orgId');
+  });
+
   it("provides validated tenant-scoped compliance CSV preview and import", () => {
     expect(routersSource).toContain("previewImport:");
     expect(routersSource).toContain("importCsv:");
