@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { notifyOwner } from "./notification";
 import { adminProcedure, publicProcedure, router } from "./trpc";
@@ -8,14 +9,15 @@ const RELEASE = "fleetops-observability-20260820";
 
 export const systemRouter = router({
   health: publicProcedure
-    .input(z.object({ timestamp: z.number().min(0, "timestamp cannot be negative") }))
+    .input(z.object({ timestamp: z.number().min(0, "timestamp cannot be negative"), correlationId: z.string().trim().min(8).max(128).optional() }))
     .query(async ({ input }) => {
       const startedAt = Date.now();
+      const correlationId = input.correlationId ?? randomUUID();
       try {
         await db.execute(sql`select 1`);
-        return { ok: true, release: RELEASE, database: "ok" as const, checkedAt: new Date().toISOString(), latencyMs: Date.now() - startedAt, clientTimestamp: input.timestamp };
+        return { ok: true, release: RELEASE, database: "ok" as const, checkedAt: new Date().toISOString(), latencyMs: Date.now() - startedAt, clientTimestamp: input.timestamp, correlationId };
       } catch {
-        return { ok: false, release: RELEASE, database: "degraded" as const, checkedAt: new Date().toISOString(), latencyMs: Date.now() - startedAt, clientTimestamp: input.timestamp };
+        return { ok: false, release: RELEASE, database: "degraded" as const, checkedAt: new Date().toISOString(), latencyMs: Date.now() - startedAt, clientTimestamp: input.timestamp, correlationId };
       }
     }),
   release: publicProcedure.query(() => ({ release: RELEASE, service: "FleetOps API", environment: process.env.NODE_ENV === "production" ? "production" : "development" })),

@@ -8,8 +8,8 @@ import { systemRouter } from "./_core/systemRouter";
 
 describe("public system diagnostics", () => {
   it("returns a safe release and PostgreSQL dependency status", async () => {
-    const result = await systemRouter.createCaller({} as never).health({ timestamp: 123 });
-    expect(result).toMatchObject({ ok: true, release: "fleetops-observability-20260820", database: "ok", clientTimestamp: 123 });
+    const result = await systemRouter.createCaller({} as never).health({ timestamp: 123, correlationId: "fleetops-test-correlation-123" });
+    expect(result).toMatchObject({ ok: true, release: "fleetops-observability-20260820", database: "ok", clientTimestamp: 123, correlationId: "fleetops-test-correlation-123" });
     expect(mocks.execute).toHaveBeenCalledOnce();
   });
 
