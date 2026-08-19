@@ -49,7 +49,9 @@ try {
   await forbidden("Mechanic cannot read financial ledger", () => tRPC("financials.list", mechanicToken, null, "GET"));
   await forbidden("Fleet Manager cannot read financial ledger", () => tRPC("financials.list", managerToken, null, "GET"));
   const before = await pool.query(`SELECT "quantityOnHand" FROM inventory_parts WHERE id = $1`, [partId]);
+  await check("Mechanic records a completed checklist", () => tRPC("workOrders.updateChecklist", mechanicToken, { workOrderId: orderId, items: [{ id: "brake-inspection", title: "Brake inspection completed", completed: true }] }));
   await check("Mechanic completes dispatched order with inventory part", () => tRPC("workOrders.complete", mechanicToken, { workOrderId: orderId, parts: [{ partId, qtyUsed: 1 }] }));
+  await check("Fleet Manager approves the ready-for-review order", () => tRPC("workOrders.approve", managerToken, { workOrderId: orderId }));
   const after = await pool.query(`SELECT "quantityOnHand" FROM inventory_parts WHERE id = $1`, [partId]); if (Number(after.rows[0].quantityOnHand) !== Number(before.rows[0].quantityOnHand) - 1) throw new Error("Shared inventory quantity was not decremented"); results.push({ name: "Verify shared inventory deduction", status: "PASS", detail: "one part consumed by Mechanic completion" });
   await check("Fleet Manager sees completed shared work order", async () => { const orders = await tRPC("workOrders.list", managerToken, null, "GET"); const shared = orders.find((item) => item.id === orderId); if (!shared || shared.status !== "COMPLETED") throw new Error("Fleet Manager did not see completed status"); });
   await check("Superadmin receives completion notification", async () => { const notifications = await tRPC("notifications.list", ownerToken, null, "GET"); if (!notifications.some((item) => item.referenceId === orderId)) throw new Error("Completion notification was not delivered to Superadmin"); });
