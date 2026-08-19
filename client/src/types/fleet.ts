@@ -1,0 +1,6 @@
+export type TeamMember = { id: string; fullName: string; email: string; role: string; status?: string };
+export type Invitation = { id: string; email: string; role: string; expiresAt: string | Date; acceptedAt?: string | Date | null; delivery?: string; joinUrl?: string; tokenHash?: string; deliveryError?: string | null };
+export type InvitationResponse = { email?: string; role?: string; delivery: "MANUAL_TOKEN" | "EMAIL"; joinUrl?: string; tokenHash?: string; deliveryError?: string; serverRelease?: string };
+export type FleetVehicle = { id: string; licensePlate: string; make?: string; model?: string; status?: string; currentOdometer?: number };
+export type FinancialRecord = { id: string; vehicleId: string; vehicle?: Pick<FleetVehicle, "licensePlate">; type: "REVENUE" | "EXPENSE"; category: string; amount: number | string; transactionDate: string | Date; approvalStatus?: string; reversalOfId?: string | null };
+export type NotificationRow = { id: string; title: string; message: string; type: string; severity?: string; isRead: boolean; resolvedAt?: string | Date | null; escalationLevel?: number };
