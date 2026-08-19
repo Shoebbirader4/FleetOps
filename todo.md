@@ -370,9 +370,9 @@
 - [x] Production verification increment: confirm the published landing page resolves with distinct Sign In/Create Organization routes and current organization-bound messaging; keep authenticated session tests explicitly pending.
 - [x] Authoritative P0 production diagnostics: add caller-supplied or generated correlation IDs to system health responses with regression coverage, preserving safe release and database status reporting.
 - [x] Production verification increment: confirm the published Create Organization route renders the Superadmin signup form without submitting or creating production data.
-- [ ] Background verification: create an isolated test organization and Superadmin test user without modifying the user’s production organization.
-- [ ] Background verification: exercise invitation creation/redemption and designated workspace access for Fleet Manager, Inventory Manager, Mechanic, Technician, Driver, and Accountant test users.
-- [ ] Background verification: validate the Issue → Triage → Work Order → Mechanic Execution → Inventory Consumption/Return → Review → Accounting/Reconciliation loop and record verified results.
-- [ ] Background verification: clean up isolated test records/users where the available test harness permits safe cleanup, and document any non-destructive limitations.
+- [x] Background verification: create an isolated test organization and Superadmin test user without modifying the user’s production organization.
+- [x] Background verification: exercise invitation creation/redemption and designated workspace access for Fleet Manager, Inventory Manager, Mechanic, Technician, Driver, and Accountant test users; local role suites passed and the published comprehensive invite flow passed.
+- [x] Background verification: validate the Issue → Triage → Work Order → Mechanic Execution → Inventory Consumption/Return → Review → Accounting/Reconciliation loop; corrected handoff harness passed locally and results are recorded in background-verification-report-2026-08-20.md.
+- [x] Background verification: clean up isolated test records/users where the available test harness permits safe cleanup, and document the published-role proxy timeout limitation in background-verification-report-2026-08-20.md.
 - [x] Background-test fix: correct notifications.list multi-column ordering so isolated Superadmin and role-suite tests can read recipient-scoped notifications.
 - [x] Background-test harness fix: model Mechanic completion as READY_FOR_REVIEW followed by Fleet Manager checklist approval before asserting COMPLETED.
