@@ -378,3 +378,5 @@
 - [x] Background-test harness fix: model Mechanic completion as READY_FOR_REVIEW followed by Fleet Manager checklist approval before asserting COMPLETED.
 - [x] P1 increment: add a tenant-scoped Fleet Manager maintenance planning view with due-date signals for component mileage, expiring documents, and open work orders, including date-range filtering and actionable source references.
 - [x] P1 increment: add regression coverage for the maintenance planning query, tenant isolation, role restrictions, and Fleet Manager rendering contract.
+- [x] P1 increment: add a tenant-scoped Fleet Manager driver-handoff view showing driver, vehicle, latest reported issue, acknowledgement time, and safety disposition.
+- [x] P1 increment: add regression coverage for driver-handoff tenant scoping, role restrictions, and status aggregation.

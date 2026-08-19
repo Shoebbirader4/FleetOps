@@ -54,6 +54,14 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('orgId: ctx.fleetopsUser.orgId');
   });
 
+  it("defines tenant-scoped Driver handoff visibility with safety aggregation", () => {
+    expect(routersSource).toContain("driverHandoffs:");
+    expect(routersSource).toContain('type: "DRIVER_SAFETY_DISPOSITION"');
+    expect(routersSource).toContain('vehicle?.status === "OUT_OF_SERVICE" ? "UNSAFE"');
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
+    expect(routersSource).toContain('where: { orgId: ctx.fleetopsUser.orgId, active: true }');
+  });
+
   it("provides validated tenant-scoped compliance CSV preview and import", () => {
     expect(routersSource).toContain("previewImport:");
     expect(routersSource).toContain("importCsv:");
