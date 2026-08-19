@@ -336,3 +336,4 @@
 - [x] P1 accounting reconciliation: add an Accountant reconciliation query comparing fuel logs and ledger fuel expenses, with visible mismatch status and tenant-scoped audit access.
 - [x] Verify the intended Supabase CLI project, PostgreSQL connectivity, and pending Drizzle migration state before applying organization settings schema changes.
 - [x] P1 maintenance templates: add reusable tenant-scoped maintenance templates with Fleet Manager assignment into vehicle work orders and visible template controls.
+- [x] P1 driver assignment administration: add clear active-assignment visibility and guarded reassignment controls for Fleet Manager with tenant-scoped audit events.

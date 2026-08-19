@@ -14,6 +14,7 @@
 
 | P1-Accounting | Implemented | Accountant reconciliation compares persisted fuel logs with ledger FUEL expenses per vehicle and surfaces matched or mismatch status inside the tenant-scoped Accountant workspace. |
 | P1-Maintenance | Implemented | Fleet Manager and Superadmin can list and apply a reusable City Bus preventive-maintenance template to existing tenant vehicles; duplicate component schedules are preserved, missing schedules are added, and the action is audited. |
+| P1-Assignments | Implemented | Fleet Manager assignment administration now returns readable active roster details and coverage counts; reassignment safely closes conflicting active driver/vehicle assignments and audits the closed assignment IDs. |
 
 ## Remaining roadmap
 
@@ -21,4 +22,4 @@ The next improvement track should address driver assignment administration, docu
 
 ## Validation record
 
-The current settings increment was applied through the linked Supabase CLI project `yieicrulmncikbjxjupv`; the remote migration list records `20260820000100`, and a read-only linked query confirmed `public.organization_settings` exists. The implementation is covered by contract regression tests. TypeScript validation, 67 Vitest tests, and the production build passed. All procedures remain organization-scoped and role-guarded.
+The current release includes Supabase CLI migration verification plus maintenance template and assignment administration increments. The assignment implementation is covered by Fleet Manager contract regression tests. TypeScript validation, 69 Vitest tests, and the production build passed. All assignment procedures remain organization-scoped and role-guarded.

@@ -28,4 +28,12 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain("skippedExisting");
     expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
   });
+
+  it("guards reassignment conflicts and returns readable roster visibility", () => {
+    expect(routersSource).toContain("VEHICLE_REASSIGNED");
+    expect(routersSource).toContain("closedAssignmentIds");
+    expect(routersSource).toContain("activeAssignmentCount");
+    expect(routersSource).toContain("unassignedDrivers");
+    expect(routersSource).toContain("unassignedVehicles");
+  });
 });
