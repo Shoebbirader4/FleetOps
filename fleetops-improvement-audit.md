@@ -15,11 +15,12 @@
 | P1-Accounting | Implemented | Accountant reconciliation compares persisted fuel logs with ledger FUEL expenses per vehicle and surfaces matched or mismatch status inside the tenant-scoped Accountant workspace. |
 | P1-Maintenance | Implemented | Fleet Manager and Superadmin can list and apply a reusable City Bus preventive-maintenance template to existing tenant vehicles; duplicate component schedules are preserved, missing schedules are added, and the action is audited. |
 | P1-Assignments | Implemented | Fleet Manager assignment administration now returns readable active roster details and coverage counts; reassignment safely closes conflicting active driver/vehicle assignments and audits the closed assignment IDs. |
+| P1-Documents | Implemented | Fleet Manager and Superadmin can preview and import compliance CSV rows with required-column/type/UUID validation, tenant vehicle checks, duplicate protection, and DOCUMENT_IMPORT_CSV audit events. |
 
 ## Remaining roadmap
 
-The next improvement track should address driver assignment administration, document import/export expansion, and production-scale observability. Razorpay billing remains intentionally deferred by product decision.
+The next improvement track should address production-scale observability and real-account production verification. Razorpay billing remains intentionally deferred by product decision.
 
 ## Validation record
 
-The current release includes Supabase CLI migration verification plus maintenance template and assignment administration increments. The assignment implementation is covered by Fleet Manager contract regression tests. TypeScript validation, 69 Vitest tests, and the production build passed. All assignment procedures remain organization-scoped and role-guarded.
+The current release includes Supabase CLI migration verification, maintenance templates, driver assignment administration, and compliance CSV import. Document import is covered by Fleet Manager contract regression tests. TypeScript validation, 70 Vitest tests, and the production build passed. All import procedures remain organization-scoped and role-guarded.

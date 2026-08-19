@@ -36,4 +36,12 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain("unassignedDrivers");
     expect(routersSource).toContain("unassignedVehicles");
   });
+
+  it("provides validated tenant-scoped compliance CSV preview and import", () => {
+    expect(routersSource).toContain("previewImport:");
+    expect(routersSource).toContain("importCsv:");
+    expect(routersSource).toContain("DOCUMENT_IMPORT_CSV");
+    expect(routersSource).toContain("Every row must reference an organization vehicle");
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
+  });
 });
