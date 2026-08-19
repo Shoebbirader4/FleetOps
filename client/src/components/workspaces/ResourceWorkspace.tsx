@@ -1,0 +1,48 @@
+import { useState } from "react";
+import { Check, Download, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
+import { WorkspaceState as State } from "@/components/workspaces/WorkspaceState";
+import { NotificationWorkspace } from "@/components/workspaces/NotificationWorkspace";
+import { RoleOverviewWorkspace } from "@/components/workspaces/RoleOverviewWorkspace";
+import { DriverWorkspace } from "@/components/workspaces/DriverWorkspace";
+import { AccountantWorkspace } from "@/components/workspaces/AccountantWorkspace";
+import { ProcurementWorkspace } from "@/components/workspaces/ProcurementWorkspace";
+import { ComplianceWorkspace } from "@/components/workspaces/ComplianceWorkspace";
+import type { FleetVehicle, WorkOrderRow } from "@/types/fleet";
+type GenericResourceRow = { id: string; [key: string]: unknown };
+
+function downloadCsv(filename: string, content: string) { const blob = new Blob([content], { type: "text/csv;charset=utf-8" }); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url); }
+function downloadPdf(filename: string, base64: string) { const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0)); const blob = new Blob([bytes], { type: "application/pdf" }); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url); }
+
+export function ResourceWorkspace({ section }: { section: string }) {
+  const utils = trpc.useUtils();
+  const vehicles = trpc.vehicles.list.useQuery(undefined, { enabled: section === "Vehicles" || section === "Work orders" || section === "Billing", retry: false });
+  const safeVehicles = vehicles.data?.filter((vehicle: FleetVehicle) => vehicle?.id && vehicle.licensePlate) ?? [];
+  const orders = trpc.workOrders.list.useQuery(undefined, { enabled: section === "Work orders", retry: false });
+  const inventory = trpc.inventory.list.useQuery(undefined, { enabled: section === "Inventory", retry: false });
+  const notifications = trpc.notifications.list.useQuery(undefined, { enabled: section === "Notifications", retry: false });
+  const documents = trpc.documents.list.useQuery(undefined, { enabled: section === "Compliance vault", retry: false });
+  const purchaseOrders = trpc.purchaseOrders.list.useQuery(undefined, { enabled: section === "Purchase orders", retry: false });
+  const financials = trpc.financials.list.useQuery(undefined, { enabled: section === "P&L analytics", retry: false });
+  const billing = trpc.billing.status.useQuery(undefined, { enabled: section === "Billing", retry: false });
+  const members = trpc.team.members.useQuery(undefined, { enabled: section === "Billing", retry: false });
+  const [workOrderTitle, setWorkOrderTitle] = useState("");
+  const [workOrderVehicleId, setWorkOrderVehicleId] = useState("");
+  const [workOrderPriority, setWorkOrderPriority] = useState<"LOW" | "MEDIUM" | "HIGH" | "CRITICAL">("MEDIUM");
+  const createWorkOrder = trpc.workOrders.create.useMutation({ onSuccess: () => { setWorkOrderTitle(""); setWorkOrderVehicleId(""); setWorkOrderPriority("MEDIUM"); toast.success("Work order created"); void utils.workOrders.list.invalidate(); }, onError: (error) => toast.error("Work order creation failed", { description: error.message }) });
+  const query = section === "Vehicles" ? vehicles : section === "Work orders" ? orders : section === "Inventory" ? inventory : section === "Notifications" ? notifications : section === "Compliance vault" ? documents : financials;
+  const labels: Record<string, string> = { Vehicles: "Fleet register", "Work orders": "Maintenance queue", Inventory: "Parts ledger", Notifications: "Notification center", "Compliance vault": "Compliance documents", "P&L analytics": "Financial ledger" };
+  if (section === "Notifications") return <NotificationWorkspace />;
+  if (section === "Fleet manager workspace") return <RoleOverviewWorkspace role="FLEET_MANAGER" />;
+  if (section === "Mechanic workspace") return <RoleOverviewWorkspace role="MECHANIC" />;
+  if (section === "Driver portal") return <DriverWorkspace />;
+  if (section === "Accountant ledger") return <AccountantWorkspace />;
+  if (section === "Purchase orders") return <ProcurementWorkspace />;
+  if (section === "Compliance vault") return <ComplianceWorkspace />;
+  if (section === "Work orders") return <><div className="workspace-form panel"><div><div className="panel-kicker">Maintenance queue</div><h2>Create work order</h2><p>Create a persisted work order for a vehicle and assign its initial priority.</p></div><form className="invite-form" onSubmit={(event) => { event.preventDefault(); if (!workOrderVehicleId || !workOrderTitle.trim()) return; createWorkOrder.mutate({ vehicleId: workOrderVehicleId, title: workOrderTitle.trim(), priority: workOrderPriority }); }}><label>Vehicle<select required value={workOrderVehicleId} onChange={(event) => setWorkOrderVehicleId(event.target.value)}><option value="">Select a vehicle</option>{safeVehicles.map((vehicle: FleetVehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.licensePlate} · {vehicle.make} {vehicle.model}</option>)}</select></label><label>Title<input required value={workOrderTitle} onChange={(event) => setWorkOrderTitle(event.target.value)} placeholder="Describe the maintenance task" /></label><label>Priority<select value={workOrderPriority} onChange={(event) => setWorkOrderPriority(event.target.value as typeof workOrderPriority)}>{["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((item) => <option key={item} value={item}>{item}</option>)}</select></label><button className="primary-button" disabled={createWorkOrder.isPending || vehicles.isLoading}><Plus size={16} />{createWorkOrder.isPending ? "Creating…" : "Create work order"}</button></form></div><section className="panel workspace-table"><div className="panel-heading"><div><div className="panel-kicker">Persisted Supabase records</div><h2>Maintenance queue</h2></div><span className="signal-chip good"><Check size={13} /> Live query</span></div><State loading={orders.isLoading} error={orders.isError} empty={!orders.isLoading && !orders.isError && !orders.data?.length}><div className="resource-list">{(orders.data ?? []).filter((row: WorkOrderRow) => row?.id).map((row: WorkOrderRow) => <div className="resource-row" key={row.id}><div><strong>{row.title}</strong><span>{row.vehicle?.licensePlate ?? "Vehicle unavailable"} · {row.priority}</span></div><span className="resource-meta">{row.status}</span></div>)}</div></State></section></>;
+  if (section === "Billing") return <section className="panel workspace-table billing-workspace"><div className="panel-heading"><div><div className="panel-kicker">Subscription control</div><h2>Billing & limits</h2></div><span className={`signal-chip ${billing.data?.writeLocked ? "warn" : "good"}`}><Check size={13} /> {billing.data?.writeLocked ? "Writes locked" : "Live status"}</span></div><State loading={billing.isLoading} error={billing.isError} empty={!billing.data}><div className="billing-grid"><div><span>Current tier</span><strong>{billing.data?.tier?.replaceAll("_", " ")}</strong></div><div><span>Trial days remaining</span><strong>{billing.data?.daysRemaining}</strong></div><div><span>Vehicle capacity</span><strong>{billing.data?.maxVehicles}</strong></div><div><span>Team capacity</span><strong>{billing.data?.maxUsers}</strong></div></div><div className="billing-capacity"><div><span>Vehicle utilization</span><strong>Live from fleet register</strong></div><div className="capacity-track"><span style={{ width: `${billing.data?.maxVehicles ? Math.min(100, ((vehicles.data?.length ?? 0) / billing.data.maxVehicles) * 100) : 0}%` }} /></div><div><span>Team utilization</span><strong>{members.data?.length ?? 0} of {billing.data?.maxUsers ?? "—"} members</strong></div></div><div className="billing-note">{billing.data?.writeLocked ? "The trial has expired and write procedures are locked for this workspace." : `The ${billing.data?.tier?.replaceAll("_", " ")} plan is active. Limits and write permissions are enforced by the FleetOps API.`}</div></State></section>;
+  const rows = ((query.data ?? []) as Array<GenericResourceRow>).filter((row) => typeof row.id === "string");
+  return <section className="panel workspace-table"><div className="panel-heading"><div><div className="panel-kicker">Persisted Supabase records</div><h2>{labels[section]}</h2></div><span className="signal-chip good"><Check size={13} /> Live query</span></div><State loading={query.isLoading} error={query.isError} empty={!query.isLoading && !query.isError && !rows.length}><div className="resource-list">{rows.map((row) => <div className="resource-row" key={row.id}><div><strong>{String(row.name ?? row.title ?? row.licensePlate ?? row.sku ?? row.email ?? row.category ?? "Fleet record")}</strong><span>{String(row.description ?? row.message ?? (row.make ? `${String(row.make)} ${String(row.model ?? "")}` : row.status ?? row.role ?? row.docType ?? row.type ?? "Persisted record"))}</span></div><span className="resource-meta">{String(row.status ?? row.quantityOnHand ?? row.amount ?? row.expiresAt ?? "—")}</span></div>)}</div></State></section>;
+}
+

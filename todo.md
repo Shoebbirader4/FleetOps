@@ -363,3 +363,4 @@
 - [x] Architecture subtask: extract ComplianceWorkspace into client/src/components/workspaces/ComplianceWorkspace.tsx and preserve document upload, renewal, expiry, and export behavior.
 - [x] Architecture subtask: extract AccountantWorkspace into client/src/components/workspaces/AccountantWorkspace.tsx and retarget financial-ledger regression coverage.
 - [x] Architecture subtask: extract OrganizationSettingsWorkspace into client/src/components/workspaces/OrganizationSettingsWorkspace.tsx and preserve Superadmin settings persistence and validation.
+- [x] Architecture subtask: extract ResourceWorkspace and RoleOverviewWorkspace into dedicated modules while preserving shared live queries, billing, work-order, notification, and role-overview routing.
