@@ -331,3 +331,4 @@
 - [x] P0 priority 3: implement explicit work-order lifecycle states for waiting for parts, ready for review, rework, completed, and cancelled with role-safe transitions and audit events.
 - [x] P0 priority 4: add work-order parts reservation and return workflows with reserved quantities, stock protection, movement/audit records, and role-safe controls.
 - [x] P0 priority 5: add mechanic/technician execution checklists and Fleet Manager or Superadmin review approval before final work-order completion.
+- [x] P0 priority 6: add a Driver daily home with start-of-shift DVIR, odometer and fuel capture, assigned-vehicle readiness, unsafe-to-drive disposition, and Fleet Manager escalation.

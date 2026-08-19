@@ -74,4 +74,13 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("fleetops-compliance-");
     expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
   });
+
+  it("defines the Driver daily readiness and safety disposition loop", () => {
+    expect(routersSource).toContain("dailyHome: fleetOpsProcedure.query");
+    expect(routersSource).toContain("unsafeDisposition: fleetOpsProcedure.input");
+    expect(routersSource).toContain('readiness === "UNSAFE"');
+    expect(routersSource).toContain("DRIVER_SAFETY_DISPOSITION");
+    expect(routersSource).toContain("Driver marked vehicle unsafe");
+    expect(routersSource).toContain("active: true");
+  });
 });
