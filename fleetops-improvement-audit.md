@@ -16,11 +16,12 @@
 | P1-Maintenance | Implemented | Fleet Manager and Superadmin can list and apply a reusable City Bus preventive-maintenance template to existing tenant vehicles; duplicate component schedules are preserved, missing schedules are added, and the action is audited. |
 | P1-Assignments | Implemented | Fleet Manager assignment administration now returns readable active roster details and coverage counts; reassignment safely closes conflicting active driver/vehicle assignments and audits the closed assignment IDs. |
 | P1-Documents | Implemented | Fleet Manager and Superadmin can preview and import compliance CSV rows with required-column/type/UUID validation, tenant vehicle checks, duplicate protection, and DOCUMENT_IMPORT_CSV audit events. |
+| P1-Observability | Implemented locally | Added public `system.health` and `system.release` diagnostics with safe release metadata, PostgreSQL `select 1` status, latency, and regression coverage. Local validation passed; the public domain still serves an older backend revision and requires propagation recheck. |
 
 ## Remaining roadmap
 
-The next improvement track should address production-scale observability and real-account production verification. Razorpay billing remains intentionally deferred by product decision.
+The next improvement track should address authenticated production verification and resolving the public-domain revision propagation gap. Razorpay billing remains intentionally deferred by product decision.
 
 ## Validation record
 
-The current release includes Supabase CLI migration verification, maintenance templates, driver assignment administration, and compliance CSV import. Document import is covered by Fleet Manager contract regression tests. TypeScript validation, 70 Vitest tests, and the production build passed. All import procedures remain organization-scoped and role-guarded.
+The current release includes Supabase CLI migration verification, maintenance templates, driver assignment administration, compliance CSV import, and local public observability diagnostics. TypeScript validation, 72 Vitest tests, and the production build passed. The live public domain was checked and is currently serving a previous backend revision; this is recorded for follow-up rather than claimed as resolved.

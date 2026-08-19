@@ -338,3 +338,4 @@
 - [x] P1 maintenance templates: add reusable tenant-scoped maintenance templates with Fleet Manager assignment into vehicle work orders and visible template controls.
 - [x] P1 driver assignment administration: add clear active-assignment visibility and guarded reassignment controls for Fleet Manager with tenant-scoped audit events.
 - [x] P1 document import: add tenant-scoped compliance document CSV preview/import with row validation, duplicate protection, and audit-backed Fleet Manager controls.
+- [x] P1 observability: add safe public health and release diagnostics for the published FleetOps deployment, with backend dependency status and regression coverage.
