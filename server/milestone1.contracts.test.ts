@@ -92,4 +92,12 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain('status: Math.abs(difference) < 0.01 ? "MATCHED" : "MISMATCH"');
     expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "ACCOUNTANT"])');
   });
+
+  it("defines Superadmin-only organization settings over the migrated table", () => {
+    expect(routersSource).toContain("organizationSettings: router({");
+    expect(routersSource).toContain("organizationSetting.findFirst");
+    expect(routersSource).toContain("ORGANIZATION_SETTINGS_UPDATED");
+    expect(routersSource).toContain('odometerMaxDailyKm: z.number().int().min(100).max(5000)');
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"])');
+  });
 });

@@ -77,6 +77,10 @@ export const appRouter = router({
     me: publicProcedure.query(({ ctx }) => ctx.fleetopsUser ?? ctx.user),
     logout: publicProcedure.mutation(() => ({ success: true } as const)),
   }),
+  organizationSettings: router({
+    get: fleetOpsProcedure.query(async ({ ctx }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); const existing = await fleetDb.organizationSetting.findFirst({ where: { orgId: ctx.fleetopsUser.orgId } }); return existing ?? { orgId: ctx.fleetopsUser.orgId, timezone: "Asia/Kolkata", odometerMaxDailyKm: 1000, safetyContactName: null, safetyContactPhone: null }; }),
+    update: fleetOpsProcedure.input(z.object({ timezone: z.string().trim().min(3).max(80), odometerMaxDailyKm: z.number().int().min(100).max(5000), safetyContactName: z.string().trim().max(160).optional(), safetyContactPhone: z.string().trim().max(40).optional() })).mutation(async ({ ctx, input }) => { requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"]); assertWritable(ctx.fleetopsUser.org); const existing = await fleetDb.organizationSetting.findFirst({ where: { orgId: ctx.fleetopsUser.orgId } }); const settings = existing ? await fleetDb.organizationSetting.update({ where: { id: existing.id }, data: input }) : await fleetDb.organizationSetting.create({ data: { id: crypto.randomUUID(), orgId: ctx.fleetopsUser.orgId, ...input, createdAt: new Date(), updatedAt: new Date() } }); await recordAudit(ctx, { action: "ORGANIZATION_SETTINGS_UPDATED", entityType: "ORGANIZATION", entityId: ctx.fleetopsUser.orgId, summary: "Organization operating settings updated", metadata: input }); return settings; }),
+  }),
   onboarding: router({
     bootstrap: publicProcedure.input(z.object({ orgName: z.string().min(2).optional(), fullName: z.string().min(2).optional() })).mutation(async ({ ctx, input }) => {
       const authUser = await getSupabaseAuthIdentity(ctx.req);

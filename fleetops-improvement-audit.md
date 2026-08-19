@@ -10,6 +10,7 @@
 | P0-4 | Implemented | Work-order parts reservation and return flows with stock protection, movement records, partial returns, and audit events. |
 | P0-5 | Implemented | Mechanic/Technician execution checklists with READY_FOR_REVIEW handoff and Fleet Manager/Superadmin approval before completion. |
 | P0-6 | Implemented | Driver daily home with assigned-vehicle readiness, start-of-shift DVIR signal, odometer/fuel access, unsafe-to-drive disposition, and Fleet Manager notifications. |
+| P0-7 | Implemented | Superadmin-only organization settings for operating timezone, odometer policy, and safety escalation contacts, persisted in the Supabase PostgreSQL `organization_settings` table. |
 
 | P1-Accounting | Implemented | Accountant reconciliation compares persisted fuel logs with ledger FUEL expenses per vehicle and surfaces matched or mismatch status inside the tenant-scoped Accountant workspace. |
 
@@ -19,4 +20,4 @@ The next improvement track should address organization settings and operational 
 
 ## Validation record
 
-The current P0-6 increment is covered by the Driver contract regression test. TypeScript validation, the full Vitest suite, and the production build passed after implementation. All procedures remain organization-scoped and role-guarded; the Driver daily home resolves only the active assignment for the authenticated Driver.
+The current settings increment was applied through the linked Supabase CLI project `yieicrulmncikbjxjupv`; the remote migration list records `20260820000100`, and a read-only linked query confirmed `public.organization_settings` exists. The implementation is covered by contract regression tests. TypeScript validation, 67 Vitest tests, and the production build passed. All procedures remain organization-scoped and role-guarded.
