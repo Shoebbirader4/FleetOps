@@ -298,3 +298,4 @@
 - [x] Fix invalid Supabase refresh-token recovery so expired sessions do not trigger unauthorized protected-query batches and recover cleanly.
 - [x] Reset FleetOps application data by deleting organization-bound records plus all application `users` and `organizations` rows, while preserving Supabase Auth identities.
 - [x] Resolve clean-start Superadmin signup when a preserved Supabase Auth identity has no FleetOps application profile, without weakening duplicate-account security.
+- [x] Stop dashboard.summary from retrying/refetching repeatedly after unauthorized session state and keep the unload warning non-blocking.

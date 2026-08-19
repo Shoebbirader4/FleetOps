@@ -93,7 +93,7 @@ export default function Home({ initialSection = "Command center", publicMode = "
     window.addEventListener("fleetops-session-expired", onExpired);
     return () => window.removeEventListener("fleetops-session-expired", onExpired);
   }, []);
-  const { data: backendSummary, isLoading: summaryLoading, isError: summaryError } = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false });
+  const { data: backendSummary, isLoading: summaryLoading, isError: summaryError } = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   const metadataNeedsOnboarding = session?.user.user_metadata?.needsOnboarding === true || session?.user.user_metadata?.needsOnboarding === "true";
   const backendRole = String(backendSummary?.role ?? "");
   const organizationName = String(backendSummary?.org?.name ?? session?.user.user_metadata?.orgName ?? "").trim();

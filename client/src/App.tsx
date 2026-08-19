@@ -28,7 +28,7 @@ function CreateOrganizationRoute() {
 
 function GuardedWorkspaceRoute({ section, allowedRoles }: { section: string; allowedRoles: string[] }) {
   const { session, loading } = useFleetOpsAuth();
-  const summary = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false });
+  const summary = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   if (loading || (session && summary.isLoading)) return <div className="auth-page"><div className="auth-card"><h1>Loading workspace access…</h1></div></div>;
   if (session && summary.data?.role && !allowedRoles.includes(summary.data.role)) return <div className="auth-page"><div className="auth-card"><h1>Workspace access restricted.</h1><p>Your FleetOps role does not have access to the {section} workspace.</p><a className="primary-button" href="/">Return to command center</a></div></div>;
   return <Home initialSection={section} />;
