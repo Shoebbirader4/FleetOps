@@ -301,3 +301,10 @@
 - [x] Stop dashboard.summary from retrying/refetching repeatedly after unauthorized session state and keep the unload warning non-blocking.
 - [x] Run a disposable full lifecycle test covering Superadmin, organization onboarding, all invited roles, fleet setup, alerts, telemetry, maintenance handoff, mechanic execution, inventory consumption, cross-role visibility, RBAC, and cleanup.
 - [x] Produce a presentation-ready video walkthrough of the disposable full lifecycle test using captured workflow scenes.
+- [x] Read the connected Shoebbirader4/fleetguard repository and compare it with FleetOps without modifying either repository.
+- [x] Audit the entire FleetOps application and every member workspace to identify and prioritize improvement opportunities without changing product code.
+- [x] Milestone 1: add organization-wide audit events and Superadmin audit visibility.
+- [x] Milestone 1: add Fleet Manager issue triage and work-order control surface.
+- [x] Milestone 1: add transactional inventory movement records and integrity controls.
+- [x] Milestone 1: add secure authorized document/evidence access actions.
+- [x] Milestone 1: add regression coverage, lifecycle validation, and production build for the milestone.
