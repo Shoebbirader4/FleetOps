@@ -351,3 +351,4 @@
 - [x] Architecture subtask: extract NotificationWorkspace and share WorkspaceState across workspace modules with regression-safe behavior.
 - [x] Architecture subtask: replace the Driver workspace vehicle selection any annotation with the shared FleetVehicle domain type.
 - [x] Architecture subtask: replace mechanic inventory-part and service-component map any annotations with shared InventoryPart and ServiceComponent types.
+- [x] Architecture subtask: replace owner and Fleet Manager workspace collection any annotations with shared notification, document, audit, vehicle, work-order, member, and maintenance-signal types.
