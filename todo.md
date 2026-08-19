@@ -299,3 +299,5 @@
 - [x] Reset FleetOps application data by deleting organization-bound records plus all application `users` and `organizations` rows, while preserving Supabase Auth identities.
 - [x] Resolve clean-start Superadmin signup when a preserved Supabase Auth identity has no FleetOps application profile, without weakening duplicate-account security.
 - [x] Stop dashboard.summary from retrying/refetching repeatedly after unauthorized session state and keep the unload warning non-blocking.
+- [x] Run a disposable full lifecycle test covering Superadmin, organization onboarding, all invited roles, fleet setup, alerts, telemetry, maintenance handoff, mechanic execution, inventory consumption, cross-role visibility, RBAC, and cleanup.
+- [x] Produce a presentation-ready video walkthrough of the disposable full lifecycle test using captured workflow scenes.
