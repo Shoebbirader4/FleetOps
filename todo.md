@@ -380,3 +380,5 @@
 - [x] P1 increment: add regression coverage for the maintenance planning query, tenant isolation, role restrictions, and Fleet Manager rendering contract.
 - [x] P1 increment: add a tenant-scoped Fleet Manager driver-handoff view showing driver, vehicle, latest reported issue, acknowledgement time, and safety disposition.
 - [x] P1 increment: add regression coverage for driver-handoff tenant scoping, role restrictions, and status aggregation.
+- [x] P1 increment: add an Inventory Manager receipt form to the live Inventory workspace using the existing inventory.receive procedure, with quantity, unit cost, reason, validation, and persisted refresh.
+- [x] P1 increment: add regression coverage for the inventory receipt UI contract and role-scoped receiving procedure.
