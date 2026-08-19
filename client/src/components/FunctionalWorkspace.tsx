@@ -11,6 +11,7 @@ import { DriverWorkspace } from "@/components/workspaces/DriverWorkspace";
 import { ProcurementWorkspace } from "@/components/workspaces/ProcurementWorkspace";
 import { ComplianceWorkspace } from "@/components/workspaces/ComplianceWorkspace";
 import { AccountantWorkspace } from "@/components/workspaces/AccountantWorkspace";
+import { OrganizationSettingsWorkspace } from "@/components/workspaces/OrganizationSettingsWorkspace";
 
 type Props = { section: string; session: boolean; onBack: () => void; organizationName?: string };
 type GenericResourceRow = { id: string; [key: string]: unknown };
@@ -24,15 +25,6 @@ function RoleOverviewWorkspace({ role }: { role: "FLEET_MANAGER" | "MECHANIC" })
   return <section className="role-overview-workspace"><div className="workspace-form panel"><div className="panel-kicker">{isFleetManager ? "Fleet Manager workspace" : "Mechanic workspace"}</div><h2>{isFleetManager ? "Run the fleet with operational control" : "Resolve maintenance work safely"}</h2><p>{isFleetManager ? "Your workspace is limited to fleet readiness, work-order coordination, compliance, and operational alerts. Financial ledger, billing, inventory pricing, and team governance remain outside this role." : "Your workspace is limited to assigned maintenance execution, work-order status, vehicle readiness, and notifications. Team, billing, financial, and inventory governance remain outside this role."}</p><div className="workspace-scope-grid"><div><strong>{isFleetManager ? "Fleet readiness" : "Assigned maintenance"}</strong><span>{isFleetManager ? "Vehicles and live status" : "Work orders and defect follow-up"}</span></div><div><strong>{isFleetManager ? "Compliance control" : "Safety records"}</strong><span>{isFleetManager ? "Renewals and expiry signals" : "Inspection and repair context"}</span></div><div><strong>Protected boundary</strong><span>Every procedure is role-checked and tenant-scoped</span></div></div></div></section>;
 }
 
-
-function OrganizationSettingsWorkspace() {
-  const utils = trpc.useUtils();
-  const settings = trpc.organizationSettings.get.useQuery(undefined, { retry: false });
-  const [form, setForm] = useState({ timezone: "Asia/Kolkata", odometerMaxDailyKm: "1000", safetyContactName: "", safetyContactPhone: "" });
-  useEffect(() => { if (settings.data) setForm({ timezone: settings.data.timezone ?? "Asia/Kolkata", odometerMaxDailyKm: String(settings.data.odometerMaxDailyKm ?? 1000), safetyContactName: settings.data.safetyContactName ?? "", safetyContactPhone: settings.data.safetyContactPhone ?? "" }); }, [settings.data]);
-  const update = trpc.organizationSettings.update.useMutation({ onSuccess: () => { toast.success("Organization settings saved"); void utils.organizationSettings.get.invalidate(); }, onError: (error) => toast.error("Settings update failed", { description: error.message }) });
-  return <section className="panel workspace-form"><div><div className="panel-kicker">Superadmin governance</div><h2>Organization settings</h2><p>Configure the operating timezone, odometer policy, and safety escalation contact for this organization.</p></div><State loading={settings.isLoading} error={settings.isError}><form className="invite-form" onSubmit={(event) => { event.preventDefault(); update.mutate({ timezone: form.timezone, odometerMaxDailyKm: Number(form.odometerMaxDailyKm), safetyContactName: form.safetyContactName || undefined, safetyContactPhone: form.safetyContactPhone || undefined }); }}><label>Operating timezone<input required value={form.timezone} onChange={(event) => setForm({ ...form, timezone: event.target.value })} placeholder="Asia/Kolkata" /></label><label>Maximum odometer increase per day (km)<input required type="number" min="100" max="5000" value={form.odometerMaxDailyKm} onChange={(event) => setForm({ ...form, odometerMaxDailyKm: event.target.value })} /></label><label>Safety escalation contact<input value={form.safetyContactName} onChange={(event) => setForm({ ...form, safetyContactName: event.target.value })} placeholder="Operations control room" /></label><label>Safety contact phone<input value={form.safetyContactPhone} onChange={(event) => setForm({ ...form, safetyContactPhone: event.target.value })} placeholder="+91 …" /></label><button className="primary-button" disabled={update.isPending}>{update.isPending ? "Saving…" : "Save organization settings"}</button></form></State></section>;
-}
 
 function ResourceWorkspace({ section }: { section: string }) {
   const utils = trpc.useUtils();
