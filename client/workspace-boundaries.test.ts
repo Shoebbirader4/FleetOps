@@ -35,7 +35,7 @@ describe("role workspace boundaries", () => {
 
   it("removes static tenant labels and unauthorized owner actions from the authenticated shell", () => {
     const homeSource = readFileSync(resolve(process.cwd(), "client/src/pages/Home.tsx"), "utf8");
-    const teamSource = readFileSync(resolve(process.cwd(), "client/src/components/FunctionalWorkspace.tsx"), "utf8");
+    const teamSource = readFileSync(resolve(process.cwd(), "client/src/components/workspaces/TeamWorkspace.tsx"), "utf8");
     expect(homeSource).not.toContain("Avani Transit");
     expect(homeSource).not.toContain('onClick={() => setActiveNav("Work orders")}>New work order');
     expect(teamSource).toContain('team.members.useQuery(undefined, { enabled, retry: false })');

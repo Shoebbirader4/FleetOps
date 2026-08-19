@@ -347,3 +347,4 @@
 - [ ] Authoritative P0 workspace architecture: reduce monolithic workspace coupling, replace remaining broad any usage in touched surfaces, and centralize query policy contracts.
 - [x] Architecture subtask: centralize seven-role RBAC policy contracts and reusable tenant scope helper with regression tests.
 - [x] Architecture subtask: replace Team workspace invitation/member any annotations with shared client domain types and safe token handling.
+- [x] Architecture subtask: extract TeamWorkspace into its own module and update workspace-boundary regression coverage.
