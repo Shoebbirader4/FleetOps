@@ -110,4 +110,14 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("reversalOfId");
     expect(routersSource).toContain("already been reversed");
   });
+
+  it("defines storage lifecycle safeguards and authorized access logging", () => {
+    expect(routersSource).toContain("ALLOWED_DOCUMENT_TYPES");
+    expect(routersSource).toContain("MAX_DOCUMENT_BYTES");
+    expect(routersSource).toContain("fileChecksum");
+    expect(routersSource).toContain("retentionUntil");
+    expect(routersSource).toContain("malwareScanPolicy");
+    expect(routersSource).toContain("lifecycle: fleetOpsProcedure.query");
+    expect(routersSource).toContain("FILE_ACCESSED");
+  });
 });
