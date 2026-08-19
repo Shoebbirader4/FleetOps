@@ -120,4 +120,15 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("lifecycle: fleetOpsProcedure.query");
     expect(routersSource).toContain("FILE_ACCESSED");
   });
+
+  it("defines notification routing, deduplication, escalation, and source-aware resolution", () => {
+    expect(routersSource).toContain("severity");
+    expect(routersSource).toContain("sourceType");
+    expect(routersSource).toContain("dedupeKey");
+    expect(routersSource).toContain("acknowledgedAt");
+    expect(routersSource).toContain("NOTIFICATION_ESCALATED");
+    expect(routersSource).toContain("NOTIFICATION_RESOLVED");
+    expect(routersSource).toContain("Resolve the source vehicle issue");
+    expect(routersSource).toContain("Complete the source work order");
+  });
 });

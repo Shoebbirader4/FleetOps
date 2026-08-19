@@ -342,6 +342,6 @@
 - [ ] Reconcile all 20 actionable P0 requirements in FleetOpsWhole-ProductandWorkspaceImprovementAudit.md item by item and implement any P0 gaps that remain.
 - [x] Authoritative P0 accounting integrity: add immutable financial reversals/adjustments with actor and reason, plus Superadmin approval for high-value expenses and manual adjustments.
 - [x] Authoritative P0 storage lifecycle: add file type/size validation, checksum metadata, retention/orphan policy checks, and access-log coverage for stored documents/evidence.
-- [ ] Authoritative P0 notification policy: add role/severity/source routing, deduplication, acknowledgement escalation state, and source-resolution closure safeguards.
+- [x] Authoritative P0 notification policy: add role/severity/source routing, deduplication, acknowledgement escalation state, and source-resolution closure safeguards.
 - [ ] Authoritative P0 inventory concurrency: add explicit adjustment workflow and transactional conflict handling beyond insufficient-stock protection.
 - [ ] Authoritative P0 workspace architecture: reduce monolithic workspace coupling, replace remaining broad any usage in touched surfaces, and centralize query policy contracts.
