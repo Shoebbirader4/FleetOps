@@ -345,3 +345,4 @@
 - [x] Authoritative P0 notification policy: add role/severity/source routing, deduplication, acknowledgement escalation state, and source-resolution closure safeguards.
 - [x] Authoritative P0 inventory concurrency: add explicit adjustment workflow and transactional conflict handling beyond insufficient-stock protection.
 - [ ] Authoritative P0 workspace architecture: reduce monolithic workspace coupling, replace remaining broad any usage in touched surfaces, and centralize query policy contracts.
+- [x] Architecture subtask: centralize seven-role RBAC policy contracts and reusable tenant scope helper with regression tests.

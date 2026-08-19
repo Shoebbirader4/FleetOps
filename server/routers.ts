@@ -6,6 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { fleetDb } from "./db";
 import { getSupabaseAuthIdentity, provisionFleetOpsUser, supabaseAdmin } from "./supabase";
 import { storageGetSignedUrl, storagePut } from "./storage";
+import { roleCanAct, type FleetRole } from "./role-policy";
 const Priority = { LOW: "LOW", MEDIUM: "MEDIUM", HIGH: "HIGH", CRITICAL: "CRITICAL" } as const;
 const WorkOrderStatus = { OPEN: "OPEN", IN_PROGRESS: "IN_PROGRESS", COMPLETED: "COMPLETED", CANCELLED: "CANCELLED" } as const;
 export const CITY_BUS_MAINTENANCE_TEMPLATE = [
@@ -48,8 +49,8 @@ function retentionAfterExpiry(expiryDate: Date) {
   return new Date(Math.max(expiryDate.getTime(), Date.now()) + 7 * 365 * 24 * 60 * 60 * 1000);
 }
 
-export function requireRole(role: string, allowed: string[]) {
-  if (!allowed.includes(role)) throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot perform this action." });
+export function requireRole(role: string, allowed: readonly string[]) {
+  if (!roleCanAct(role, allowed as readonly FleetRole[])) throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot perform this action." });
 }
 
 function csvCell(value: unknown) { const text = value === null || value === undefined ? "" : String(value); return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text; }
