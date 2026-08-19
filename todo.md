@@ -309,3 +309,7 @@
 - [x] Milestone 1: add secure authorized document/evidence access actions.
 - [x] Milestone 1: add regression coverage, lifecycle validation, and production build for the milestone.
 - [x] Add tenant-scoped notification acknowledgement so authorized workspace users can mark operational alerts as read.
+- [x] Add a tenant-scoped work-order board query with role-safe status grouping and dispatch metadata.
+- [x] Add vehicle health detail data with component readiness, odometer trend, open work orders, and compliance signals.
+- [x] Add inventory receiving and issuing workflows with transactional movement records and role-safe controls.
+- [ ] Add Milestone 2 regression tests, visual validation, typecheck, production build, and publish the verified increment.
