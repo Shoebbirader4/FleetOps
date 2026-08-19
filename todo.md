@@ -323,6 +323,6 @@
 - [x] Audit Milestone 3 CSV export requirements and confirm all tracker items are complete.
 - [x] Validate Milestone 3 export RBAC, audit logging, tests, build, and published release before advancing.
 - [x] Define and begin Milestone 4 only after Milestone 3 passes its completion gate.
-- [ ] Milestone 4: add secure PDF report generation for compliance and financial exports without exposing cross-tenant data.
+- [x] Milestone 4: add secure PDF report generation for compliance and financial exports without exposing cross-tenant data.
 - [ ] Milestone 4: add offline-ready draft persistence for Driver issue reports and Mechanic execution notes, with explicit sync status.
 - [ ] Milestone 4: add regression tests, lifecycle validation, and publish the first Milestone 4 increment.

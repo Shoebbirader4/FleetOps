@@ -19,6 +19,8 @@ describe("Accountant financial ledger", () => {
     expect(ui).toContain("Tenant-scoped records");
     expect(ui).toContain("trpc.financials.exportCsv");
     expect(ui).toContain("Export CSV");
+    expect(ui).toContain("trpc.financials.exportPdf");
+    expect(ui).toContain("Export PDF");
   });
 
   it("keeps financial procedures restricted to Accountant and Superadmin", () => {
@@ -29,5 +31,7 @@ describe("Accountant financial ledger", () => {
     expect(router).toContain("orgId: ctx.fleetopsUser.orgId");
     expect(router).toContain("FINANCIAL_EXPORT_CSV");
     expect(router).toContain("amountInr");
+    expect(router).toContain("FINANCIAL_EXPORT_PDF");
+    expect(router).toContain("simplePdf");
   });
 });
