@@ -162,9 +162,22 @@ export default function Home({ initialSection = "Command center", publicMode = "
     setAuthError("");
     setAuthSubmitting(true);
     const { data, error } = await signUpWithEmail(authEmail, authPassword, authFullName);
+    if (error && /already registered|already exists|user exists/i.test(error.message)) {
+      const existing = await signInWithEmail(authEmail, authPassword);
+      if (existing.error) {
+        setAuthError("This email already has a FleetOps Auth account. Use its existing password or choose Sign In.");
+      } else if (!existing.data.session) {
+        setAuthError("The existing account did not return an active session. Please use Sign In and try again.");
+      } else {
+        const refreshed = await refreshSession();
+        if (refreshed.error) setAuthError(`Session setup failed: ${refreshed.error.message}`);
+      }
+    } else if (error) {
+      setAuthError(error.message);
+    } else if (!data.session) {
+      setAuthError("Account created. Confirm your email, then sign in to continue organization setup.");
+    }
     setAuthSubmitting(false);
-    if (error) setAuthError(error.message);
-    else if (!data.session) setAuthError("Account created. Confirm your email, then sign in to continue organization setup.");
   };
 
   const visibleVehicles = useMemo(() => persistedVehicles.filter((vehicle: any) => `${vehicle.id} ${vehicle.name}`.toLowerCase().includes(query.toLowerCase()) && (filter === "All fleet" || vehicle.status === filter)), [query, filter]);
