@@ -100,4 +100,14 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain('odometerMaxDailyKm: z.number().int().min(100).max(5000)');
     expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN"])');
   });
+
+  it("defines immutable financial approval and reversal controls", () => {
+    expect(routersSource).toContain("approvalStatus");
+    expect(routersSource).toContain("PENDING_APPROVAL");
+    expect(routersSource).toContain("approvalQueue:");
+    expect(routersSource).toContain("FINANCIAL_RECORD_APPROVED");
+    expect(routersSource).toContain("FINANCIAL_RECORD_REVERSED");
+    expect(routersSource).toContain("reversalOfId");
+    expect(routersSource).toContain("already been reversed");
+  });
 });
