@@ -355,3 +355,4 @@
 - [x] Architecture subtask: replace Fleet Manager dispatch, board, triage, issue, assignment, odometer, and template-map any annotations with shared domain types.
 - [x] Architecture subtask: replace Inventory Manager stock, purchase-order, movement, and Mechanic execution collection any annotations with shared domain types.
 - [x] Architecture subtask: remove the final broad any annotation from RoleWorkspaces using the shared VehicleIssueStatus union.
+- [x] Architecture subtask: replace FunctionalWorkspace Accountant reconciliation, metrics, financial ledger, vehicle, and work-order any annotations with shared domain types.
