@@ -357,3 +357,4 @@
 - [x] Architecture subtask: remove the final broad any annotation from RoleWorkspaces using the shared VehicleIssueStatus union.
 - [x] Architecture subtask: replace FunctionalWorkspace Accountant reconciliation, metrics, financial ledger, vehicle, and work-order any annotations with shared domain types.
 - [x] Architecture subtask: replace FunctionalWorkspace Driver issue, inspection, fuel-log, Compliance document, Procurement order, and generic resource-row any annotations with shared domain types.
+- [x] Architecture subtask: eliminate all broad any annotations from FunctionalWorkspace with shared domain and generic resource-row contracts.
