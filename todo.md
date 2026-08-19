@@ -367,3 +367,4 @@
 - [x] Authoritative P0 workspace architecture: reduce monolithic workspace coupling through dedicated workspace modules, eliminate broad any usage in touched surfaces, and retain centralized RBAC/query policy boundaries.
 - [x] Authoritative P0 backup and recovery: add a Supabase PostgreSQL, Storage, Auth, migration, tenant-retention, and restore-verification runbook with regression coverage.
 - [x] Authoritative P0 data integrity: add expectedUpdatedAt validation to work-order status transitions, return explicit CONFLICT errors for stale edits, and pass row timestamps from Fleet Manager and Mechanic controls.
+- [x] Production verification increment: confirm the published landing page resolves with distinct Sign In/Create Organization routes and current organization-bound messaging; keep authenticated session tests explicitly pending.
