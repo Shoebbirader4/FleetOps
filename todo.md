@@ -329,3 +329,4 @@
 - [x] P0 priority 1: upgrade Superadmin audit visibility into a tenant-scoped searchable audit log with actor, role, action, entity, date, and outcome filters.
 - [x] P0 priority 2: add a unified Fleet Manager triage queue combining driver issues, expiring documents, open work, and low-stock signals with acknowledge, assign, defer, and resolve actions.
 - [x] P0 priority 3: implement explicit work-order lifecycle states for waiting for parts, ready for review, rework, completed, and cancelled with role-safe transitions and audit events.
+- [x] P0 priority 4: add work-order parts reservation and return workflows with reserved quantities, stock protection, movement/audit records, and role-safe controls.

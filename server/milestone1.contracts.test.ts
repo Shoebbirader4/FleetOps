@@ -58,6 +58,11 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("receive: fleetOpsProcedure.input");
     expect(routersSource).toContain("issue: fleetOpsProcedure.input");
     expect(routersSource).toContain('movementType: \"RECEIPT\"');
+    expect(routersSource).toContain("reservePart: fleetOpsProcedure.input");
+    expect(routersSource).toContain("returnReservedPart: fleetOpsProcedure.input");
+    expect(routersSource).toContain("INVENTORY_PART_RESERVED");
+    expect(routersSource).toContain("INVENTORY_PART_RETURNED");
+    expect(routersSource).toContain("Insufficient available stock after existing reservations");
     expect(routersSource).toContain('movementType: \"ISSUE\"');
     expect(routersSource).toContain("DOCUMENT_EXPORT_CSV");
     expect(routersSource).toContain("fleetops-compliance-");
