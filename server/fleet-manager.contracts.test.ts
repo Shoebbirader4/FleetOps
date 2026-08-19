@@ -37,6 +37,12 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain("unassignedVehicles");
   });
 
+  it("rejects stale concurrent work-order status edits with a conflict", () => {
+    expect(routersSource).toContain("expectedUpdatedAt: z.coerce.date().optional()");
+    expect(routersSource).toContain("This work order changed elsewhere. Refresh the queue before updating its status.");
+    expect(routersSource).toContain('code: "CONFLICT"');
+  });
+
   it("provides validated tenant-scoped compliance CSV preview and import", () => {
     expect(routersSource).toContain("previewImport:");
     expect(routersSource).toContain("importCsv:");
