@@ -13,10 +13,11 @@
 | P0-7 | Implemented | Superadmin-only organization settings for operating timezone, odometer policy, and safety escalation contacts, persisted in the Supabase PostgreSQL `organization_settings` table. |
 
 | P1-Accounting | Implemented | Accountant reconciliation compares persisted fuel logs with ledger FUEL expenses per vehicle and surfaces matched or mismatch status inside the tenant-scoped Accountant workspace. |
+| P1-Maintenance | Implemented | Fleet Manager and Superadmin can list and apply a reusable City Bus preventive-maintenance template to existing tenant vehicles; duplicate component schedules are preserved, missing schedules are added, and the action is audited. |
 
 ## Remaining roadmap
 
-The next improvement track should address organization settings and operational configuration, followed by deeper accounting reconciliation, maintenance templates, driver assignment administration, document import/export expansion, and production-scale observability. Razorpay billing remains intentionally deferred by product decision.
+The next improvement track should address driver assignment administration, document import/export expansion, and production-scale observability. Razorpay billing remains intentionally deferred by product decision.
 
 ## Validation record
 
