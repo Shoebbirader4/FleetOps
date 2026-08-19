@@ -15,6 +15,8 @@ describe("Driver vehicle issue workflow", () => {
     expect(driverUi).toContain("Photo evidence");
     expect(driverUi).toContain("vehicleIssues.create");
     expect(driverUi).toContain("Reported vehicle issues");
+    expect(driverUi).toContain("fleetops:driver-issue-draft");
+    expect(driverUi).toContain("Draft saved locally");
   });
 
   it("enforces assigned-driver scope and notifies Fleet Managers", () => {

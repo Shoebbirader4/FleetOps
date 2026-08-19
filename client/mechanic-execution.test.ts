@@ -14,6 +14,8 @@ describe("Mechanic execution contract", () => {
     expect(workspace).toContain("Repair notes");
     expect(workspace).toContain("Photo / evidence attachments");
     expect(workspace).toContain("workOrders.startWork");
+    expect(workspace).toContain("fleetops:mechanic-execution-draft");
+    expect(workspace).toContain("Execution draft saved locally");
   });
 
   it("keeps mechanics assigned-order scoped and persists evidence through storage", () => {
