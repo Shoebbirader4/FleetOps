@@ -131,4 +131,12 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("Resolve the source vehicle issue");
     expect(routersSource).toContain("Complete the source work order");
   });
+
+  it("defines optimistic inventory adjustment conflict protection", () => {
+    expect(routersSource).toContain("adjust: fleetOpsProcedure.input");
+    expect(routersSource).toContain("expectedQuantityOnHand");
+    expect(routersSource).toContain("Inventory changed since it was loaded");
+    expect(routersSource).toContain("Inventory adjustments cannot produce a negative balance");
+    expect(routersSource).toContain("INVENTORY_ADJUSTED");
+  });
 });
