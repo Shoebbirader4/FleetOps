@@ -35,6 +35,15 @@ describe("Milestone 1 operational contracts", () => {
     expect(() => requireRole("MECHANIC", ["SUPERADMIN", "FLEET_MANAGER", "MECHANIC", "TECHNICIAN"])).not.toThrow();
   });
 
+  it("defines a tenant-scoped unified triage queue with operational sources", () => {
+    expect(routersSource).toContain("triage: router({");
+    expect(routersSource).toContain("queue: fleetOpsProcedure.query");
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
+    expect(routersSource).toContain("vehicleIssue.findMany");
+    expect(routersSource).toContain("inventoryPart.findMany");
+    expect(routersSource).toContain("actionable: true");
+  });
+
   it("defines tenant-scoped board and inventory movement procedures", () => {
     expect(routersSource).toContain("board: fleetOpsProcedure.query");
     expect(routersSource).toContain("receive: fleetOpsProcedure.input");
