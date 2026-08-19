@@ -14,7 +14,7 @@ export async function evaluateVehicleMaintenance(vehicleId: string, orgId: strin
   for (const component of components) {
     const consumed = Number(vehicle.currentOdometer) - Number(component.lastServicedOdometer);
     if (consumed < Number(component.alertThresholdKm)) continue;
-    const existing = await fleetDb.workOrder.findFirst({ where: { orgId, vehicleId, status: { in: ["OPEN", "IN_PROGRESS"] }, title: { contains: component.name } } });
+    const existing = await fleetDb.workOrder.findFirst({ where: { orgId, vehicleId, status: { in: ["OPEN", "IN_PROGRESS", "WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK"] }, title: { contains: component.name } } });
     if (existing) continue;
     const workOrder = await fleetDb.workOrder.create({ data: { orgId, vehicleId, title: `${component.name} service threshold reached`, description: `${component.name} has consumed ${Math.round((consumed / Number(component.expectedLifeKm)) * 100)}% of expected life.`, priority: consumed >= Number(component.expectedLifeKm) ? "CRITICAL" : "HIGH" } });
     await notifyRoles(orgId, ["SUPERADMIN", "FLEET_MANAGER"], "Predictive maintenance alert", `${vehicle.licensePlate}: ${component.name} crossed its service threshold.`, "MAINTENANCE_THRESHOLD", workOrder.id);

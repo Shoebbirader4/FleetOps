@@ -47,6 +47,12 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("TRIAGE_STATE_CHANGED");
   });
 
+  it("defines explicit work-order lifecycle states and guarded transitions", () => {
+    for (const state of ["WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK", "CANCELLED"]) expect(routersSource).toContain(state);
+    expect(routersSource).toContain("WORK_ORDER_STATUS_CHANGED");
+    expect(routersSource).toContain("Cannot move work order from");
+  });
+
   it("defines tenant-scoped board and inventory movement procedures", () => {
     expect(routersSource).toContain("board: fleetOpsProcedure.query");
     expect(routersSource).toContain("receive: fleetOpsProcedure.input");
