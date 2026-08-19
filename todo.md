@@ -295,3 +295,4 @@
 - [x] Implement Driver Report Vehicle Issue workflow with assigned-vehicle scope, urgency, notes, optional photo evidence, Fleet Manager visibility, and regression coverage.
 - [x] Add Accountant revenue/expense entry form and detailed INR financial ledger with tenant/RBAC validation and regression coverage.
 - [x] Create public FleetOps landing page with distinct Sign In and Create Organization CTAs while preserving invitation onboarding and authenticated routing.
+- [x] Fix invalid Supabase refresh-token recovery so expired sessions do not trigger unauthorized protected-query batches and recover cleanly.

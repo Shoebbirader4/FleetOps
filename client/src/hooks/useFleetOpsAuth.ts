@@ -9,17 +9,33 @@ export function useFleetOpsAuth() {
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data, error }) => {
       if (!mounted) return;
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+      if (error) {
+        await supabase.auth.signOut({ scope: "local" });
+        setSession(null);
+        setUser(null);
+      } else {
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+      }
+      setLoading(false);
+    }).catch(() => {
+      if (!mounted) return;
+      setSession(null);
+      setUser(null);
       setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        setUser(null);
+      } else {
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
+      }
       setLoading(false);
     });
 
@@ -37,6 +53,12 @@ export function useFleetOpsAuth() {
     signInWithEmail: (email: string, password: string) => supabase.auth.signInWithPassword({ email, password }),
     signUpWithEmail: (email: string, password: string, fullName: string, invitationToken?: string) => supabase.auth.signUp({ email, password, options: { data: { fullName, needsOnboarding: invitationToken ? false : true, invitationToken } } }),
     signOut: () => supabase.auth.signOut(),
-    refreshSession: () => supabase.auth.refreshSession(),
+    refreshSession: async () => {
+      const result = await supabase.auth.refreshSession();
+      if (result.error || !result.data.session) {
+        await supabase.auth.signOut({ scope: "local" });
+      }
+      return result;
+    },
   };
 }

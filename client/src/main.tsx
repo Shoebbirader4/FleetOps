@@ -37,12 +37,21 @@ const trpcClient = trpc.createClient({
             window.clearTimeout(timeout);
           }
         };
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          await supabase.auth.signOut({ scope: "local" });
+          window.dispatchEvent(new CustomEvent("fleetops-session-expired"));
+          throw new Error("FleetOps session expired. Please sign in again.");
+        }
         let response = await request(data.session?.access_token);
-        if (response.status === 401) {
+        if (response.status === 401 && data.session) {
           const refreshed = await supabase.auth.refreshSession();
-          if (refreshed.data.session?.access_token) response = await request(refreshed.data.session.access_token);
-          if (response.status === 401 && !refreshed.data.session) window.dispatchEvent(new CustomEvent("fleetops-session-expired"));
+          if (refreshed.data.session?.access_token) {
+            response = await request(refreshed.data.session.access_token);
+          } else {
+            await supabase.auth.signOut({ scope: "local" });
+            window.dispatchEvent(new CustomEvent("fleetops-session-expired"));
+          }
         }
         return response;
       },
