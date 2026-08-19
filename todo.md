@@ -313,3 +313,10 @@
 - [x] Add vehicle health detail data with component readiness, odometer trend, open work orders, and compliance signals.
 - [x] Add inventory receiving and issuing workflows with transactional movement records and role-safe controls.
 - [x] Add Milestone 2 regression tests, visual validation, typecheck, production build, and publish the verified increment.
+- [x] Re-verify Milestone 1 audit, triage, movement, secure-access, and RBAC contracts on the current release.
+- [x] Re-verify Milestone 2 Kanban, vehicle-health, inventory receive/issue, movement, and audit contracts on the current release.
+- [x] Resolve any verified defects found during Milestone 1 and Milestone 2 verification before starting Milestone 3; no application defects were found, and the public-edge cache mismatch remains documented separately.
+- [x] Define and begin Milestone 3 from the verified baseline with role-safe tests and a published kickoff checkpoint.
+- [x] Milestone 3: add role-safe CSV export for the Accountant financial ledger and Fleet Manager compliance register.
+- [x] Milestone 3: add export affordances with clear loading, empty, and browser-download behavior.
+- [x] Milestone 3: add regression tests and publish the reporting/export kickoff checkpoint.

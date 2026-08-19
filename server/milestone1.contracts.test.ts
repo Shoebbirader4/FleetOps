@@ -38,5 +38,8 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("issue: fleetOpsProcedure.input");
     expect(routersSource).toContain('movementType: \"RECEIPT\"');
     expect(routersSource).toContain('movementType: \"ISSUE\"');
+    expect(routersSource).toContain("DOCUMENT_EXPORT_CSV");
+    expect(routersSource).toContain("fleetops-compliance-");
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
   });
 });
