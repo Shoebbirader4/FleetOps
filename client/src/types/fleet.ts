@@ -1,7 +1,7 @@
 export type TeamMember = { id: string; fullName: string; email: string; role: string; status?: string };
 export type Invitation = { id: string; email: string; role: string; expiresAt: string | Date; acceptedAt?: string | Date | null; delivery?: string; joinUrl?: string; tokenHash?: string; deliveryError?: string | null };
 export type InvitationResponse = { email?: string; role?: string; delivery: "MANUAL_TOKEN" | "EMAIL"; joinUrl?: string; tokenHash?: string; deliveryError?: string; serverRelease?: string };
-export type FleetVehicle = { id: string; licensePlate: string; make?: string; model?: string; status?: string; currentOdometer?: number };
+export type FleetVehicle = { id: string; licensePlate: string; make?: string; model?: string; status?: string; currentOdometer?: number; components?: ServiceComponent[] };
 export type FinancialRecord = { id: string; vehicleId: string; vehicle?: Pick<FleetVehicle, "licensePlate">; type: "REVENUE" | "EXPENSE"; category: string; amount: number | string; transactionDate: string | Date; approvalStatus?: string; reversalOfId?: string | null };
 export type FinancialReconciliationRow = { vehicleId: string; vehicle: string; fuelLogged: number | string; ledgerFuel: number | string; difference: number | string; status: string };
 export type FinancialMetricRow = { vehicleId: string; vehicle: string; revenue: number | string; expenses: number | string; profit: number | string; cpk: number | string };
