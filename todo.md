@@ -360,3 +360,4 @@
 - [x] Architecture subtask: eliminate all broad any annotations from FunctionalWorkspace with shared domain and generic resource-row contracts.
 - [x] Architecture subtask: extract DriverWorkspace into client/src/components/workspaces/DriverWorkspace.tsx and retarget its workflow regression coverage.
 - [x] Architecture subtask: extract ProcurementWorkspace into client/src/components/workspaces/ProcurementWorkspace.tsx and preserve its live purchase-order query and regression coverage.
+- [x] Architecture subtask: extract ComplianceWorkspace into client/src/components/workspaces/ComplianceWorkspace.tsx and preserve document upload, renewal, expiry, and export behavior.
