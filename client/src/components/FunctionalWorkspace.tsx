@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { TeamWorkspace } from "@/components/workspaces/TeamWorkspace";
 import { NotificationWorkspace } from "@/components/workspaces/NotificationWorkspace";
 import { WorkspaceState as State } from "@/components/workspaces/WorkspaceState";
+import type { FleetVehicle } from "@/types/fleet";
 import { AccountantRoleWorkspace, DriverRoleWorkspace, FleetManagerWorkspace, InventoryManagerWorkspace, MechanicWorkspace, OwnerWorkspace } from "@/components/RoleWorkspaces";
 
 type Props = { section: string; session: boolean; onBack: () => void; organizationName?: string };
@@ -23,7 +24,7 @@ function DriverWorkspace() {
   const utils = trpc.useUtils();
   const vehicles = trpc.vehicles.list.useQuery(undefined, { retry: false });
   const dailyHome = trpc.driver.dailyHome.useQuery(undefined, { retry: false });
-  const safeVehicles = dailyHome.data?.vehicle ? [dailyHome.data.vehicle] : vehicles.data?.filter((vehicle: any) => vehicle?.id && vehicle.licensePlate).slice(0, 1) ?? [];
+  const safeVehicles = dailyHome.data?.vehicle ? [dailyHome.data.vehicle] : vehicles.data?.filter((vehicle: FleetVehicle) => vehicle?.id && vehicle.licensePlate).slice(0, 1) ?? [];
   const inspections = trpc.driver.inspections.useQuery(undefined, { retry: false });
   const fuelLogs = trpc.driver.fuelLogs.useQuery(undefined, { retry: false });
   const issues = trpc.vehicleIssues.list.useQuery(undefined, { retry: false });
