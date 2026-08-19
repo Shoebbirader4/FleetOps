@@ -358,3 +358,4 @@
 - [x] Architecture subtask: replace FunctionalWorkspace Accountant reconciliation, metrics, financial ledger, vehicle, and work-order any annotations with shared domain types.
 - [x] Architecture subtask: replace FunctionalWorkspace Driver issue, inspection, fuel-log, Compliance document, Procurement order, and generic resource-row any annotations with shared domain types.
 - [x] Architecture subtask: eliminate all broad any annotations from FunctionalWorkspace with shared domain and generic resource-row contracts.
+- [x] Architecture subtask: extract DriverWorkspace into client/src/components/workspaces/DriverWorkspace.tsx and retarget its workflow regression coverage.

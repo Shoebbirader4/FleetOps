@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
-const driverUi = fs.readFileSync(path.join(root, "client/src/components/FunctionalWorkspace.tsx"), "utf8");
+const driverUi = fs.readFileSync(path.join(root, "client/src/components/workspaces/DriverWorkspace.tsx"), "utf8");
 const router = fs.readFileSync(path.join(root, "server/routers.ts"), "utf8");
 const schema = fs.readFileSync(path.join(root, "drizzle/fleetops-schema.ts"), "utf8");
 
