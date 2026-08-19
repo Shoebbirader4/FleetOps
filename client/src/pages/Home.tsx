@@ -93,7 +93,14 @@ export default function Home({ initialSection = "Command center", publicMode = "
     window.addEventListener("fleetops-session-expired", onExpired);
     return () => window.removeEventListener("fleetops-session-expired", onExpired);
   }, []);
-  const { data: backendSummary, isLoading: summaryLoading, isError: summaryError } = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const { data: backendSummary, isLoading: summaryLoading, isError: summaryError, error: summaryQueryError } = trpc.dashboard.summary.useQuery(undefined, { enabled: Boolean(session), retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const [staleSessionRecoveryAttempted, setStaleSessionRecoveryAttempted] = useState(false);
+  useEffect(() => {
+    const unauthorizedSummary = summaryQueryError?.data?.code === "UNAUTHORIZED" || /unauthorized|organization profile|session expired/i.test(summaryQueryError?.message ?? "");
+    if (!session || backendSummary || !summaryError || staleSessionRecoveryAttempted || !unauthorizedSummary) return;
+    setStaleSessionRecoveryAttempted(true);
+    void signOut();
+  }, [backendSummary, signOut, staleSessionRecoveryAttempted, summaryError, summaryQueryError, session]);
   const metadataNeedsOnboarding = session?.user.user_metadata?.needsOnboarding === true || session?.user.user_metadata?.needsOnboarding === "true";
   const backendRole = String(backendSummary?.role ?? "");
   const organizationName = String(backendSummary?.org?.name ?? session?.user.user_metadata?.orgName ?? "").trim();
@@ -200,6 +207,7 @@ export default function Home({ initialSection = "Command center", publicMode = "
   const operatorInitials = operatorName.slice(0, 2).toUpperCase();
 
   if (session && (metadataNeedsOnboarding || backendSummary?.needsOnboarding)) return <OrganizationOnboarding initialName={String(session.user.user_metadata?.fullName ?? backendSummary?.org?.name ?? "")} initialOrganization={String(session.user.user_metadata?.orgName ?? "")} onComplete={async () => { const { error } = await refreshSession(); if (error) { toast.error("Session refresh failed", { description: error.message }); return; } window.localStorage.setItem("fleetops.openTeam", "1"); window.location.reload(); }} />;
+  if (session && staleSessionRecoveryAttempted && !backendSummary) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>Refreshing your session.</h1><p>The previous session no longer maps to an active FleetOps organization. We are signing it out safely so you can start or join the correct workspace.</p><div className="workspace-state"><RefreshCw className="spin" size={18} /> Returning to secure entry…</div></section></main>;
   if (session && !backendSummary && summaryError) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>We could not load your workspace.</h1><p>Your Supabase session is active, but the organization summary did not respond. Refresh the page to retry without losing your session.</p><button className="primary-button" onClick={() => window.location.reload()}>Retry workspace load</button></section></main>;
   if (session && !backendSummary && summaryLoading) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>Loading your workspace.</h1><p>We are checking your organization and role before opening operational data.</p><div className="workspace-state"><RefreshCw className="spin" size={18} /> Connecting to Supabase…</div></section></main>;
   if (!authLoading && !session && publicMode === "landing") return <LandingPage />;

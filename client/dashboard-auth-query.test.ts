@@ -16,4 +16,10 @@ describe("dashboard auth query gating", () => {
     expect(home).toContain("refetchOnWindowFocus: false");
     expect(home).toContain("refetchOnReconnect: false");
   });
+
+  it("recovers stale sessions when the organization summary is unauthorized", () => {
+    expect(home).toContain('summaryQueryError?.data?.code === "UNAUTHORIZED"');
+    expect(home).toContain("staleSessionRecoveryAttempted");
+    expect(home).toContain("void signOut()");
+  });
 });

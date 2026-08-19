@@ -308,3 +308,4 @@
 - [x] Milestone 1: add transactional inventory movement records and integrity controls.
 - [x] Milestone 1: add secure authorized document/evidence access actions.
 - [x] Milestone 1: add regression coverage, lifecycle validation, and production build for the milestone.
+- [x] Add tenant-scoped notification acknowledgement so authorized workspace users can mark operational alerts as read.
