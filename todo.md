@@ -348,3 +348,4 @@
 - [x] Architecture subtask: centralize seven-role RBAC policy contracts and reusable tenant scope helper with regression tests.
 - [x] Architecture subtask: replace Team workspace invitation/member any annotations with shared client domain types and safe token handling.
 - [x] Architecture subtask: extract TeamWorkspace into its own module and update workspace-boundary regression coverage.
+- [x] Architecture subtask: extract NotificationWorkspace and share WorkspaceState across workspace modules with regression-safe behavior.

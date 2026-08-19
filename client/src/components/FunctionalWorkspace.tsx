@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Check, Download, Gauge, Mail, Plus, RefreshCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, Download, Gauge, Mail, Plus, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { TeamWorkspace } from "@/components/workspaces/TeamWorkspace";
+import { NotificationWorkspace } from "@/components/workspaces/NotificationWorkspace";
+import { WorkspaceState as State } from "@/components/workspaces/WorkspaceState";
 import { AccountantRoleWorkspace, DriverRoleWorkspace, FleetManagerWorkspace, InventoryManagerWorkspace, MechanicWorkspace, OwnerWorkspace } from "@/components/RoleWorkspaces";
 
 type Props = { section: string; session: boolean; onBack: () => void; organizationName?: string };
@@ -10,26 +12,12 @@ type Props = { section: string; session: boolean; onBack: () => void; organizati
 function downloadCsv(filename: string, content: string) { const blob = new Blob([content], { type: "text/csv;charset=utf-8" }); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url); }
 function downloadPdf(filename: string, base64: string) { const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0)); const blob = new Blob([bytes], { type: "application/pdf" }); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url); }
 
-function State({ loading, error, empty, children }: { loading?: boolean; error?: boolean; empty?: boolean; children: React.ReactNode }) {
-  if (loading) return <div className="workspace-state"><RefreshCw className="spin" size={18} /> Loading live FleetOps data…</div>;
-  if (error) return <div className="workspace-state error-state">This workspace could not load from Supabase. Check your session and try again.</div>;
-  if (empty) return <div className="workspace-state">No records yet. Use the action above to create the first record.</div>;
-  return <>{children}</>;
-}
-
 
 function RoleOverviewWorkspace({ role }: { role: "FLEET_MANAGER" | "MECHANIC" }) {
   const isFleetManager = role === "FLEET_MANAGER";
   return <section className="role-overview-workspace"><div className="workspace-form panel"><div className="panel-kicker">{isFleetManager ? "Fleet Manager workspace" : "Mechanic workspace"}</div><h2>{isFleetManager ? "Run the fleet with operational control" : "Resolve maintenance work safely"}</h2><p>{isFleetManager ? "Your workspace is limited to fleet readiness, work-order coordination, compliance, and operational alerts. Financial ledger, billing, inventory pricing, and team governance remain outside this role." : "Your workspace is limited to assigned maintenance execution, work-order status, vehicle readiness, and notifications. Team, billing, financial, and inventory governance remain outside this role."}</p><div className="workspace-scope-grid"><div><strong>{isFleetManager ? "Fleet readiness" : "Assigned maintenance"}</strong><span>{isFleetManager ? "Vehicles and live status" : "Work orders and defect follow-up"}</span></div><div><strong>{isFleetManager ? "Compliance control" : "Safety records"}</strong><span>{isFleetManager ? "Renewals and expiry signals" : "Inspection and repair context"}</span></div><div><strong>Protected boundary</strong><span>Every procedure is role-checked and tenant-scoped</span></div></div></div></section>;
 }
 
-function NotificationWorkspace() {
-  const utils = trpc.useUtils();
-  const notifications = trpc.notifications.list.useQuery(undefined, { retry: false });
-  const markRead = trpc.notifications.markRead.useMutation({ onSuccess: () => { void utils.notifications.list.invalidate(); void utils.activity.recent.invalidate(); }, onError: (error) => toast.error("Notification update failed", { description: error.message }) });
-  const unread = notifications.data?.filter((item: any) => !item.isRead) ?? [];
-  return <section className="panel workspace-table"><div className="panel-heading"><div><div className="panel-kicker">Recipient-scoped Supabase alerts</div><h2>Notification center</h2></div><span className={`signal-chip ${unread.length ? "warn" : "good"}`}><Mail size={13} /> {unread.length} unread</span></div><State loading={notifications.isLoading} error={notifications.isError} empty={!notifications.isLoading && !notifications.isError && !notifications.data?.length}><div className="resource-list">{notifications.data?.map((item: any) => <div className={`resource-row ${item.isRead ? "notification-read" : "notification-unread"}`} key={item.id}><div><strong>{item.title}</strong><span>{item.message}</span><small>{new Date(item.createdAt).toLocaleString("en-IN")}</small></div><div className="notification-actions">{item.isRead ? <span className="status-label accepted">Read</span> : <button className="secondary-button compact-button" onClick={() => markRead.mutate({ id: item.id })} disabled={markRead.isPending}><Check size={14} /> Mark read</button>}</div></div>)}</div></State></section>;
-}
 
 function DriverWorkspace() {
   const utils = trpc.useUtils();
