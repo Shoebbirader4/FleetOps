@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
-const ui = fs.readFileSync(path.join(root, "client/src/components/FunctionalWorkspace.tsx"), "utf8");
+const ui = fs.readFileSync(path.join(root, "client/src/components/workspaces/AccountantWorkspace.tsx"), "utf8");
 const router = fs.readFileSync(path.join(root, "server/routers.ts"), "utf8");
 
 describe("Accountant financial ledger", () => {

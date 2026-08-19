@@ -361,3 +361,4 @@
 - [x] Architecture subtask: extract DriverWorkspace into client/src/components/workspaces/DriverWorkspace.tsx and retarget its workflow regression coverage.
 - [x] Architecture subtask: extract ProcurementWorkspace into client/src/components/workspaces/ProcurementWorkspace.tsx and preserve its live purchase-order query and regression coverage.
 - [x] Architecture subtask: extract ComplianceWorkspace into client/src/components/workspaces/ComplianceWorkspace.tsx and preserve document upload, renewal, expiry, and export behavior.
+- [x] Architecture subtask: extract AccountantWorkspace into client/src/components/workspaces/AccountantWorkspace.tsx and retarget financial-ledger regression coverage.
