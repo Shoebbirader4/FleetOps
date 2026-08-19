@@ -42,6 +42,9 @@ describe("Milestone 1 operational contracts", () => {
     expect(routersSource).toContain("vehicleIssue.findMany");
     expect(routersSource).toContain("inventoryPart.findMany");
     expect(routersSource).toContain("actionable: true");
+    expect(routersSource).toContain("triageState");
+    expect(routersSource).toContain('state: z.enum(["ACKNOWLEDGED", "ASSIGNED", "DEFERRED", "RESOLVED"])');
+    expect(routersSource).toContain("TRIAGE_STATE_CHANGED");
   });
 
   it("defines tenant-scoped board and inventory movement procedures", () => {
