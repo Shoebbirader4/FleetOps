@@ -23,13 +23,16 @@ let invitationId;
 
 async function tRPC(path, token, input, method = "POST") {
   const query = encodeURIComponent(JSON.stringify({ 0: { json: input } }));
-  const url = `${baseUrl}/api/trpc/${path}?batch=1${method === "GET" ? `&input=${query}` : ""}`;
+  const isQuery = method === "GET";
+  const url = `${baseUrl}/api/trpc/${path}?batch=1${isQuery ? `&input=${query}` : ""}`;
   const response = await fetch(url, {
-    method,
-    headers: { "content-type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: method === "GET" ? undefined : JSON.stringify({ 0: { json: input } }),
+    method: isQuery ? "GET" : "POST",
+    headers: { "accept": "application/json", "trpc-accept": "application/json", "content-type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: isQuery ? undefined : JSON.stringify({ 0: { json: input } }),
   });
-  const payload = await response.json();
+  const raw = await response.text();
+  let payload;
+  try { payload = JSON.parse(raw); } catch { throw new Error(`${path} HTTP ${response.status} returned non-JSON: ${raw.slice(0, 300)}`); }
   if (!response.ok) throw new Error(`${path} HTTP ${response.status}: ${JSON.stringify(payload).slice(0, 600)}`);
   const value = payload?.[0]?.result?.data?.json ?? payload?.[0]?.result?.data;
   if (payload?.[0]?.error) throw new Error(`${path} tRPC error: ${JSON.stringify(payload[0].error).slice(0, 600)}`);

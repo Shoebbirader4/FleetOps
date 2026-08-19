@@ -312,4 +312,4 @@
 - [x] Add a tenant-scoped work-order board query with role-safe status grouping and dispatch metadata.
 - [x] Add vehicle health detail data with component readiness, odometer trend, open work orders, and compliance signals.
 - [x] Add inventory receiving and issuing workflows with transactional movement records and role-safe controls.
-- [ ] Add Milestone 2 regression tests, visual validation, typecheck, production build, and publish the verified increment.
+- [x] Add Milestone 2 regression tests, visual validation, typecheck, production build, and publish the verified increment.
