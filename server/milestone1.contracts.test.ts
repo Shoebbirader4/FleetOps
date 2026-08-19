@@ -7,10 +7,13 @@ import { requireRole } from "./routers";
 const routersSource = fs.readFileSync(path.resolve(import.meta.dirname, "routers.ts"), "utf8");
 
 describe("Milestone 1 operational contracts", () => {
-  it("keeps organization audit history Superadmin-only", () => {
+  it("keeps organization audit history Superadmin-only and filterable by governance dimensions", () => {
     expect(() => requireRole("SUPERADMIN", ["SUPERADMIN"])).not.toThrow();
     expect(() => requireRole("FLEET_MANAGER", ["SUPERADMIN"])).toThrowError(TRPCError);
     expect(() => requireRole("ACCOUNTANT", ["SUPERADMIN"])).toThrowError(TRPCError);
+    for (const filter of ["actorId", "actorRole", "entityType", "action", "outcome", "dateFrom", "dateTo"]) expect(routersSource).toContain(filter);
+    expect(routersSource).toContain('outcome: z.enum(["SUCCESS", "ERROR"])');
+    expect(routersSource).toContain("orgId: ctx.fleetopsUser.orgId");
   });
 
   it("keeps driver issue triage inside management roles", () => {

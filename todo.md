@@ -326,3 +326,4 @@
 - [x] Milestone 4: add secure PDF report generation for compliance and financial exports without exposing cross-tenant data.
 - [x] Milestone 4: add offline-ready draft persistence for Driver issue reports and Mechanic execution notes, with explicit sync status.
 - [x] Milestone 4: add regression tests, lifecycle validation, and publish the first Milestone 4 increment.
+- [x] P0 priority 1: upgrade Superadmin audit visibility into a tenant-scoped searchable audit log with actor, role, action, entity, date, and outcome filters.
