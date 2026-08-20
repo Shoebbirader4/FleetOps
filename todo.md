@@ -412,3 +412,4 @@
 - [x] Harden the Superadmin background harness to redact access tokens from test output and retain only session-established evidence.
 - [x] Run isolated background Fleet Manager E2E: invited profile creation, login, vehicle onboarding, odometer, maintenance, work orders, assignment, scheduling, handoff visibility, compliance, exports, RBAC, tenant isolation, and cleanup; produce pass/fail evidence report. Result: 44/44 checks passed with cleanup verification.
 - [x] Fix the Supabase PostgreSQL work_orders schema gap discovered by Fleet Manager planning verification: add the missing updatedAt column through a Supabase CLI migration and validate the planning route.
+- [x] Run isolated background Mechanic E2E: invited profile creation, login, assigned work-order visibility, start-work, checklist/evidence, labor hours, parts, completion handoff, notifications, RBAC, and cleanup; produce pass/fail evidence report. Result: 31/31 checks passed with cleanup verification.
