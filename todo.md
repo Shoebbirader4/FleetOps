@@ -449,3 +449,5 @@
 - [x] Refine the Superadmin workspace navigation and UI: removed operational-only Components, Vehicles, Inventory, Vendors, and Purchase orders entries from the Superadmin left panel while preserving executive oversight, billing, team, notifications, compliance, analytics, and work-order governance; added an executive-governance scope marker. Validation passed with 102 tests, TypeScript, and production build.
 
 - [x] Correct Superadmin Team organization-directory role labels and add a guarded remove-member action that deletes the FleetOps user membership and corresponding Supabase Auth identity within the organization; self-removal, owner removal, non-Superadmin authorization, and tenant isolation are guarded. Validation passed with 105 tests, TypeScript, and production build.
+
+- [x] Remove the remaining Work orders entry from the Superadmin left navigation while retaining executive maintenance visibility through Command center signals; the role-boundary regression now asserts Work orders is denied for Superadmin and retained for Fleet Manager. Validation passed with 105 tests, TypeScript, and production build.

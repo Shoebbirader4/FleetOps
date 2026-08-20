@@ -18,7 +18,7 @@ describe("role workspace boundaries", () => {
 
   it("keeps specialist and operational-only workspaces unavailable to Superadmin navigation", () => {
     expect(canAccessWorkspace("SUPERADMIN", "Command center")).toBe(true);
-    expect(canAccessWorkspace("SUPERADMIN", "Work orders")).toBe(true);
+    expect(canAccessWorkspace("SUPERADMIN", "Work orders")).toBe(false);
     expect(canAccessWorkspace("SUPERADMIN", "Notifications")).toBe(true);
     expect(canAccessWorkspace("SUPERADMIN", "Billing")).toBe(true);
     expect(canAccessWorkspace("SUPERADMIN", "Team")).toBe(true);
