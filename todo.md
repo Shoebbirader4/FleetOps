@@ -443,3 +443,5 @@
 - [x] Validate the cleaned Vercel deployment and commit the final Manus-free code to GitHub; Vercel landing returned HTTP 200, system.health returned database ok, and GitHub main contains commit 0d2d886.
 
 - [x] Fix component maintenance alerts so a vehicle already beyond a component's configured alert threshold creates a Fleet Manager notification immediately; component create/update now evaluates maintenance, creates a critical work order, persists MAINTENANCE_THRESHOLD notifications for Superadmin/Fleet Manager, and refreshes the relevant workspace queries. Regression validation passed with 101 tests, TypeScript, and production build.
+
+- [x] Verify Inventory Manager low-stock alert creation, recipient notification, automatic draft purchase-order generation, and workspace refresh behavior; low-stock part creation now refreshes notifications and purchase orders, and regression coverage confirms Inventory Manager notification plus draft PO creation. Validation passed with 102 tests, TypeScript, and production build.
