@@ -34,7 +34,7 @@
 - [x] Implement verified Supabase session-expired handling for protected queries and sign-out.
 
 - [x] Prepare the production Edge Function deployment and scheduler configuration without publishing from this session.
-- [ ] Validate the deployed maintenance callback after the user publishes the project.
+- [x] Validate the deployed maintenance callback after the user publishes the project; Heartbeat task QSscoBdUfDSKYjuNaT6jJa returned HTTP 200 with successful tenant evaluation.
 - [ ] Run an end-to-end Supabase owner/invited-user Auth and invitation redemption test with real accounts.
 
 - [x] Replace Prisma ORM with Drizzle ORM while keeping Supabase PostgreSQL/Auth/Realtime/RLS unchanged.
@@ -415,7 +415,7 @@
 - [x] Run isolated background Mechanic E2E: invited profile creation, login, assigned work-order visibility, start-work, checklist/evidence, labor hours, parts, completion handoff, notifications, RBAC, and cleanup; produce pass/fail evidence report. Result: 31/31 checks passed with cleanup verification.
 - [x] Capture and deliver an authenticated Fleet Manager workspace screenshot using a fresh test account without exposing credentials; clean up temporary test data afterward.
 - [x] Create a fresh Fleet Manager test account, authenticate the published browser session, capture the workspace screenshot, and clean up temporary organization/account data; screenshot captured and cleanup verified.
-- [x] Diagnose and fix the Supabase password-login HTTP 400 path, add user-facing error handling and regression coverage, and verify the published login entry point without exposing credentials; authenticated credential verification remains session-blocked.
+- [x] Diagnose and fix the Supabase password-login HTTP 400 path, add user-facing error handling and regression coverage, and verify the published login entry point without exposing credentials; published temporary-account password sign-in and onboarding passed through the Superadmin harness with cleanup.
 - [x] Add a typed Supabase Auth error-message mapper for invalid credentials, unconfirmed email, rate limits, and generic login failures, with client regression coverage; validated in the 100-test suite.
 - [x] Run isolated background Inventory Manager E2E: invitation acceptance, profile signup, login, catalog, receiving, PO-linked receipts, supplier/invoice metadata, reorder, notifications, RBAC, tenant isolation, and cleanup; produce pass/fail evidence report.
 - [x] Add purchase_orders.updatedAt through a Supabase CLI PostgreSQL migration, synchronize Drizzle schema, and rerun the complete Inventory Manager receipt/lifecycle workflow.
