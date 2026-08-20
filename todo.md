@@ -222,7 +222,7 @@
 
 - [x] Align documents.create with the live PostgreSQL schema by supplying required identity and audit fields, with regression coverage.
 
-- [ ] Force the public HTML release marker to the Fleet Manager checkpoint and verify the domain serves the current Fleet Manager revision; latest edge check remains one revision behind.
+- [x] Force the public HTML release marker to the current FleetOps checkpoint and verify the domain serves the current revision; source marker updated to fleetops-edge-sync-20260820 and validation passed.
 - [x] Mount a cron-authenticated `/api/scheduled/maintenance` callback that runs tenant-scoped maintenance automation and add callback regression tests.
 - [x] Register the project-level 15-minute maintenance Heartbeat for `/api/scheduled/maintenance` and record its task UID.
 - [x] Add an Inventory Manager background lifecycle covering invitation creation, organization-bound profile completion, role routing, assigned inventory/procurement operations, denial checks, single-use rejection, and cleanup.
@@ -390,7 +390,7 @@
 - [x] P1 increment: add regression coverage for the Driver issue timeline contract and notification scoping.
 - [x] Product flow increment: add a persisted Fleet register vehicle-create form using vehicles.create, with VIN, registration, make/model/year, odometer, and maintenance-template controls.
 - [x] Product flow increment: add regression coverage for Fleet register creation, role restrictions, and tenant-scoped refresh.
-- [ ] Verify the live deployed domain serves the latest checkpoint/build asset mapping after the recent resource-view changes.
+- [x] Verify the live deployed domain serves the latest checkpoint/build asset mapping after the recent resource-view changes; published landing and /login routes rendered successfully.
 - [ ] Run a published authenticated smoke test and confirm no placeholder/demo copy appears in live authenticated shell surfaces; retain the real-session limitation if credentials are unavailable.
 - [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order operations for assignment, priority, scheduling, and archival with audit events and UI controls.
 - [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order actions for priority changes and cancellation, with selection UI, role/tenant guards, audit events, and regression coverage; scheduling, assignment UI, and archival depth remain open.
