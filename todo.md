@@ -396,3 +396,8 @@
 - [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order actions for priority changes and cancellation, with selection UI, role/tenant guards, audit events, and regression coverage; scheduling, assignment UI, and archival depth remain open.
 - [x] P1 increment: extend the bulk work-order controls with live tenant-scoped mechanic/technician assignment using the existing team roster, plus targeted RBAC/UI regression coverage and a passing production build.
 - [ ] Enforce Supabase PostgreSQL-only schema/deployment workflow: use Supabase CLI migrations and PostgreSQL-compatible verification; do not use TiDB/MySQL management SQL paths.
+- [ ] Partial-P1 completion: finish Fleet Manager bulk work-order operations with scheduling/rescheduling, archive/unarchive, export, and complete audit coverage.
+- [ ] Partial-P1 completion: finish Inventory receiving and Procurement lifecycle with PO-linked partial receiving, supplier invoice/location metadata, and complete state history.
+- [ ] Partial-P1 completion: finish Accountant ledger filters/saved views, reconciliation links, GST/TDS-ready fields, cost centers, and complete reporting exports.
+- [ ] Partial-P1 completion: finish global search across all tenant resources with role-filtered results and stable navigation paths.
+- [ ] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces.

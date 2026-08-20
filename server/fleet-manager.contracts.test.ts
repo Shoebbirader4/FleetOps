@@ -69,6 +69,10 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('where: { orgId: ctx.fleetopsUser.orgId, id: { in: input.workOrderIds } }');
     expect(routersSource).toContain("WORK_ORDER_BULK_UPDATED");
     expect(routersSource).toContain("Assignee must belong to this organization.");
+    expect(routersSource).toContain('scheduledFor: z.coerce.date().nullable().optional()');
+    expect(routersSource).toContain('archive: z.boolean().optional()');
+    expect(routersSource).toContain('archivedAt: input.archive ? new Date() : null');
+    expect(routersSource).toContain('scheduledFor: input.scheduledFor');
   });
 
   it("defines tenant-scoped Driver handoff visibility with safety aggregation", () => {
