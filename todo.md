@@ -434,3 +434,10 @@
 - [x] Add a Vercel Node API adapter and SPA rewrite configuration so tRPC, maintenance callbacks, and client-side routes remain functional instead of deploying only static Vite assets; bundled API function deployed and `system.health` returned HTTP 200.
 - [x] Push the current FleetOps codebase to https://github.com/Shoebbirader4/FleetOps.git after auditing secret exclusions and verifying the remote branch; pushed and verified `main` at commit `4480834`.
 - [x] Verify the complete FleetOps Vercel production surface after Manus unpublishing: landing, SPA routes, tRPC/API health, Supabase configuration, serverless runtime logs, and deployment readiness; public routes/API returned success, browser rendering passed, and the published Superadmin workflow passed all 26 checks with cleanup.
+- [ ] Remove obsolete Manus hosting/runtime/configuration references from FleetOps while preserving Supabase, Vercel, tRPC, application storage, and authentication functionality; validate and push the cleaned code to GitHub.
+
+- [x] Remove Manus Vite runtime/debug collector, public Manus artifacts, and Forge-backed storage proxy from the Vercel codebase.
+- [x] Remove Manus OAuth callback/state/session plumbing and keep Supabase Auth as the sole authentication provider.
+- [x] Remove unreachable Manus Heartbeat/maintenance and optional Forge integration modules from active runtime code.
+- [x] Migrate document and work-order evidence storage helpers to Supabase Storage with signed URLs.
+- [ ] Validate the cleaned Vercel deployment and commit the final Manus-free code to GitHub.
