@@ -474,3 +474,6 @@
 - [x] Correct any GitHub/Vercel synchronization or route/build mismatch found and verify the enhancement in the authenticated production workspace; Vercel auto-deployed commit b575d2a7 from GitHub main and the live CSS/JS contain workspace-page-header, workspace-chain, and Fleet Manager enhancement markers.
 
 - [x] Enable automatic production deployments from the connected FleetOps GitHub repository to Vercel and verify the `main` branch trigger; Vercel is connected to Shoebbirader4/FleetOps on main, production deployment b575d2a7 is Ready, and the live bundle contains the Fleet Manager UI markers.
+
+- [x] Diagnose why the authenticated Fleet Manager workspace appears old on production while GitHub and Vercel show the upgraded release; compare production domains, deployment assets, cache, branch, and route behavior. Live production assets and authenticated browser routes now resolve to the upgraded release.
+- [x] Correct any production domain, deployment, cache, branch, or authenticated route mismatch and verify the actual Fleet Manager workspace upgrade on Vercel; authenticated Vercel verification showed the upgraded Fleet Manager overview and Vehicles page with contextual headers, Fleet register → Maintenance → Dispatch workflow cues, redesigned vehicle onboarding form, and refined fleet register.
