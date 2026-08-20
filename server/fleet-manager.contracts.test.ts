@@ -56,7 +56,7 @@ describe("Fleet Manager responsibility contracts", () => {
 
   it("defines guarded Procurement purchase-order lifecycle transitions", () => {
     expect(routersSource).toContain("updateStatus: fleetOpsProcedure");
-    expect(routersSource).toContain('status: z.enum(["DRAFT", "SENT", "RECEIVED", "CANCELLED"])');
+    expect(routersSource).toContain('status: z.enum(["DRAFT", "SENT", "PARTIALLY_RECEIVED", "RECEIVED", "CANCELLED", "CLOSED"])');
     expect(routersSource).toContain("This purchase order changed elsewhere. Refresh before updating its status.");
     expect(routersSource).toContain("PURCHASE_ORDER_STATUS_CHANGED");
     expect(routersSource).toContain('where: { id: input.id, orgId: ctx.fleetopsUser.orgId }');
