@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("./db", () => ({ fleetDb: mocks }));
+const evaluateVehicleMaintenance = vi.hoisted(() => vi.fn().mockResolvedValue({ createdWorkOrders: 1 }));
+vi.mock("./automation", () => ({ evaluateVehicleMaintenance }));
 
 const component = mocks.component;
 const vehicle = mocks.vehicle;
@@ -30,6 +32,7 @@ describe("component procedures", () => {
     const result = await appRouter.createCaller(ctx).components.create({ vehicleId: "00000000-0000-4000-8000-000000000001", name: "Brake pad", expectedLifeKm: 50000, lastServicedOdometer: 1000, alertThresholdKm: 5000 });
     expect(result).toEqual({ id: "00000000-0000-4000-8000-000000000002" });
     expect(vehicle.findFirst).toHaveBeenCalledWith({ where: { id: "00000000-0000-4000-8000-000000000001", orgId: "org-a" } });
+    expect(evaluateVehicleMaintenance).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "org-a");
   });
 
   it("blocks a driver from updating a component", async () => {

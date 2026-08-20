@@ -441,3 +441,5 @@
 - [x] Remove unreachable Manus Heartbeat/maintenance and optional Forge integration modules from active runtime code.
 - [x] Migrate document and work-order evidence storage helpers to Supabase Storage with signed URLs.
 - [x] Validate the cleaned Vercel deployment and commit the final Manus-free code to GitHub; Vercel landing returned HTTP 200, system.health returned database ok, and GitHub main contains commit 0d2d886.
+
+- [x] Fix component maintenance alerts so a vehicle already beyond a component's configured alert threshold creates a Fleet Manager notification immediately; component create/update now evaluates maintenance, creates a critical work order, persists MAINTENANCE_THRESHOLD notifications for Superadmin/Fleet Manager, and refreshes the relevant workspace queries. Regression validation passed with 101 tests, TypeScript, and production build.
