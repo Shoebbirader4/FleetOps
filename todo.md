@@ -410,3 +410,5 @@
 - [x] Create and deliver a complete responsibility specification covering the original FleetOps role matrix, all seven roles, workspace isolation, operational handoffs, audit improvements, and deferred scope.
 - [x] Run isolated background Superadmin E2E: fresh signup, organization creation, team invitations, governance, approvals, oversight, exports, tenant isolation, and cleanup; produce pass/fail evidence report. Result: 26/26 checks passed with cleanup verification.
 - [x] Harden the Superadmin background harness to redact access tokens from test output and retain only session-established evidence.
+- [x] Run isolated background Fleet Manager E2E: invited profile creation, login, vehicle onboarding, odometer, maintenance, work orders, assignment, scheduling, handoff visibility, compliance, exports, RBAC, tenant isolation, and cleanup; produce pass/fail evidence report. Result: 44/44 checks passed with cleanup verification.
+- [x] Fix the Supabase PostgreSQL work_orders schema gap discovered by Fleet Manager planning verification: add the missing updatedAt column through a Supabase CLI migration and validate the planning route.
