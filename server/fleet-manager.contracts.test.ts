@@ -21,7 +21,20 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(() => requireRole("DRIVER", ["FLEET_MANAGER", "MECHANIC", "TECHNICIAN"])).toThrowError(TRPCError);
   });
 
-  it("exposes a tenant-scoped reusable template apply workflow", () => {
+  it("defines Fleet Manager vehicle edit and delete authority with tenant guards", () => {
+    expect(routersSource).toContain("update: fleetOpsProcedure.input(z.object({ id: z.string().uuid(), vin:");
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["FLEET_MANAGER"])');
+    expect(routersSource).toContain('action: "VEHICLE_UPDATED"');
+    expect(routersSource).toContain('remove: fleetOpsProcedure.input(z.object({ id: z.string().uuid() }))');
+    expect(routersSource).toContain('action: "VEHICLE_DELETED"');
+  });
+
+  it("reevaluates maintenance after driver fuel odometer updates", () => {
+    expect(routersSource).toContain('source: "MANUAL_DRIVER"');
+    expect(routersSource).toContain("await evaluateVehicleMaintenance(vehicle.id, ctx.fleetopsUser.orgId);");
+  });
+
+  it("defines tenant-scoped reusable template apply workflow", () => {
     expect(routersSource).toContain("maintenanceTemplates: router({");
     expect(routersSource).toContain("applyTemplate:");
     expect(routersSource).toContain("MAINTENANCE_TEMPLATE_APPLIED");
