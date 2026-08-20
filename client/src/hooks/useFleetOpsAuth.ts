@@ -45,14 +45,25 @@ export function useFleetOpsAuth() {
     };
   }, []);
 
+  const signInWithEmail = async (email: string, password: string) => {
+    // A logout can leave an expired persisted access/refresh token while the
+    // password form is already visible. Clear only this browser's session
+    // before password authentication so Supabase starts a fresh grant instead
+    // of racing the auth-state listener or attempting to refresh stale state.
+    await supabase.auth.signOut({ scope: "local" });
+    return supabase.auth.signInWithPassword({ email: email.trim(), password });
+  };
+
+  const signOut = () => supabase.auth.signOut({ scope: "local" });
+
   return {
     session,
     user,
     loading,
     isAuthenticated: Boolean(session),
-    signInWithEmail: (email: string, password: string) => supabase.auth.signInWithPassword({ email, password }),
-    signUpWithEmail: (email: string, password: string, fullName: string, invitationToken?: string) => supabase.auth.signUp({ email, password, options: { data: { fullName, needsOnboarding: invitationToken ? false : true, invitationToken } } }),
-    signOut: () => supabase.auth.signOut(),
+    signInWithEmail,
+    signUpWithEmail: (email: string, password: string, fullName: string, invitationToken?: string) => supabase.auth.signUp({ email: email.trim(), password, options: { data: { fullName, needsOnboarding: invitationToken ? false : true, invitationToken } } }),
+    signOut,
     refreshSession: async () => {
       const result = await supabase.auth.refreshSession();
       if (result.error || !result.data.session) {
