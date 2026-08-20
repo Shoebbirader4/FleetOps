@@ -104,3 +104,6 @@ nav { display: grid; gap: 3px; }
 
 .sidebar-scope { display: flex; align-items: center; gap: 7px; margin: 14px 18px 8px; color: var(--muted-foreground); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .scope-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--orange); box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 15%, transparent); }
+
+.danger-button { border: 1px solid color-mix(in srgb, #b42318 28%, var(--border)); background: color-mix(in srgb, #b42318 7%, var(--card)); color: #b42318; }
+.danger-button:hover:not(:disabled) { background: color-mix(in srgb, #b42318 13%, var(--card)); }

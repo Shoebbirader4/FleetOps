@@ -447,3 +447,5 @@
 - [x] Verify Inventory Manager low-stock alert creation, recipient notification, automatic draft purchase-order generation, and workspace refresh behavior; low-stock part creation now refreshes notifications and purchase orders, and regression coverage confirms Inventory Manager notification plus draft PO creation. Validation passed with 102 tests, TypeScript, and production build.
 
 - [x] Refine the Superadmin workspace navigation and UI: removed operational-only Components, Vehicles, Inventory, Vendors, and Purchase orders entries from the Superadmin left panel while preserving executive oversight, billing, team, notifications, compliance, analytics, and work-order governance; added an executive-governance scope marker. Validation passed with 102 tests, TypeScript, and production build.
+
+- [x] Correct Superadmin Team organization-directory role labels and add a guarded remove-member action that deletes the FleetOps user membership and corresponding Supabase Auth identity within the organization; self-removal, owner removal, non-Superadmin authorization, and tenant isolation are guarded. Validation passed with 105 tests, TypeScript, and production build.
