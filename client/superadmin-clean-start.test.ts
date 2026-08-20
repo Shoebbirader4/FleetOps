@@ -8,7 +8,7 @@ describe("clean-start Superadmin signup", () => {
   it("verifies an existing Auth account before reusing it", () => {
     expect(home).toContain("already registered|already exists|user exists");
     expect(home).toContain("signInWithEmail(authEmail, authPassword)");
-    expect(home).toContain("Use its existing password or choose Sign In.");
+    expect(home).toContain("describeAuthError(existing.error, \"sign-in\")");
   });
 
   it("continues through the normal session refresh path after verified reuse", () => {

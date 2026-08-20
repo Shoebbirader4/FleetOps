@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { describeAuthError } from "@/lib/authErrors";
 import { useFleetOpsAuth } from "@/hooks/useFleetOpsAuth";
 import { useFleetOpsRealtime } from "@/hooks/useFleetOpsRealtime";
 import FunctionalWorkspace from "@/components/FunctionalWorkspace";
@@ -156,11 +157,11 @@ export default function Home({ initialSection = "Command center", publicMode = "
     setAuthError("");
     setAuthSubmitting(true);
     const { data, error } = await signInWithEmail(authEmail, authPassword);
-    if (error) setAuthError(error.message);
+    if (error) setAuthError(describeAuthError(error, "sign-in"));
     else if (!data.session) setAuthError("Supabase did not return an active session. Please try signing in again.");
     else {
       const refreshed = await refreshSession();
-      if (refreshed.error) setAuthError(`Session setup failed: ${refreshed.error.message}`);
+      if (refreshed.error) setAuthError(`Session setup failed: ${describeAuthError(refreshed.error, "sign-in")}`);
     }
     setAuthSubmitting(false);
   };
@@ -172,15 +173,15 @@ export default function Home({ initialSection = "Command center", publicMode = "
     if (error && /already registered|already exists|user exists/i.test(error.message)) {
       const existing = await signInWithEmail(authEmail, authPassword);
       if (existing.error) {
-        setAuthError("This email already has a FleetOps Auth account. Use its existing password or choose Sign In.");
+        setAuthError(describeAuthError(existing.error, "sign-in"));
       } else if (!existing.data.session) {
         setAuthError("The existing account did not return an active session. Please use Sign In and try again.");
       } else {
         const refreshed = await refreshSession();
-        if (refreshed.error) setAuthError(`Session setup failed: ${refreshed.error.message}`);
+        if (refreshed.error) setAuthError(`Session setup failed: ${describeAuthError(refreshed.error, "sign-in")}`);
       }
     } else if (error) {
-      setAuthError(error.message);
+      setAuthError(describeAuthError(error, "sign-up"));
     } else if (!data.session) {
       setAuthError("Account created. Confirm your email, then sign in to continue organization setup.");
     }

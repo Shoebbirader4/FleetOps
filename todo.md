@@ -415,3 +415,5 @@
 - [x] Run isolated background Mechanic E2E: invited profile creation, login, assigned work-order visibility, start-work, checklist/evidence, labor hours, parts, completion handoff, notifications, RBAC, and cleanup; produce pass/fail evidence report. Result: 31/31 checks passed with cleanup verification.
 - [x] Capture and deliver an authenticated Fleet Manager workspace screenshot using a fresh test account without exposing credentials; clean up temporary test data afterward.
 - [x] Create a fresh Fleet Manager test account, authenticate the published browser session, capture the workspace screenshot, and clean up temporary organization/account data; screenshot captured and cleanup verified.
+- [ ] Diagnose and fix the Supabase password-login HTTP 400 path, add user-facing error handling and regression coverage, and verify the published login flow without exposing credentials.
+- [x] Add a typed Supabase Auth error-message mapper for invalid credentials, unconfirmed email, rate limits, and generic login failures, with client regression coverage; validated in the 100-test suite.
