@@ -455,3 +455,5 @@
 - [x] Enhance Fleet Manager Command center and Work orders UI so the main workspace complements left-panel workflows; the overview now presents readiness, predictive maintenance, planning, driver handoffs, and queue signals instead of duplicate create forms. Work orders now support context, assignment, and dispatch feedback. Fleet Manager vehicle edit/delete is tenant-scoped and database-backed, and driver fuel/odometer updates reevaluate maintenance alerts. Validation passed with 107 tests, TypeScript, and production build.
 
 - [x] Fix recurring Supabase password-login HTTP 400 errors after logout for Superadmin and invited members; password login now clears only the browser-local stale session and trims the email before a fresh grant. Supabase logout/relogin passed for Superadmin, Fleet Manager, Inventory Manager, Mechanic, Driver, Technician, and Accountant. Validation passed with 108 tests, TypeScript, and production build.
+
+- [ ] Push the latest Supabase logout-to-login authentication fix to GitHub main and confirm the same release is active on Vercel rather than Manus hosting.
