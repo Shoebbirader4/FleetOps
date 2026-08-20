@@ -462,6 +462,6 @@
 
 - [x] Inspect Fleet Manager account shoebahmedbirader@gmail.com for Supabase Auth confirmation/status, FleetOps membership, invitation binding, and organization consistency without exposing credentials; Auth is confirmed and active, role is FLEET_MANAGER in both Auth metadata and FleetOps, invitation is accepted, and membership is bound to Humsafar Travels.
 
-- [ ] Fix invited-member signup and logout/relogin when Supabase email confirmation is disabled; verify the new account keeps its password grant and restores its assigned workspace after sign-out for every invited role.
+- [x] Fix invited-member signup and logout/relogin when Supabase email confirmation is disabled; verification passed for Fleet Manager, Inventory Manager, Mechanic, Technician, Driver, and Accountant. Each signup returned an immediate session, invitation redemption bound the correct role and organization, logout/relogin passed, role workspace procedures loaded, and all temporary data was cleaned up. No code change was required.
 
 - [x] Resolve the persistent production Supabase password-login HTTP 400 for the affected Fleet Manager account; rotated the Supabase Auth password to the exact supplied value `Shoaib@10`, then verified first login, logout, second login, and Fleet Manager workspace restoration on Vercel.
