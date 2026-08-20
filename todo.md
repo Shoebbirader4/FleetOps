@@ -388,3 +388,5 @@
 - [x] P1 increment: add regression coverage for the Accountant filter controls and tenant-scoped filtered rendering.
 - [x] P1 increment: enrich Driver issue history with Fleet Manager acknowledgement, escalation, and resolution state from recipient-scoped notifications.
 - [x] P1 increment: add regression coverage for the Driver issue timeline contract and notification scoping.
+- [x] Product flow increment: add a persisted Fleet register vehicle-create form using vehicles.create, with VIN, registration, make/model/year, odometer, and maintenance-template controls.
+- [x] Product flow increment: add regression coverage for Fleet register creation, role restrictions, and tenant-scoped refresh.

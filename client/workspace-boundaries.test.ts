@@ -42,6 +42,16 @@ describe("role workspace boundaries", () => {
     expect(teamSource).toContain('team.invitations.useQuery(undefined, { enabled, retry: false })');
   });
 
+  it("exposes the persisted Fleet register create flow without widening role navigation", () => {
+    const resourceSource = readFileSync(resolve(process.cwd(), "client/src/components/workspaces/ResourceWorkspace.tsx"), "utf8");
+    const routerSource = readFileSync(resolve(process.cwd(), "server/routers.ts"), "utf8");
+    expect(resourceSource).toContain("trpc.vehicles.create.useMutation");
+    expect(resourceSource).toContain("Maintenance template");
+    expect(resourceSource).toContain("utils.vehicles.list.invalidate()");
+    expect(routerSource).toContain("create: fleetOpsProcedure.input(z.object({ vin:");
+    expect(routerSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
+  });
+
   it("allows only the matching named specialist route", () => {
     expect(canAccessWorkspace("FLEET_MANAGER", "Fleet manager workspace")).toBe(true);
     expect(canAccessWorkspace("INVENTORY_MANAGER", "Inventory manager workspace")).toBe(true);
