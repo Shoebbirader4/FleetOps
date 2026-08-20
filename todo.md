@@ -426,3 +426,6 @@
 - [x] Implement accessible Fleet Manager left navigation and connected vehicle → component → threshold alert → work-order → mechanic assignment flow with FleetGuard-style component fields and lifecycle.
 - [x] Implement accessible Inventory Manager left navigation and connected inventory part → vendor → purchase order → receiving flow with tenant-scoped INR records.
 - [x] Update workspace-boundary regression tests to assert the requested role-specific operational navigation while still denying cross-role specialist workspaces.
+- [x] Create a fresh temporary published test organization and role users; verify Fleet Manager vehicle, driver assignment, component threshold, notification, work-order, and mechanic-assignment flow; published harness passed and cleanup verified.
+- [x] Verify Inventory Manager part creation, INR stock receipt, vendor creation, purchase-order creation/lifecycle, and PO-linked receiving against the published backend; published harness passed and cleanup verified.
+- [x] Capture authenticated Fleet Manager and Inventory Manager workspace screenshots and inspect them for functional controls rather than placeholders, then clean up all temporary data; screenshots captured and targeted tenant/Auth cleanup verified at zero.
