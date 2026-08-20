@@ -420,3 +420,4 @@
 - [x] Run isolated background Inventory Manager E2E: invitation acceptance, profile signup, login, catalog, receiving, PO-linked receipts, supplier/invoice metadata, reorder, notifications, RBAC, tenant isolation, and cleanup; produce pass/fail evidence report.
 - [x] Add purchase_orders.updatedAt through a Supabase CLI PostgreSQL migration, synchronize Drizzle schema, and rerun the complete Inventory Manager receipt/lifecycle workflow.
 - [x] Repair the remote Supabase PostgreSQL purchase_orders metadata drift by applying supplierInvoiceNumber, receivedAt, and closedAt columns plus receipt-table verification through the CLI, then rerun Inventory Manager receipts.
+- [x] Run a fresh isolated published Superadmin test account workflow, verify password sign-in, onboarding, invitation/governance reads, and complete temporary-data cleanup without exposing credentials; all checks passed and cleanup verified.
