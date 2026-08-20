@@ -407,3 +407,4 @@
 - [x] Partial-P1 sub-increment: expand Superadmin Quick Find to live inventory and financial records with workspace routing; 93 tests, typecheck, and production build pass.
 - [x] Partial-P1 sub-increment: make Accountant CSV/PDF exports honor vehicle, type, category, and date filters through tenant-scoped Supabase queries; focused tests, typecheck, and production build pass.
 - [x] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces; shared workspace-table/resource-list/invite-form styles and responsive breakpoints are covered by contract tests, with 95 tests, typecheck, and production build passing.
+- [x] Create and deliver a complete responsibility specification covering the original FleetOps role matrix, all seven roles, workspace isolation, operational handoffs, audit improvements, and deferred scope.
