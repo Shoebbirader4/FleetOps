@@ -401,3 +401,4 @@
 - [ ] Partial-P1 completion: finish Accountant ledger filters/saved views, reconciliation links, GST/TDS-ready fields, cost centers, and complete reporting exports.
 - [ ] Partial-P1 completion: finish global search across all tenant resources with role-filtered results and stable navigation paths.
 - [ ] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces.
+- [x] Partial-P1 sub-increment: add Fleet Manager work-order CSV export covering id, vehicle, priority, status, schedule, and archive state; targeted tests, typecheck, and production build pass.
