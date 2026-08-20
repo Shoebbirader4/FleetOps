@@ -456,4 +456,4 @@
 
 - [x] Fix recurring Supabase password-login HTTP 400 errors after logout for Superadmin and invited members; password login now clears only the browser-local stale session and trims the email before a fresh grant. Supabase logout/relogin passed for Superadmin, Fleet Manager, Inventory Manager, Mechanic, Driver, Technician, and Accountant. Validation passed with 108 tests, TypeScript, and production build.
 
-- [ ] Push the latest Supabase logout-to-login authentication fix to GitHub main and confirm the same release is active on Vercel rather than Manus hosting.
+- [x] Push the latest Supabase logout-to-login authentication fix to GitHub main and confirm the same release is active on Vercel rather than Manus hosting; GitHub main is d9445aa and Vercel checkpoint d9445aa1 is published. Manus hosting is not used for the application.
