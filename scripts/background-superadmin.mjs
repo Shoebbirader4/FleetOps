@@ -21,7 +21,7 @@ async function signIn() { const { data, error } = await anon.auth.signInWithPass
 async function check(name, fn) { try { const value = await fn(); results.push({ name, status: "PASS", detail: typeof value === "string" ? value : "completed" }); return value; } catch (error) { results.push({ name, status: "FAIL", detail: error instanceof Error ? error.message : String(error) }); throw error; } }
 try {
   await check("Create temporary Superadmin Auth user", async () => { const { data, error } = await admin.auth.admin.createUser({ email: ownerEmail, password, email_confirm: true, user_metadata: { fullName: "Superadmin E2E Owner", needsOnboarding: true } }); if (error || !data.user) throw error ?? new Error("No owner returned"); ownerId = data.user.id; });
-  const token = await check("Sign in Superadmin", signIn);
+  const token = await signIn(); results.push({ name: "Sign in Superadmin", status: "PASS", detail: "session established" });
   await check("Bootstrap organization", () => tRPC("onboarding.bootstrap", token, { orgName: `Superadmin E2E ${runId}`, fullName: "Superadmin E2E Owner" }));
   const summary = await check("Read organization command summary", () => tRPC("dashboard.summary", token, null, "GET")); orgId = summary.org.id; if (summary.role !== "SUPERADMIN" || summary.needsOnboarding !== true) throw new Error("Owner summary role or onboarding state is incorrect before completion");
   await check("Complete organization onboarding", () => tRPC("onboarding.complete", token, { orgName: `Superadmin E2E ${runId}`, fullName: "Superadmin E2E Owner" }));

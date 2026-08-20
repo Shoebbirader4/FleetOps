@@ -408,3 +408,5 @@
 - [x] Partial-P1 sub-increment: make Accountant CSV/PDF exports honor vehicle, type, category, and date filters through tenant-scoped Supabase queries; focused tests, typecheck, and production build pass.
 - [x] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces; shared workspace-table/resource-list/invite-form styles and responsive breakpoints are covered by contract tests, with 95 tests, typecheck, and production build passing.
 - [x] Create and deliver a complete responsibility specification covering the original FleetOps role matrix, all seven roles, workspace isolation, operational handoffs, audit improvements, and deferred scope.
+- [x] Run isolated background Superadmin E2E: fresh signup, organization creation, team invitations, governance, approvals, oversight, exports, tenant isolation, and cleanup; produce pass/fail evidence report. Result: 26/26 checks passed with cleanup verification.
+- [x] Harden the Superadmin background harness to redact access tokens from test output and retain only session-established evidence.
