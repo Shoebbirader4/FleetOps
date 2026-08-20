@@ -386,3 +386,5 @@
 - [x] P1 increment: add regression coverage for purchase-order transition guards and Procurement workspace controls.
 - [x] P1 increment: add Accountant ledger filters by vehicle, type, category, and date range with a clear-filter action and persisted client view state.
 - [x] P1 increment: add regression coverage for the Accountant filter controls and tenant-scoped filtered rendering.
+- [x] P1 increment: enrich Driver issue history with Fleet Manager acknowledgement, escalation, and resolution state from recipient-scoped notifications.
+- [x] P1 increment: add regression coverage for the Driver issue timeline contract and notification scoping.

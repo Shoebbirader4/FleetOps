@@ -19,6 +19,15 @@ describe("Driver vehicle issue workflow", () => {
     expect(driverUi).toContain("Draft saved locally");
   });
 
+  it("shows Fleet Manager response state in the Driver issue timeline", () => {
+    expect(driverUi).toContain("trpc.notifications.list");
+    expect(driverUi).toContain("Acknowledged");
+    expect(driverUi).toContain("Escalation");
+    expect(driverUi).toContain("Resolved");
+    expect(driverUi).toContain("Awaiting Fleet Manager response");
+    expect(router).toContain("recipientId: ctx.fleetopsUser.id");
+  });
+
   it("enforces assigned-driver scope and notifies Fleet Managers", () => {
     expect(router).toContain('requireRole(ctx.fleetopsUser.role, ["DRIVER"]); assertWritable');
     expect(router).toContain("await assertDriverVehicle(ctx, input.vehicleId)");
