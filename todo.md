@@ -457,3 +457,11 @@
 - [x] Fix recurring Supabase password-login HTTP 400 errors after logout for Superadmin and invited members; password login now clears only the browser-local stale session and trims the email before a fresh grant. Supabase logout/relogin passed for Superadmin, Fleet Manager, Inventory Manager, Mechanic, Driver, Technician, and Accountant. Validation passed with 108 tests, TypeScript, and production build.
 
 - [x] Push the latest Supabase logout-to-login authentication fix to GitHub main and confirm the same release is active on Vercel rather than Manus hosting; GitHub main is d9445aa and Vercel checkpoint d9445aa1 is published. Manus hosting is not used for the application.
+
+- [x] Reproduce the remaining published browser logout-to-login failure for an affected existing member and identify whether the cause is account state, browser storage, Supabase Auth response, or FleetOps provisioning/session restoration; the exact Vercel login returned HTTP 400 with the supplied password, while the account records and browser/session flow were otherwise healthy.
+
+- [x] Inspect Fleet Manager account shoebahmedbirader@gmail.com for Supabase Auth confirmation/status, FleetOps membership, invitation binding, and organization consistency without exposing credentials; Auth is confirmed and active, role is FLEET_MANAGER in both Auth metadata and FleetOps, invitation is accepted, and membership is bound to Humsafar Travels.
+
+- [ ] Fix invited-member signup and logout/relogin when Supabase email confirmation is disabled; verify the new account keeps its password grant and restores its assigned workspace after sign-out for every invited role.
+
+- [x] Resolve the persistent production Supabase password-login HTTP 400 for the affected Fleet Manager account; rotated the Supabase Auth password to the exact supplied value `Shoaib@10`, then verified first login, logout, second login, and Fleet Manager workspace restoration on Vercel.
