@@ -440,4 +440,4 @@
 - [x] Remove Manus OAuth callback/state/session plumbing and keep Supabase Auth as the sole authentication provider.
 - [x] Remove unreachable Manus Heartbeat/maintenance and optional Forge integration modules from active runtime code.
 - [x] Migrate document and work-order evidence storage helpers to Supabase Storage with signed URLs.
-- [ ] Validate the cleaned Vercel deployment and commit the final Manus-free code to GitHub.
+- [x] Validate the cleaned Vercel deployment and commit the final Manus-free code to GitHub; Vercel landing returned HTTP 200, system.health returned database ok, and GitHub main contains commit 0d2d886.
