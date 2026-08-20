@@ -404,3 +404,4 @@
 - [x] Partial-P1 sub-increment: add Fleet Manager work-order CSV export covering id, vehicle, priority, status, schedule, and archive state; targeted tests, typecheck, and production build pass.
 - [x] Partial-P1 sub-increment: add Supabase-backed PO-linked partial receiving with optimistic inventory concurrency, supplier invoice/location metadata, final-receipt status, receipt history, expanded lifecycle states, UI controls, and 91-test/build validation.
 - [x] Partial-P1 sub-increment: add Supabase-backed GST/TDS-ready financial fields, vendor/invoice/payment metadata, cost-center fields, reconciliation references, Accountant entry controls, and per-record reconciliation UI; 91 tests, typecheck, build, and remote migration verification pass.
+- [x] Partial-P1 sub-increment: expand Superadmin Quick Find to live inventory and financial records with workspace routing; 93 tests, typecheck, and production build pass.
