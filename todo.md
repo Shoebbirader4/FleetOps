@@ -394,3 +394,4 @@
 - [ ] Run a published authenticated smoke test and confirm no placeholder/demo copy appears in live authenticated shell surfaces; retain the real-session limitation if credentials are unavailable.
 - [ ] P1 increment: add tenant-scoped Fleet Manager bulk work-order operations for assignment, priority, scheduling, and archival with audit events and UI controls.
 - [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order actions for priority changes and cancellation, with selection UI, role/tenant guards, audit events, and regression coverage; scheduling, assignment UI, and archival depth remain open.
+- [x] P1 increment: extend the bulk work-order controls with live tenant-scoped mechanic/technician assignment using the existing team roster, plus targeted RBAC/UI regression coverage and a passing production build.
