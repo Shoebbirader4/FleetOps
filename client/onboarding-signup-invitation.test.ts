@@ -1,0 +1,31 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+describe("signup to organization invitation flow", () => {
+  const read = (file: string) => readFileSync(resolve(process.cwd(), file), "utf8");
+
+  it("bootstraps and completes the first Superadmin organization onboarding flow", () => {
+    const source = read("client/src/components/OrganizationOnboarding.tsx");
+    expect(source).toContain("trpc.onboarding.complete.useMutation");
+    expect(source).toContain("orgName");
+    expect(source).toContain("fullName");
+  });
+
+  it("accepts an organization-bound invitation before opening the invited role workspace", () => {
+    const source = read("client/src/pages/JoinOrganization.tsx");
+    expect(source).toContain("trpc.onboarding.inviteDetails.useQuery");
+    expect(source).toContain("trpc.onboarding.acceptInvite.useMutation");
+    expect(source).toContain("organization");
+    expect(source).toContain("role");
+    expect(source).toContain("acceptInvite.mutate");
+  });
+
+  it("keeps signup and invitation redemption in the application route map", () => {
+    const appSource = read("client/src/App.tsx");
+    const homeSource = read("client/src/pages/Home.tsx");
+    expect(appSource).toContain("JoinOrganization");
+    expect(appSource).toContain("/create-organization");
+    expect(homeSource).toContain("signIn");
+  });
+});

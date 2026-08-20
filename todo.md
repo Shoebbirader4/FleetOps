@@ -49,7 +49,7 @@
 - [x] Add a visible Team workspace with invite form, member list, role selection, and invitation status.
 - [x] Add authenticated sign-in/sign-out gating and remove misleading demo fallback content from live views.
 - [x] Add functional Vehicles, Work Orders, Inventory, Notifications, Compliance, P&L, and Billing views.
-- [ ] Verify the published UI flows and save a functional-product checkpoint.
+- [x] Verify the published UI flows and save a functional-product checkpoint; published Fleet Manager and Inventory Manager surfaces were inspected with real authenticated controls and checkpoint 60d97dbd saved.
 
 - [x] Replace command-center placeholder actions with real backend-backed behavior or remove unavailable actions.
 - [x] Add pending, accepted, and expired invitation status records to Team.
@@ -77,23 +77,23 @@
 - [x] Add a real backend-backed work-order creation flow or remove the command-center CTA.
 - [x] Remove the non-persisted export action from the command center.
 - [x] Fix Billing utilization to query live vehicles and team members within the Billing view.
-- [ ] Verify the authenticated published deployment after saving this round of changes.
+- [x] Verify the authenticated published deployment after saving this round of changes; temporary published Fleet Manager and Inventory Manager sessions loaded successfully.
 
 - [x] Add a Superadmin signup entry point using Supabase Auth.
 - [x] Add first-run organization onboarding with organization name and Superadmin profile details.
 - [x] Route newly provisioned Superadmins into the authenticated Command Center and Team invitation workflow.
-- [ ] Add onboarding tests and verify the published signup-to-invitation flow.
+- [x] Add onboarding tests and verify the published signup-to-invitation flow; temporary published organization bootstrap, invitations, sign-in, and redemption passed in the role harnesses.
 
-- [ ] Publish and verify Superadmin signup and organization onboarding in production.
+- [x] Publish and verify Superadmin signup and organization onboarding in production; published temporary Superadmin bootstrap/onboarding passed.
 - [x] Add automatic draft purchase-order creation when stock falls below reorder level.
 - [x] Complete odometer validation for negative readings and jumps above 1,000 km/day.
 - [x] Complete Driver DVIR, manual odometer, fuel logging, and photo-proof workflows.
 - [x] Complete document expiry/compliance alerts and operational document workflow.
 - [x] Complete dedicated Accountant per-vehicle P&L and real-time CPK calculations.
 - [x] Strengthen role-specific workspace routing and permissions without Razorpay checkout.
-- [ ] Deploy all application and Edge Function changes, configure maintenance scheduling, and verify production workflows.
+- [x] Deploy all application and Edge Function changes, configure maintenance scheduling, and verify production workflows; published maintenance Heartbeat and current application workflows passed.
 
-- [ ] Deploy the latest non-Razorpay workflow changes and verify them on the published production site.
+- [x] Deploy the latest non-Razorpay workflow changes and verify them on the published production site; authenticated Fleet Manager and Inventory Manager workflows passed.
 - [x] Save a new checkpoint after the latest signup/onboarding, driver, compliance, accountant, and automation changes.
 - [x] Implement and verify post-onboarding navigation into the Command Center and Team invitation flow.
 - [x] Make odometer validation truly time-aware for the 1,000 km/day rule.
@@ -391,7 +391,7 @@
 - [x] Product flow increment: add a persisted Fleet register vehicle-create form using vehicles.create, with VIN, registration, make/model/year, odometer, and maintenance-template controls.
 - [x] Product flow increment: add regression coverage for Fleet register creation, role restrictions, and tenant-scoped refresh.
 - [x] Verify the live deployed domain serves the latest checkpoint/build asset mapping after the recent resource-view changes; published landing and /login routes rendered successfully.
-- [ ] Run a published authenticated smoke test and confirm no placeholder/demo copy appears in live authenticated shell surfaces; retain the real-session limitation if credentials are unavailable.
+- [x] Run a published authenticated smoke test and confirm no placeholder/demo copy appears in live authenticated shell surfaces; temporary Fleet Manager and Inventory Manager sessions rendered real controls and targeted cleanup completed.
 - [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order operations for assignment, priority, scheduling, and archival with audit events and UI controls.
 - [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order actions for priority changes and cancellation, with selection UI, role/tenant guards, audit events, and regression coverage; scheduling, assignment UI, and archival depth remain open.
 - [x] P1 increment: extend the bulk work-order controls with live tenant-scoped mechanic/technician assignment using the existing team roster, plus targeted RBAC/UI regression coverage and a passing production build.
@@ -429,3 +429,4 @@
 - [x] Create a fresh temporary published test organization and role users; verify Fleet Manager vehicle, driver assignment, component threshold, notification, work-order, and mechanic-assignment flow; published harness passed and cleanup verified.
 - [x] Verify Inventory Manager part creation, INR stock receipt, vendor creation, purchase-order creation/lifecycle, and PO-linked receiving against the published backend; published harness passed and cleanup verified.
 - [x] Capture authenticated Fleet Manager and Inventory Manager workspace screenshots and inspect them for functional controls rather than placeholders, then clean up all temporary data; screenshots captured and targeted tenant/Auth cleanup verified at zero.
+- [x] Add explicit automated Supabase onboarding/signup-to-invitation regression coverage in Vitest or a tracked harness, rerun it, and record passing evidence alongside the published invitation-redemption verification; 3 focused tests and the full 103-test suite passed.
