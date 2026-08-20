@@ -107,3 +107,95 @@ nav { display: grid; gap: 3px; }
 
 .danger-button { border: 1px solid color-mix(in srgb, #b42318 28%, var(--border)); background: color-mix(in srgb, #b42318 7%, var(--card)); color: #b42318; }
 .danger-button:hover:not(:disabled) { background: color-mix(in srgb, #b42318 13%, var(--card)); }
+
+/* Fleet Manager workspace refinement: operational density with clear action hierarchy. */
+.role-workspace,
+.functional-workspace {
+  --workspace-gap: 18px;
+  isolation: isolate;
+}
+.role-workspace-header {
+  padding: 8px 0 6px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+}
+.role-workspace-header .hero-copy { max-width: 760px; line-height: 1.6; }
+.role-workspace-header .eyebrow { color: #8d8b84; }
+.role-workspace-badge { box-shadow: 0 8px 22px #2b21150d; }
+.workspace-kpi-grid { margin-top: 2px; }
+.workspace-kpi { min-height: 106px; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.workspace-kpi:hover { transform: translateY(-2px); border-color: #d8cdbc; box-shadow: 0 12px 24px #2b21150d; }
+.workspace-kpi small { line-height: 1.35; }
+.role-panel { box-shadow: 0 5px 18px #2b211508; }
+.role-panel .panel-heading { padding-bottom: 2px; }
+.role-panel .panel-heading select,
+.functional-workspace .panel-heading select {
+  min-height: 32px; border: 1px solid var(--line); border-radius: 6px; background: #fcfaf5; color: var(--ink); padding: 0 9px; font-size: 11px;
+}
+.scope-list > div { transition: background .16s ease, padding .16s ease; }
+.scope-list > div:hover { background: #fcf8f1; padding-left: 8px; padding-right: 8px; }
+.resource-list { overflow: hidden; border-radius: 7px; }
+.resource-row { min-height: 64px; padding: 13px 12px; background: color-mix(in srgb, var(--paper) 88%, var(--ivory)); transition: background .16s ease, transform .16s ease; }
+.resource-row:hover { background: #fffaf1; transform: translateX(2px); }
+.resource-row strong { line-height: 1.25; }
+.resource-row span { line-height: 1.4; }
+.inline-actions { display: flex; align-items: center; justify-content: flex-end; gap: 7px; flex-wrap: wrap; }
+.role-pill { min-height: 30px; background: #fcfaf5; color: var(--ink); outline: none; }
+.role-pill:focus, .role-panel select:focus, .functional-workspace select:focus, .functional-workspace input:focus, .functional-workspace textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 3px #f26b3820; outline: none; }
+.compact-form { align-items: end; gap: 10px; }
+.compact-form label { display: grid; gap: 6px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.compact-form textarea { min-height: 84px; resize: vertical; border: 1px solid var(--line); background: #fcfaf5; border-radius: 5px; padding: 9px 10px; color: var(--ink); font-size: 11px; }
+.form-note { padding-top: 2px; line-height: 1.45; }
+.functional-workspace { max-width: 1180px; gap: var(--workspace-gap); }
+.functional-workspace > .workspace-form { position: relative; overflow: hidden; background: linear-gradient(135deg, #fffdf8 0%, #fff9f1 100%); border-color: #e8d8c8; box-shadow: 0 10px 30px #2b21150b; }
+.functional-workspace > .workspace-form::after { content: ""; position: absolute; width: 170px; height: 170px; right: -75px; top: -95px; border-radius: 50%; background: #f26b3810; pointer-events: none; }
+.workspace-form > div { position: relative; z-index: 1; }
+.workspace-form h2 { font-size: clamp(22px, 2.5vw, 29px); letter-spacing: -.045em; }
+.workspace-form p { line-height: 1.6; }
+.invite-form { align-items: stretch; gap: 12px; position: relative; z-index: 1; }
+.invite-form label { flex: 1 1 190px; min-width: 150px; }
+.invite-form input, .invite-form select { width: 100%; min-width: 0; height: 40px; padding: 0 11px; font-size: 12px; }
+.invite-form .primary-button { align-self: end; min-height: 40px; white-space: nowrap; }
+.workspace-table { box-shadow: 0 6px 22px #2b211508; }
+.workspace-table .panel-heading { align-items: center; }
+.workspace-table .panel-heading h2 { font-size: 21px; }
+.workspace-table .resource-list { margin-top: 4px; }
+.workspace-state { min-height: 170px; border: 1px dashed #ddd2c4; border-radius: 8px; background: #fcfaf5; line-height: 1.5; }
+.error-state { min-height: 110px; padding: 18px; }
+.edit-panel { border-color: #cbded6; background: linear-gradient(135deg, #fffdf8, #f5fbf7); }
+.danger-button { min-height: 38px; border-radius: 6px; padding: 0 13px; font-size: 11px; font-weight: 700; }
+@media (max-width: 900px) {
+  .role-workspace { gap: 15px; }
+  .role-workspace-header { gap: 16px; }
+  .role-workspace-header h1 { margin-top: 9px; }
+  .functional-workspace > .workspace-form { padding: 22px; }
+  .invite-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .invite-form .primary-button { width: 100%; }
+}
+@media (max-width: 620px) {
+  .role-workspace-header { padding-top: 2px; }
+  .role-workspace-header h1 { font-size: 30px; }
+  .role-workspace-badge { grid-template-columns: 20px 1fr; }
+  .workspace-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-kpi { min-height: 92px; padding: 12px; }
+  .workspace-kpi strong { font-size: 21px; }
+  .role-panel { padding: 15px; }
+  .role-panel .panel-heading { align-items: flex-start; flex-direction: column; }
+  .functional-workspace > .workspace-form { padding: 18px; }
+  .invite-form { grid-template-columns: 1fr; }
+  .resource-row { gap: 10px; padding: 12px 9px; flex-wrap: wrap; }
+  .resource-row > div { flex-basis: calc(100% - 10px); }
+  .resource-row .resource-meta, .resource-row .status-label, .resource-row .inline-actions { margin-left: 0; }
+  .inline-actions { width: 100%; justify-content: flex-start; }
+  .inline-actions .primary-button, .inline-actions .secondary-button, .inline-actions select { flex: 1 1 auto; }
+}
+
+.fleet-manager-surface .back-link { margin-bottom: -2px; }
+.workspace-page-header { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding: 2px 0 20px; border-bottom: 1px solid var(--line); }
+.workspace-page-header h1 { margin: 7px 0 8px; font: 600 clamp(28px, 3vw, 40px)/1.05 "Space Grotesk", sans-serif; letter-spacing: -.055em; }
+.workspace-page-header p { max-width: 650px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.workspace-chain { display: flex; align-items: center; gap: 7px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.workspace-chain i { width: 18px; height: 1px; background: #d8cec1; }
+.chain-node { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #d9cfc3; border-radius: 50%; color: #9c958c; font-size: 8px; }
+.chain-node.active { color: white; border-color: var(--orange); background: var(--orange); }
+@media (max-width: 900px) { .workspace-page-header { align-items: flex-start; flex-direction: column; gap: 15px; } .workspace-chain { width: 100%; justify-content: space-between; } }
+@media (max-width: 520px) { .workspace-page-header h1 { font-size: 30px; } .workspace-chain { gap: 4px; font-size: 8px; } .workspace-chain i { width: 10px; } }
