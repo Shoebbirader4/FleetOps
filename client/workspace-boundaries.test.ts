@@ -24,13 +24,17 @@ describe("role workspace boundaries", () => {
     expect(canAccessWorkspace("SUPERADMIN", "Accountant ledger")).toBe(false);
   });
 
-  it("keeps each member limited to their own workspace and notifications", () => {
-    for (const [role, workspace] of Object.entries(dedicatedWorkspaceByRole)) {
-      if (role === "SUPERADMIN") continue;
+  it("keeps each member within their role-specific workspace surface", () => {
+    expect(roleNavAccess.FLEET_MANAGER).toEqual(["Fleet manager workspace", "Vehicles", "Components", "Work orders", "Notifications"]);
+    expect(roleNavAccess.INVENTORY_MANAGER).toEqual(["Inventory manager workspace", "Inventory", "Vendors", "Purchase orders", "Notifications"]);
+    for (const role of ["MECHANIC", "TECHNICIAN", "DRIVER", "ACCOUNTANT"]) {
+      const workspace = dedicatedWorkspaceByRole[role];
       expect(roleNavAccess[role]).toEqual([workspace, "Notifications"]);
       expect(getAllowedWorkspace(role, "Command center")).toBe(workspace);
       expect(getAllowedWorkspace(role, "Billing")).toBe(workspace);
     }
+    expect(getAllowedWorkspace("FLEET_MANAGER", "Inventory")).toBe("Fleet manager workspace");
+    expect(getAllowedWorkspace("INVENTORY_MANAGER", "Work orders")).toBe("Inventory manager workspace");
   });
 
   it("removes static tenant labels and unauthorized owner actions from the authenticated shell", () => {
@@ -42,14 +46,22 @@ describe("role workspace boundaries", () => {
     expect(teamSource).toContain('team.invitations.useQuery(undefined, { enabled, retry: false })');
   });
 
-  it("exposes the persisted Fleet register create flow without widening role navigation", () => {
+  it("exposes the persisted Fleet register, component, inventory, vendor, and procurement flows", () => {
     const resourceSource = readFileSync(resolve(process.cwd(), "client/src/components/workspaces/ResourceWorkspace.tsx"), "utf8");
     const routerSource = readFileSync(resolve(process.cwd(), "server/routers.ts"), "utf8");
+    const procurementSource = readFileSync(resolve(process.cwd(), "client/src/components/workspaces/ProcurementWorkspace.tsx"), "utf8");
     expect(resourceSource).toContain("trpc.vehicles.create.useMutation");
     expect(resourceSource).toContain("Maintenance template");
     expect(resourceSource).toContain("utils.vehicles.list.invalidate()");
+    expect(resourceSource).toContain("trpc.components.create.useMutation");
+    expect(resourceSource).toContain("Installation odometer");
+    expect(resourceSource).toContain("trpc.inventory.create.useMutation");
+    expect(resourceSource).toContain("trpc.vendors.create.useMutation");
+    expect(procurementSource).toContain("Create purchase order");
     expect(routerSource).toContain("create: fleetOpsProcedure.input(z.object({ vin:");
     expect(routerSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
+    expect(routerSource).toContain("vendors: router({");
+    expect(routerSource).toContain("VENDOR_CREATED");
   });
 
   it("allows only the matching named specialist route", () => {

@@ -57,9 +57,12 @@ const roles = [
 const navItems = [
   { label: "Command center", icon: LayoutDashboard },
   { label: "Vehicles", icon: Bus },
+  { label: "Components", icon: Wrench },
   { label: "Work orders", icon: Wrench },
   { label: "Inventory manager workspace", icon: Package },
   { label: "Inventory", icon: Package },
+  { label: "Vendors", icon: Users },
+  { label: "Purchase orders", icon: ClipboardCheck },
   { label: "Notifications", icon: Bell },
   { label: "Compliance vault", icon: FileText },
   { label: "P&L analytics", icon: TrendingUp },

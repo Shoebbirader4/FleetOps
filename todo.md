@@ -423,3 +423,6 @@
 - [x] Run a fresh isolated published Superadmin test account workflow, verify password sign-in, onboarding, invitation/governance reads, and complete temporary-data cleanup without exposing credentials; all checks passed and cleanup verified.
 - [x] Diagnose the stale Supabase Auth email conflict where signup reports an existing user after application-table cleanup; confirmed 13 orphaned Auth identities and removed them after explicit user confirmation.
 - [x] Permanently delete all 13 confirmed orphaned Supabase Auth users; verification found 0 Auth users, 0 application users, and 0 invitations, while 5 organization rows remain because organization deletion was not authorized in this request.
+- [x] Implement accessible Fleet Manager left navigation and connected vehicle → component → threshold alert → work-order → mechanic assignment flow with FleetGuard-style component fields and lifecycle.
+- [x] Implement accessible Inventory Manager left navigation and connected inventory part → vendor → purchase order → receiving flow with tenant-scoped INR records.
+- [x] Update workspace-boundary regression tests to assert the requested role-specific operational navigation while still denying cross-role specialist workspaces.
