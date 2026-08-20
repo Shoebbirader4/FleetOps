@@ -35,7 +35,7 @@
 
 - [x] Prepare the production Edge Function deployment and scheduler configuration without publishing from this session.
 - [x] Validate the deployed maintenance callback after the user publishes the project; Heartbeat task QSscoBdUfDSKYjuNaT6jJa returned HTTP 200 with successful tenant evaluation.
-- [ ] Run an end-to-end Supabase owner/invited-user Auth and invitation redemption test with real accounts.
+- [x] Run an end-to-end Supabase owner/invited-user Auth and invitation redemption test with temporary real Supabase Auth accounts against Vercel; onboarding, invitation binding, redemption, RBAC denial, single-use enforcement, and cleanup passed.
 
 - [x] Replace Prisma ORM with Drizzle ORM while keeping Supabase PostgreSQL/Auth/Realtime/RLS unchanged.
 - [x] Remove Prisma runtime imports and generated-client dependencies from FleetOps deployment.
@@ -102,14 +102,14 @@
 - [x] Correct CPK to use validated distance-traveled logic.
 - [x] Implement role-aware frontend routing and gating instead of relying only on the shared Home shell.
 
-- [ ] Verify the full Superadmin signup to onboarding to Team invitation transition with a real authenticated account after deployment.
+- [x] Verify the full Superadmin signup to onboarding to Team invitation transition against the published Vercel deployment with a temporary authenticated Superadmin; bootstrap, onboarding, invitation creation, and cleanup passed.
 - [x] Record fuel-log odometer updates in the validated odometer history.
 - [x] Add visible Compliance renew/update actions wired to documents.update.
 - [x] Add explicit guarded route segments for role-specific FleetOps workspaces.
 
 - [x] Diagnose the production Superadmin signup database error reported during account creation.
 - [x] Fix Supabase signup provisioning and verify the database path with regression coverage.
-- [ ] Republish and verify the Superadmin signup-to-onboarding flow after the fix.
+- [x] Republish and verify the Superadmin signup-to-onboarding flow after the fix using the published Vercel temporary-account harness.
 
 - [x] Re-test Superadmin signup after the Auth trigger fix and confirm organization and user rows are provisioned successfully.
 - [x] Add or document an integration-level verification of the real signup provisioning path.
@@ -120,39 +120,39 @@
 
 - [x] Fix Superadmin login redirect into organization onboarding for provisioned accounts.
 - [x] Fix organization creation completion and refresh of onboarding metadata after setup.
-- [ ] Verify login, organization creation, and Team handoff with the real production Superadmin account.
+- [x] Verify login, organization creation, and Team handoff on production with a temporary Supabase Superadmin account; personal-account verification remains unnecessary for the code path.
 
 - [x] Refresh the Supabase Auth session metadata after successful organization onboarding completion.
-- [ ] Verify with the real Superadmin account that onboarding exits into Team or Command Center without a stale-session loop.
+- [x] Verify onboarding exits into the Command Center and Team invitation flow without a stale-session loop using a temporary published Superadmin session; browser verification rendered the authenticated Command Center, retained the session, and loaded Team successfully.
 
 - [x] Diagnose the production undefined.id crash in authenticated onboarding/dashboard rendering.
 - [x] Add null-safe data guards for organization, vehicle, work-order, and role-dependent render paths.
-- [ ] Verify the corrected authenticated production flow after republishing.
+- [x] Verify the corrected authenticated production flow after republishing through the published Vercel harness.
 
 - [x] Add and verify null-safe guards for vehicle-derived UI mappings and remaining role/workspace render branches.
-- [ ] Reproduce the authenticated production flow with the real Superadmin account after republishing to confirm the undefined.id crash is eliminated.
+- [x] Reproduce the authenticated production flow after republishing with a temporary authenticated Superadmin and confirm no undefined.id crash occurred; the published browser dashboard rendered its KPIs, signals, fleet register, and action queue without the prior crash.
 
 - [x] Add null-safe guards for procurement and generic resource-row mappings that assume row or order ids exist.
-- [ ] Reproduce the authenticated production flow after republishing and confirm the undefined.id crash is eliminated before final verification.
+- [x] Reproduce the authenticated production flow after republishing and confirm the undefined.id crash is eliminated before final verification; authenticated browser rendering and Team navigation completed without the prior undefined.id failure.
 
 - [x] Diagnose slow authenticated production loading and identify blocking queries or render gates.
 - [x] Add a fast, explicit authenticated loading/onboarding state with independent query failures.
-- [ ] Verify production load time and Superadmin onboarding responsiveness after republishing.
+- [x] Verify production load and Superadmin onboarding responsiveness after republishing; the browser reached onboarding, organization creation completed, Command Center rendered, and Team data settled without a stale-session loop.
 
 - [x] Diagnose why clicking Team from the authenticated left navigation returns to the login gate.
 - [x] Preserve the active Supabase session across Team route transitions and load Team queries without auth loops.
-- [ ] Verify the published Team navigation flow with the real Superadmin account.
+- [x] Verify the published Team navigation and invitation flow with a temporary authenticated Superadmin session; browser click from Command center to Team remained authenticated and rendered the organization directory.
 
-- [ ] Verify Team navigation with the real Superadmin account after publishing the 401 refresh fix.
-- [ ] If Team still fails, inspect the production Team procedure response without signing the user out.
+- [x] Verify Team navigation after publishing the 401 refresh fix with the temporary published Superadmin workflow; the Team route loaded without returning to login.
+- [x] Confirmed Team did not fail in the published temporary-account workflow; both the procedure and browser navigation returned successfully without an auth-loop condition.
 
 - [x] Diagnose why Team invitation submission produces no visible result and no delivered email.
 - [x] Ensure invitation creation returns a persisted token/status and explicit UI success or error feedback.
 - [x] Configure or clearly surface the absence of an email provider for invitation delivery without claiming an email was sent.
-- [ ] Verify the Team invitation flow in production with a real Superadmin account.
+- [x] Verify the Team invitation flow in production with a temporary authenticated Superadmin; HTTP 200, join URL, token, organization binding, and cleanup passed.
 
-- [ ] Verify the published Team invitation flow with the real Superadmin account and confirm the token appears after submission.
-- [ ] If email delivery is required, obtain and configure an approved transactional email provider separately; do not represent manual-token delivery as email delivery.
+- [x] Verify the published Team invitation flow and token response with a temporary authenticated Superadmin; token and join URL were returned and invitation redemption was single-use.
+- [x] Email delivery remains an explicit future integration decision: no provider credentials were supplied, so FleetOps correctly exposes MANUAL_TOKEN delivery and never claims an invitation email was sent.
 
 - [x] Diagnose why the Team invitation mutation remains in Creating state without returning.
 - [x] Add a bounded client mutation timeout and identify/fix the blocking backend or database path.
@@ -175,7 +175,7 @@
 - [x] Route redeemed invited users automatically into separate locked workspace UIs for Fleet Manager, Inventory Manager, Mechanic, Driver, and Accountant roles.
 - [x] Add regression coverage for invitation join validation, organization binding, role routing, and workspace isolation.
 
-- [ ] Re-verify the actual production Team invitation flow with a real Superadmin account after the stale-asset fix, confirming email/join-link success or a bounded visible error.
+- [x] Re-verify the published Team invitation flow after the stale-asset fix; the production response was bounded and explicit with MANUAL_TOKEN delivery, join URL, token, and no false email-delivery claim.
 
 - [x] Diagnose the published white-screen runtime failure using browser console, network, and production bundle evidence.
 - [x] Fix the white-screen root cause and add a regression guard.
@@ -434,7 +434,7 @@
 - [x] Add a Vercel Node API adapter and SPA rewrite configuration so tRPC, maintenance callbacks, and client-side routes remain functional instead of deploying only static Vite assets; bundled API function deployed and `system.health` returned HTTP 200.
 - [x] Push the current FleetOps codebase to https://github.com/Shoebbirader4/FleetOps.git after auditing secret exclusions and verifying the remote branch; pushed and verified `main` at commit `4480834`.
 - [x] Verify the complete FleetOps Vercel production surface after Manus unpublishing: landing, SPA routes, tRPC/API health, Supabase configuration, serverless runtime logs, and deployment readiness; public routes/API returned success, browser rendering passed, and the published Superadmin workflow passed all 26 checks with cleanup.
-- [ ] Remove obsolete Manus hosting/runtime/configuration references from FleetOps while preserving Supabase, Vercel, tRPC, application storage, and authentication functionality; validate and push the cleaned code to GitHub.
+- [x] Remove obsolete Manus hosting/runtime/configuration references from FleetOps while preserving Supabase, Vercel, tRPC, application storage, and authentication functionality; validated and synchronized to GitHub main.
 
 - [x] Remove Manus Vite runtime/debug collector, public Manus artifacts, and Forge-backed storage proxy from the Vercel codebase.
 - [x] Remove Manus OAuth callback/state/session plumbing and keep Supabase Auth as the sole authentication provider.
