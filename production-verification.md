@@ -15,3 +15,7 @@ The published `/create-organization` route loaded successfully and exposed the c
 Source: https://fleetops-elktaacw.manus.space/
 
 The published landing page rendered successfully with the FleetOps Signal Ledger title, Sign In route, Create Organization route, organization-bound onboarding copy, role-isolated workspace copy, and INR-native records copy. No tenant demo label such as Avani Transit or fake customer content appeared in the public shell. This is a public-shell check only; authenticated resource views still require a real session for live verification. The browser did not expose a build marker in the rendered page, so checkpoint-to-asset mapping remains a deployment metadata check rather than a browser-visible fact.
+
+## 2026-08-20 post-2a9cd464 live shell check
+
+The published domain again rendered successfully after checkpoint `2a9cd464`, with the same current FleetOps landing shell and distinct `/login` and `/create-organization` routes. The public page contained no Avani Transit/demo tenant label or fake testimonial content. No build marker was exposed in the HTML-visible page, and no authenticated smoke test was possible without a real session; therefore asset-to-checkpoint identity and authenticated workspace verification remain open.
