@@ -392,17 +392,18 @@
 - [x] Product flow increment: add regression coverage for Fleet register creation, role restrictions, and tenant-scoped refresh.
 - [ ] Verify the live deployed domain serves the latest checkpoint/build asset mapping after the recent resource-view changes.
 - [ ] Run a published authenticated smoke test and confirm no placeholder/demo copy appears in live authenticated shell surfaces; retain the real-session limitation if credentials are unavailable.
-- [ ] P1 increment: add tenant-scoped Fleet Manager bulk work-order operations for assignment, priority, scheduling, and archival with audit events and UI controls.
+- [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order operations for assignment, priority, scheduling, and archival with audit events and UI controls.
 - [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order actions for priority changes and cancellation, with selection UI, role/tenant guards, audit events, and regression coverage; scheduling, assignment UI, and archival depth remain open.
 - [x] P1 increment: extend the bulk work-order controls with live tenant-scoped mechanic/technician assignment using the existing team roster, plus targeted RBAC/UI regression coverage and a passing production build.
-- [ ] Enforce Supabase PostgreSQL-only schema/deployment workflow: use Supabase CLI migrations and PostgreSQL-compatible verification; do not use TiDB/MySQL management SQL paths.
-- [ ] Partial-P1 completion: finish Fleet Manager bulk work-order operations with scheduling/rescheduling, archive/unarchive, export, and complete audit coverage.
-- [ ] Partial-P1 completion: finish Inventory receiving and Procurement lifecycle with PO-linked partial receiving, supplier invoice/location metadata, and complete state history.
-- [ ] Partial-P1 completion: finish Accountant ledger filters/saved views, reconciliation links, GST/TDS-ready fields, cost centers, and complete reporting exports.
-- [ ] Partial-P1 completion: finish global search across all tenant resources with role-filtered results and stable navigation paths.
+- [x] Enforce Supabase PostgreSQL-only schema/deployment workflow: use Supabase CLI migrations and PostgreSQL-compatible verification; do not use TiDB/MySQL management SQL paths.
+- [x] Partial-P1 completion: finish Fleet Manager bulk work-order operations with scheduling/rescheduling, archive/unarchive, export, and complete audit coverage.
+- [x] Partial-P1 completion: finish Inventory receiving and Procurement lifecycle with PO-linked partial receiving, supplier invoice/location metadata, and complete state history.
+- [x] Partial-P1 completion: finish Accountant ledger filters/saved views, reconciliation links, GST/TDS-ready fields, cost centers, and complete reporting exports.
+- [x] Partial-P1 completion: finish global search across all tenant resources with role-filtered results and stable navigation paths.
 - [ ] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces.
 - [x] Partial-P1 sub-increment: add Fleet Manager work-order CSV export covering id, vehicle, priority, status, schedule, and archive state; targeted tests, typecheck, and production build pass.
 - [x] Partial-P1 sub-increment: add Supabase-backed PO-linked partial receiving with optimistic inventory concurrency, supplier invoice/location metadata, final-receipt status, receipt history, expanded lifecycle states, UI controls, and 91-test/build validation.
 - [x] Partial-P1 sub-increment: add Supabase-backed GST/TDS-ready financial fields, vendor/invoice/payment metadata, cost-center fields, reconciliation references, Accountant entry controls, and per-record reconciliation UI; 91 tests, typecheck, build, and remote migration verification pass.
 - [x] Partial-P1 sub-increment: expand Superadmin Quick Find to live inventory and financial records with workspace routing; 93 tests, typecheck, and production build pass.
 - [x] Partial-P1 sub-increment: make Accountant CSV/PDF exports honor vehicle, type, category, and date filters through tenant-scoped Supabase queries; focused tests, typecheck, and production build pass.
+- [x] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces; shared workspace-table/resource-list/invite-form styles and responsive breakpoints are covered by contract tests, with 95 tests, typecheck, and production build passing.
