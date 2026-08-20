@@ -101,3 +101,6 @@ nav { display: grid; gap: 3px; }
 
 .brand-mark-glyph { font: 700 20px/1 "Space Grotesk", sans-serif; transform: rotate(4deg); }
 .maintenance-illustration { width: 48px; height: 36px; display: grid; place-items: center; color: var(--orange); background: linear-gradient(135deg, #f8e8dc, #e4d5c8); border-radius: 4px; }
+
+.sidebar-scope { display: flex; align-items: center; gap: 7px; margin: 14px 18px 8px; color: var(--muted-foreground); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.scope-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--orange); box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 15%, transparent); }

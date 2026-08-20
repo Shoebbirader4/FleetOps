@@ -16,12 +16,15 @@ describe("role workspace boundaries", () => {
     });
   });
 
-  it("keeps specialist workspaces unavailable to Superadmin navigation", () => {
+  it("keeps specialist and operational-only workspaces unavailable to Superadmin navigation", () => {
     expect(canAccessWorkspace("SUPERADMIN", "Command center")).toBe(true);
-    expect(canAccessWorkspace("SUPERADMIN", "Fleet manager workspace")).toBe(false);
-    expect(canAccessWorkspace("SUPERADMIN", "Inventory manager workspace")).toBe(false);
-    expect(canAccessWorkspace("SUPERADMIN", "Driver portal")).toBe(false);
-    expect(canAccessWorkspace("SUPERADMIN", "Accountant ledger")).toBe(false);
+    expect(canAccessWorkspace("SUPERADMIN", "Work orders")).toBe(true);
+    expect(canAccessWorkspace("SUPERADMIN", "Notifications")).toBe(true);
+    expect(canAccessWorkspace("SUPERADMIN", "Billing")).toBe(true);
+    expect(canAccessWorkspace("SUPERADMIN", "Team")).toBe(true);
+    for (const section of ["Fleet manager workspace", "Inventory manager workspace", "Driver portal", "Accountant ledger", "Vehicles", "Components", "Inventory", "Vendors", "Purchase orders"]) {
+      expect(canAccessWorkspace("SUPERADMIN", section)).toBe(false);
+    }
   });
 
   it("keeps each member within their role-specific workspace surface", () => {
