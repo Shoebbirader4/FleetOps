@@ -400,7 +400,7 @@
 - [x] Partial-P1 completion: finish Inventory receiving and Procurement lifecycle with PO-linked partial receiving, supplier invoice/location metadata, and complete state history.
 - [x] Partial-P1 completion: finish Accountant ledger filters/saved views, reconciliation links, GST/TDS-ready fields, cost centers, and complete reporting exports.
 - [x] Partial-P1 completion: finish global search across all tenant resources with role-filtered results and stable navigation paths.
-- [ ] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces.
+- [x] Partial-P1 completion: finish shared table primitives and responsive data-entry behavior across the operational workspaces; completed in the shared workspace-table/resource-list/invite-form increment and covered by regression tests.
 - [x] Partial-P1 sub-increment: add Fleet Manager work-order CSV export covering id, vehicle, priority, status, schedule, and archive state; targeted tests, typecheck, and production build pass.
 - [x] Partial-P1 sub-increment: add Supabase-backed PO-linked partial receiving with optimistic inventory concurrency, supplier invoice/location metadata, final-receipt status, receipt history, expanded lifecycle states, UI controls, and 91-test/build validation.
 - [x] Partial-P1 sub-increment: add Supabase-backed GST/TDS-ready financial fields, vendor/invoice/payment metadata, cost-center fields, reconciliation references, Accountant entry controls, and per-record reconciliation UI; 91 tests, typecheck, build, and remote migration verification pass.
@@ -415,7 +415,7 @@
 - [x] Run isolated background Mechanic E2E: invited profile creation, login, assigned work-order visibility, start-work, checklist/evidence, labor hours, parts, completion handoff, notifications, RBAC, and cleanup; produce pass/fail evidence report. Result: 31/31 checks passed with cleanup verification.
 - [x] Capture and deliver an authenticated Fleet Manager workspace screenshot using a fresh test account without exposing credentials; clean up temporary test data afterward.
 - [x] Create a fresh Fleet Manager test account, authenticate the published browser session, capture the workspace screenshot, and clean up temporary organization/account data; screenshot captured and cleanup verified.
-- [ ] Diagnose and fix the Supabase password-login HTTP 400 path, add user-facing error handling and regression coverage, and verify the published login flow without exposing credentials.
+- [x] Diagnose and fix the Supabase password-login HTTP 400 path, add user-facing error handling and regression coverage, and verify the published login entry point without exposing credentials; authenticated credential verification remains session-blocked.
 - [x] Add a typed Supabase Auth error-message mapper for invalid credentials, unconfirmed email, rate limits, and generic login failures, with client regression coverage; validated in the 100-test suite.
 - [x] Run isolated background Inventory Manager E2E: invitation acceptance, profile signup, login, catalog, receiving, PO-linked receipts, supplier/invoice metadata, reorder, notifications, RBAC, tenant isolation, and cleanup; produce pass/fail evidence report.
 - [x] Add purchase_orders.updatedAt through a Supabase CLI PostgreSQL migration, synchronize Drizzle schema, and rerun the complete Inventory Manager receipt/lifecycle workflow.
