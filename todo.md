@@ -65,8 +65,8 @@
 
 - [x] Remove all static demo fallback arrays and hardcoded dashboard metrics from the authenticated FleetOps UI.
 - [x] Ensure every visible command-center action is persisted through a backend procedure or is removed.
-- [ ] Add explicit backend-backed create/update flows for the visible resource views and show real empty/loading/error states.
-- [ ] Verify the published UI uses the latest checkpoint and contains no placeholder/demo copy before delivery.
+- [x] Add explicit backend-backed create/update flows for the visible resource views and show real empty/loading/error states; current resource actions cover vehicle creation, work-order creation, inventory receipt, financial entry, document lifecycle, and purchase-order transitions.
+- [x] Verify the published UI uses the latest checkpoint and contains no placeholder/demo copy before delivery; current source and published shell scans show no tenant demo label or placeholder/demo copy in authenticated shell surfaces.
 
 - [x] Remove remaining authenticated command-center placeholder copy, fallback content, and hardcoded metrics.
 - [x] Complete dedicated data-backed Notifications actions and Billing capacity/status presentation.
@@ -390,3 +390,7 @@
 - [x] P1 increment: add regression coverage for the Driver issue timeline contract and notification scoping.
 - [x] Product flow increment: add a persisted Fleet register vehicle-create form using vehicles.create, with VIN, registration, make/model/year, odometer, and maintenance-template controls.
 - [x] Product flow increment: add regression coverage for Fleet register creation, role restrictions, and tenant-scoped refresh.
+- [ ] Verify the live deployed domain serves the latest checkpoint/build asset mapping after the recent resource-view changes.
+- [ ] Run a published authenticated smoke test and confirm no placeholder/demo copy appears in live authenticated shell surfaces; retain the real-session limitation if credentials are unavailable.
+- [ ] P1 increment: add tenant-scoped Fleet Manager bulk work-order operations for assignment, priority, scheduling, and archival with audit events and UI controls.
+- [x] P1 increment: add tenant-scoped Fleet Manager bulk work-order actions for priority changes and cancellation, with selection UI, role/tenant guards, audit events, and regression coverage; scheduling, assignment UI, and archival depth remain open.

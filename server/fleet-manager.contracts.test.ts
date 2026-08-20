@@ -62,6 +62,15 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('where: { id: input.id, orgId: ctx.fleetopsUser.orgId }');
   });
 
+  it("defines tenant-scoped Fleet Manager bulk work-order controls", () => {
+    expect(routersSource).toContain("bulkUpdate: fleetOpsProcedure");
+    expect(routersSource).toContain('workOrderIds: z.array(z.string().uuid()).min(1).max(100)');
+    expect(routersSource).toContain('requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"])');
+    expect(routersSource).toContain('where: { orgId: ctx.fleetopsUser.orgId, id: { in: input.workOrderIds } }');
+    expect(routersSource).toContain("WORK_ORDER_BULK_UPDATED");
+    expect(routersSource).toContain("Assignee must belong to this organization.");
+  });
+
   it("defines tenant-scoped Driver handoff visibility with safety aggregation", () => {
     expect(routersSource).toContain("driverHandoffs:");
     expect(routersSource).toContain('type: "DRIVER_SAFETY_DISPOSITION"');
