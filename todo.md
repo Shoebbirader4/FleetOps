@@ -421,3 +421,5 @@
 - [x] Add purchase_orders.updatedAt through a Supabase CLI PostgreSQL migration, synchronize Drizzle schema, and rerun the complete Inventory Manager receipt/lifecycle workflow.
 - [x] Repair the remote Supabase PostgreSQL purchase_orders metadata drift by applying supplierInvoiceNumber, receivedAt, and closedAt columns plus receipt-table verification through the CLI, then rerun Inventory Manager receipts.
 - [x] Run a fresh isolated published Superadmin test account workflow, verify password sign-in, onboarding, invitation/governance reads, and complete temporary-data cleanup without exposing credentials; all checks passed and cleanup verified.
+- [x] Diagnose the stale Supabase Auth email conflict where signup reports an existing user after application-table cleanup; confirmed 13 orphaned Auth identities and removed them after explicit user confirmation.
+- [x] Permanently delete all 13 confirmed orphaned Supabase Auth users; verification found 0 Auth users, 0 application users, and 0 invitations, while 5 organization rows remain because organization deletion was not authorized in this request.
