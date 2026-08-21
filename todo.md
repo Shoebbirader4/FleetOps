@@ -589,7 +589,7 @@
 - [x] Add audit timeline filters by actor, role, entity, action, date, and organization. Superadmin audit.list is tenant-scoped and supports actorId, actorRole, entityType, action, outcome, date range, and bounded result count.
 - [ ] Add rate limiting and abuse protection for authentication, invitations, exports, uploads, and repeated mutations.
 - [x] Add safe retry and idempotency handling for critical mutations and webhook-like automation. Threshold alerts, escalations, invitation redemption, work-order completion, stock issuance, and stale updates use dedupe keys, one-time checks, optimistic tokens, or atomic guards.
-- [ ] Add production error logging with sensitive-data redaction and actionable correlation identifiers.
+- [x] Add production error logging with sensitive-data redaction and actionable correlation identifiers. Express assigns or preserves `x-request-id`, returns it in the response, and tRPC errors emit structured redacted logs; observability tests cover IDs, truncation, and token redaction.
 - [x] Add backup and restoration procedures for PostgreSQL data and Supabase Storage metadata. `backup-recovery-runbook.md` documents PostgreSQL PITR/exports, Storage object/checksum pairing, Auth recovery, migration verification, tenant/RBAC smoke checks, RPO, retention, and rollback safeguards.
 - [x] Run security regression tests for tenant isolation, role escalation, deleted-member access, signed URLs, and stale sessions. Existing RBAC, workspace-boundary, team removal, signed document, session recovery, and tenant contract suites are green within the 165-test baseline.
 

@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { createRequestId, logRequestError } from "../observability";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -32,12 +33,14 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  app.use((req, res, next) => { const requestId = req.header("x-request-id") || createRequestId(); res.locals.requestId = requestId; res.setHeader("x-request-id", requestId); next(); });
   // tRPC API
   app.use(
     "/api/trpc",
     createExpressMiddleware({
       router: appRouter,
       createContext,
+      onError: ({ path, error, req }) => { logRequestError({ requestId: req.res?.locals?.requestId ?? "unknown", path, code: error.code, message: error.message }); },
     })
   );
   // development mode uses Vite, production mode uses static files
