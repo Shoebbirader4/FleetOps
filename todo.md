@@ -557,15 +557,15 @@
 ## Phase 6 — Role-specific workspace completion
 
 - [ ] Superadmin: complete organization governance dashboard, trial/subscription status, team governance, billing summary, P&L, compliance overview, and audit access without operational navigation leakage.
-- [ ] Superadmin: add organization-level activity search and governance filters while preserving sensitive-data boundaries.
-- [ ] Fleet Manager: complete readiness dashboard, vehicle register, component schedules, alert queue, work orders, drivers, compliance, and operational exports.
+- [x] Superadmin: add organization-level activity search and governance filters while preserving sensitive-data boundaries. Owner workspace provides tenant-scoped audit search by role, entity, action, outcome, and date range with governance-only visibility.
+- [x] Fleet Manager: complete readiness dashboard, vehicle register, component schedules, alert queue, work orders, drivers, compliance, and operational exports. Fleet Manager workspace connects vehicle/component health, maintenance planning, dispatch and approval, driver handoffs, notifications, compliance actions, and CSV/PDF exports.
 - [ ] Fleet Manager: add bulk vehicle, component, work-order, and compliance actions with confirmation and audit events.
-- [ ] Mechanic: complete assigned queue, Start Work, checklist, diagnosis, parts request/use, labor, photos, notes, submit-for-review, and rework handling.
+- [x] Mechanic: complete assigned queue, Start Work, checklist, diagnosis, parts request/use, labor, photos, notes, submit-for-review, and rework handling. Mechanic execution is assignment-scoped with start, evidence, labor, checklist, parts, completion, and rework controls.
 - [ ] Technician: complete technical queue, diagnostic measurements, specialist notes, evidence, parts/labor contribution, and review handoff.
-- [ ] Driver: complete assigned-vehicle view, daily odometer, fuel, safety acknowledgement, issue report, issue history, and submission confirmation.
-- [ ] Inventory Manager: complete parts, stock movements, low-stock queue, vendors, purchase orders, receiving, and inventory exports.
-- [ ] Accountant: complete financial record entry, ledger, work-order cost review, reconciliation, P&L views, and exports.
-- [ ] Verify every role can see only its assigned navigation, records, actions, and organization-scoped data.
+- [x] Driver: complete assigned-vehicle view, daily odometer, fuel, safety acknowledgement, issue report, issue history, and submission confirmation. Driver procedures and workspace enforce active vehicle assignment scope and provide odometer, fuel, DVIR, issue, and acknowledgement flows.
+- [x] Inventory Manager: complete parts, stock movements, low-stock queue, vendors, purchase orders, receiving, and inventory exports. Inventory Manager workspace is connected to parts, movement, vendor, PO, receipt, variance, low-stock, and CSV workflows.
+- [x] Accountant: complete financial record entry, ledger, work-order cost review, reconciliation, P&L views, and exports. Accountant workspace is connected to financial entry, approval/reversal, ledger filters, handoff timeline, reconciliation, P&L/CPK, CSV, and PDF exports.
+- [x] Verify every role can see only its assigned navigation, records, actions, and organization-scoped data. Workspace-boundary and RBAC regression suites cover role-specific navigation, tenant filters, assigned-maintenance scope, and sensitive financial restrictions.
 
 ## Phase 7 — Shared UI/UX quality
 
