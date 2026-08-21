@@ -41,6 +41,12 @@ export function billingLifecycle(trialEndsAt: Date, paymentFailedAt?: Date | nul
   return trialEndsAt.getTime() >= now.getTime() ? "TRIAL" as const : "ACTIVE" as const;
 }
 
+export function comparePlanChange(fromPlan: unknown, toPlan: unknown, activeVehicles: number) {
+  const from = calculateMonthlyBill(fromPlan, activeVehicles);
+  const to = calculateMonthlyBill(toPlan, activeVehicles);
+  return { fromPlan: from.plan.id, toPlan: to.plan.id, fromSubtotalPaise: from.subtotalPaise, toSubtotalPaise: to.subtotalPaise, monthlyDeltaPaise: to.subtotalPaise - from.subtotalPaise, direction: to.subtotalPaise === from.subtotalPaise ? "UNCHANGED" as const : to.subtotalPaise > from.subtotalPaise ? "UPGRADE" as const : "DOWNGRADE" as const };
+}
+
 export function formatInrPaise(paise: number) {
   return `₹${(Math.max(0, paise) / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

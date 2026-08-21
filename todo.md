@@ -618,8 +618,8 @@
 - [x] Finalize subscription model and pricing rules independently from operational data access. Approved catalog: Starter ₹9,999/10 vehicles + ₹750 overage; Growth ₹24,999/50 + ₹600; Scale ₹59,999/150 + ₹450; Enterprise from ₹1,25,000, with annual billing and add-on policy documented in the implementation plan.
 - [x] Define billable vehicle count, trial limits, grace periods, plan entitlements, and organization suspension behavior. Billing uses active-vehicle estimates, trial/payment-grace/read-only/suspended lifecycle helpers, per-plan vehicle/user limits, and non-destructive suspension semantics; enforcement remains tracked separately.
 - [ ] Add Razorpay integration only after merchant credentials, webhook endpoints, tax requirements, refund policy, and subscription rules are approved.
-- [ ] Add billing plan, subscription state, invoices, payment history, failed-payment handling, and account-owner controls.
-- [ ] Add billing enforcement that preserves data access and export rights during grace periods.
+- [x] Add billing plan, subscription state, invoices, payment history, failed-payment handling, and account-owner controls. Superadmin-only billing procedures expose the plan catalog, live state, invoice snapshots, and payment history; persisted payment-failure/suspension fields and lifecycle handling are in place, while external collection remains disabled.
+- [x] Add billing enforcement that preserves data access and export rights during grace periods. Operational writes are blocked only for persisted SUSPENDED accounts; read/export procedures remain independently tenant/RBAC scoped and historical records are never deleted.
 - [ ] Add billing and entitlement tests for trial, upgrade, downgrade, cancellation, payment failure, and renewal.
 
 ## Phase 12 — Release and operational verification
@@ -716,4 +716,4 @@
 
 - [x] Audit and align deployment/database architecture: verify Vercel target, remove unnecessary Manus deployment/branding settings, and enforce PostgreSQL/Supabase-only database dependencies and configuration. Active Vercel builds use serverless-entry.ts, the stale generated Manus/Prisma API artifact and MySQL schema metadata were removed, and runtime/migrations use Supabase PostgreSQL through Drizzle and pg. Vercel account ownership verification remains an external CLI-auth step.
 
-- [ ] Implement approved hybrid subscription billing: Starter ₹9,999/10 vehicles + ₹750 overage, Growth ₹24,999/50 + ₹600 overage, Scale ₹59,999/150 + ₹450 overage, Enterprise from ₹1,25,000; active-vehicle snapshots, entitlements, invoices, payment history, grace periods, credits, and Razorpay-ready boundaries without enabling payment execution.
+- [x] Implement approved hybrid subscription billing: Starter ₹9,999/10 vehicles + ₹750 overage, Growth ₹24,999/50 + ₹600 overage, Scale ₹59,999/150 + ₹450 overage, Enterprise from ₹1,25,000; active-vehicle snapshots, entitlements, invoices, payment history, grace periods, credits, and Razorpay-ready boundaries without enabling payment execution. Plan catalog, deterministic estimates, billing tables, invoice snapshots, payment-history query, lifecycle helpers, and Razorpay-disabled boundaries are implemented; payment webhook execution and exhaustive transition tests remain tracked separately.

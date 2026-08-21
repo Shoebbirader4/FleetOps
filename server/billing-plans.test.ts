@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BILLING_PLANS, billingLifecycle, calculateMonthlyBill, formatInrPaise } from "./billing-plans";
+import { BILLING_PLANS, billingLifecycle, calculateMonthlyBill, comparePlanChange, formatInrPaise } from "./billing-plans";
 
 describe("FleetOps billing plans", () => {
   it("matches the approved plan catalog", () => {
@@ -27,5 +27,12 @@ describe("FleetOps billing plans", () => {
     expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), paymentFailedAt, new Date("2026-01-07T00:00:00Z"))).toBe("PAYMENT_GRACE");
     expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), paymentFailedAt, new Date("2026-01-15T00:00:00Z"))).toBe("READ_ONLY_GRACE");
     expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), paymentFailedAt, new Date("2026-01-30T00:00:00Z"))).toBe("SUSPENDED");
+  });
+
+  it("compares upgrades, downgrades, and unchanged renewals without payment side effects", () => {
+    expect(comparePlanChange("STARTER", "GROWTH", 25).direction).toBe("UPGRADE");
+    expect(comparePlanChange("SCALE", "GROWTH", 100).direction).toBe("DOWNGRADE");
+    expect(comparePlanChange("GROWTH", "GROWTH", 100).direction).toBe("UNCHANGED");
+    expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), null, new Date("2026-02-01T00:00:00Z"))).toBe("ACTIVE");
   });
 });
