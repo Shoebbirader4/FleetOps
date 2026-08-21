@@ -477,3 +477,168 @@
 
 - [x] Diagnose why the authenticated Fleet Manager workspace appears old on production while GitHub and Vercel show the upgraded release; compare production domains, deployment assets, cache, branch, and route behavior. Live production assets and authenticated browser routes now resolve to the upgraded release.
 - [x] Correct any production domain, deployment, cache, branch, or authenticated route mismatch and verify the actual Fleet Manager workspace upgrade on Vercel; authenticated Vercel verification showed the upgraded Fleet Manager overview and Vehicles page with contextual headers, Fleet register → Maintenance → Dispatch workflow cues, redesigned vehicle onboarding form, and refined fleet register.
+
+
+# FleetOps Whole-Product Implementation Backlog
+
+## Phase 1 — Closed-loop maintenance execution
+
+- [ ] Define the canonical work-order lifecycle and allowed transitions: Draft, Open, Assigned, In Progress, Waiting for Parts, Ready for Review, Completed, Rework, and Cancelled.
+- [ ] Add server-side transition guards so each role can perform only its assigned work-order actions.
+- [ ] Add Fleet Manager work-order creation from a component alert, driver issue, vehicle record, and manual maintenance request.
+- [ ] Add work-order detail view with vehicle, component, alert calculation, priority, due date, assignment, notes, and activity history.
+- [ ] Add mechanic and technician explicit Start Work action with timestamp and actor attribution.
+- [ ] Add mechanic/technician maintenance checklist items with required completion state.
+- [ ] Add diagnosis, repair notes, measurements, and exception notes to work-order execution.
+- [ ] Add labor-hour and labor-rate capture with validation and organization currency formatting in INR.
+- [ ] Add before-work and after-work photo/document evidence using Supabase Storage signed URLs.
+- [ ] Add parts-used selection from organization inventory with quantity validation.
+- [ ] Decrement inventory only on an authorized parts-consumption event, with an auditable stock movement.
+- [ ] Prevent work-order completion when required checklist, evidence, or approval requirements are incomplete.
+- [ ] Add Fleet Manager or designated reviewer approval and Rework flow for completed work.
+- [ ] Automatically update component service history and vehicle readiness after approved completion.
+- [ ] Add cross-role handoff timeline visible to Fleet Manager, Mechanic, Technician, and Accountant according to RBAC.
+- [ ] Add concurrency protection for simultaneous work-order updates and duplicate completion submissions.
+
+## Phase 2 — Predictive maintenance and alerts
+
+- [ ] Display the full component threshold calculation: installation odometer, expected life, current odometer, alert threshold, and remaining life.
+- [ ] Add alert severity levels and deterministic prioritization based on overdue status, vehicle criticality, and safety impact.
+- [ ] Add persistent alert acknowledgement, assignment, snooze, and resolution states.
+- [ ] Prevent duplicate alerts and duplicate automatic work orders for the same component threshold event.
+- [ ] Preserve alert history when a component is replaced, reset, edited, or a work order is completed.
+- [ ] Add alert-to-work-order conversion with source linkage and source evidence.
+- [ ] Add escalation rules for unacknowledged critical alerts and overdue work orders.
+- [ ] Add notification center filters by severity, type, role, vehicle, and status.
+- [ ] Add direct notification actions for acknowledge, open record, create work order, and assign owner.
+- [ ] Add automated tests for odometer updates, component creation, component updates, replacement resets, duplicate prevention, and escalation.
+
+## Phase 3 — Inventory, vendors, and purchasing
+
+- [ ] Add inventory part detail pages with on-hand, reserved, available, reorder level, unit cost, and movement history.
+- [ ] Add explicit stock-in, stock-out, adjustment, transfer, and reservation movements with actor and reason.
+- [ ] Reserve required parts when a work order enters an approved execution state.
+- [ ] Release or consume reservations safely when work orders are cancelled, reworked, or completed.
+- [ ] Add low-stock alert acknowledgement and purchase-order traceability.
+- [ ] Add vendor detail pages with contact information, supplied parts, pricing history, and purchase history.
+- [ ] Add purchase-order lifecycle: Draft, Submitted, Approved, Ordered, Partially Received, Received, Cancelled.
+- [ ] Add purchase-order approval controls and separation of requester versus approver where required.
+- [ ] Add goods-received workflow that updates inventory through auditable stock-in movements.
+- [ ] Add partial receipt, damaged receipt, back-order, and variance handling.
+- [ ] Link vendor costs and received parts to the originating purchase order and work order where applicable.
+- [ ] Add inventory CSV import/export with validation, duplicate handling, and error reporting.
+- [ ] Add inventory regression coverage from low-stock detection through purchase receipt and work-order consumption.
+
+## Phase 4 — Financial accountability and INR reporting
+
+- [ ] Automatically aggregate parts cost, labor cost, vendor cost, and other expenses into each work order.
+- [ ] Add immutable financial adjustment records with reason, actor, timestamp, and approval state.
+- [ ] Add Accountant ledger filters by date, vehicle, work order, vendor, category, and status.
+- [ ] Add cost attribution from work orders to vehicles, components, and organization-level P&L.
+- [ ] Add ledger reconciliation state and exception handling for missing source records.
+- [ ] Add INR formatting and decimal/rounding rules consistently across all financial screens and exports.
+- [ ] Add financial CSV export and print/PDF-ready ledger report generation.
+- [ ] Add organization P&L summaries for maintenance, parts, labor, vendors, and fleet operating cost.
+- [ ] Add role and approval tests preventing operational users from editing sensitive financial records.
+
+## Phase 5 — Compliance and document operations
+
+- [ ] Add document metadata validation for title, type, owner, issue date, expiry date, and secure storage reference.
+- [ ] Add document version history and replacement workflow without losing prior records.
+- [ ] Add vehicle and driver compliance status summaries with valid, expiring, expired, and missing states.
+- [ ] Add configurable expiry windows and notifications for upcoming renewals.
+- [ ] Add Fleet Manager compliance action queue with direct document upload and renewal actions.
+- [ ] Add secure signed-URL access checks for organization and role scope.
+- [ ] Add document deletion/archive controls with audit history and retention rules.
+- [ ] Add compliance CSV import with dry-run validation and row-level error reporting.
+- [ ] Add compliance CSV export and PDF-ready compliance register.
+- [ ] Add document and compliance regression coverage for tenant isolation, expiry, upload, replacement, and download.
+
+## Phase 6 — Role-specific workspace completion
+
+- [ ] Superadmin: complete organization governance dashboard, trial/subscription status, team governance, billing summary, P&L, compliance overview, and audit access without operational navigation leakage.
+- [ ] Superadmin: add organization-level activity search and governance filters while preserving sensitive-data boundaries.
+- [ ] Fleet Manager: complete readiness dashboard, vehicle register, component schedules, alert queue, work orders, drivers, compliance, and operational exports.
+- [ ] Fleet Manager: add bulk vehicle, component, work-order, and compliance actions with confirmation and audit events.
+- [ ] Mechanic: complete assigned queue, Start Work, checklist, diagnosis, parts request/use, labor, photos, notes, submit-for-review, and rework handling.
+- [ ] Technician: complete technical queue, diagnostic measurements, specialist notes, evidence, parts/labor contribution, and review handoff.
+- [ ] Driver: complete assigned-vehicle view, daily odometer, fuel, safety acknowledgement, issue report, issue history, and submission confirmation.
+- [ ] Inventory Manager: complete parts, stock movements, low-stock queue, vendors, purchase orders, receiving, and inventory exports.
+- [ ] Accountant: complete financial record entry, ledger, work-order cost review, reconciliation, P&L views, and exports.
+- [ ] Verify every role can see only its assigned navigation, records, actions, and organization-scoped data.
+
+## Phase 7 — Shared UI/UX quality
+
+- [ ] Establish consistent page headers, breadcrumbs, context summaries, and primary next actions for every workspace page.
+- [ ] Add robust loading, empty, error, retry, success, and unsaved-change states to every data surface.
+- [ ] Add accessible labels, keyboard navigation, visible focus states, validation messages, and screen-reader-friendly status updates.
+- [ ] Add consistent table sorting, filtering, pagination, responsive cards, and mobile overflow handling.
+- [ ] Add action confirmations for destructive, irreversible, approval, and financial operations.
+- [ ] Add global quick-find for vehicles, components, work orders, parts, drivers, documents, and vendors within tenant scope.
+- [ ] Add notification drawer with unread state, role-specific actions, and direct record links.
+- [ ] Add organization and user context indicators to prevent cross-tenant or wrong-workspace actions.
+- [ ] Remove remaining misleading placeholder data, fake records, and non-functional controls from production paths.
+- [ ] Add visual regression checks for desktop, tablet, and mobile layouts for all role workspaces.
+
+## Phase 8 — Security, audit, and reliability
+
+- [ ] Centralize role policy definitions and server-side authorization guards for every procedure.
+- [ ] Verify every read, create, update, delete, upload, download, export, and transition procedure is organization-scoped.
+- [ ] Add database constraints and indexes for organization membership, foreign keys, lifecycle states, and query performance.
+- [ ] Add immutable audit events for invitations, membership changes, deletions, vehicle updates, threshold events, work-order transitions, inventory movements, financial edits, and document actions.
+- [ ] Add audit timeline filters by actor, role, entity, action, date, and organization.
+- [ ] Add rate limiting and abuse protection for authentication, invitations, exports, uploads, and repeated mutations.
+- [ ] Add safe retry and idempotency handling for critical mutations and webhook-like automation.
+- [ ] Add production error logging with sensitive-data redaction and actionable correlation identifiers.
+- [ ] Add backup and restoration procedures for PostgreSQL data and Supabase Storage metadata.
+- [ ] Run security regression tests for tenant isolation, role escalation, deleted-member access, signed URLs, and stale sessions.
+
+## Phase 9 — Authentication, invitations, and communications
+
+- [ ] Add password-reset and account-recovery UX using Supabase Auth.
+- [ ] Add invited-member acceptance page showing organization name, invited email, assigned role, and invitation expiry.
+- [ ] Add invitation resend, revoke, expiry, and duplicate-email handling.
+- [ ] Add transactional invitation email delivery after selecting and configuring an email provider.
+- [ ] Add branded invitation templates with secure join links and no sensitive operational data.
+- [ ] Add email delivery status, bounce/failure handling, and resend guidance.
+- [ ] Add browser-level regression automation for organization signup, invitation acceptance, role signup, logout, relogin, and workspace restoration.
+
+## Phase 10 — Reporting, exports, and operational intelligence
+
+- [ ] Add fleet readiness report covering vehicle status, maintenance due, compliance, open work, and driver handoffs.
+- [ ] Add maintenance performance report covering downtime, turnaround time, repeat repairs, and component failure patterns.
+- [ ] Add inventory report covering consumption, stockouts, reorder risk, vendor lead time, and purchase variance.
+- [ ] Add financial report covering cost per vehicle, cost per work order, parts/labor mix, and period-over-period trends.
+- [ ] Add role-scoped CSV exports with filter context and export audit records.
+- [ ] Add PDF-ready report layouts for compliance, maintenance, inventory, and finance.
+- [ ] Add scheduled report delivery only after the periodic-update design and authorization model are finalized.
+
+## Phase 11 — Commercial readiness, after core operations
+
+- [ ] Finalize subscription model and pricing rules independently from operational data access.
+- [ ] Define billable vehicle count, trial limits, grace periods, plan entitlements, and organization suspension behavior.
+- [ ] Add Razorpay integration only after merchant credentials, webhook endpoints, tax requirements, refund policy, and subscription rules are approved.
+- [ ] Add billing plan, subscription state, invoices, payment history, failed-payment handling, and account-owner controls.
+- [ ] Add billing enforcement that preserves data access and export rights during grace periods.
+- [ ] Add billing and entitlement tests for trial, upgrade, downgrade, cancellation, payment failure, and renewal.
+
+## Phase 12 — Release and operational verification
+
+- [ ] Keep PostgreSQL/Supabase as the only production database stack and prohibit Prisma, MySQL, or TiDB additions.
+- [ ] Maintain GitHub main as the source of truth and verify Vercel automatic deployment from main after every release.
+- [ ] Require TypeScript validation, Vitest, production build, and authenticated smoke tests before release.
+- [ ] Run complete seeded-test-organization workflow without fabricating customer reviews, ratings, or testimonials.
+- [ ] Verify the complete cross-role scenario: driver issue or component alert → Fleet Manager work order → mechanic execution → inventory part use → review → completion → accountant cost visibility.
+- [ ] Verify cleanup of temporary test users, invitations, organizations, files, and records after every background regression.
+- [ ] Add a release checklist documenting database migration status, Supabase deployment status, Vercel deployment status, GitHub commit, and rollback checkpoint.
+- [ ] Add production monitoring for API errors, authentication failures, background automation failures, storage errors, and slow queries.
+
+
+# Active Implementation — Milestone 1: Closed-loop maintenance execution
+
+- [ ] Audit existing work-order, component, vehicle, inventory, activity, notification, and document models plus role policies before implementation.
+- [x] Define and enforce the work-order transition matrix across Fleet Manager, Mechanic, Technician, Inventory Manager, and Accountant; guarded transitions, role scope, stale-write conflicts, and review gates are enforced server-side.
+- [x] Implement missing mechanic/technician execution details: explicit start work, checklist, diagnosis, labor, parts, evidence, submit for review, and rework; explicit start-work auditing/manager notifications and checklist-gated submission are now enforced.
+- [ ] Implement reviewer approval and completion-side updates for component service history, vehicle readiness, inventory, and financial cost records.
+- [x] Add idempotency, validation, tenant isolation, and audit coverage for critical maintenance mutations; closed-order start protection, organization/assignment scope, stale status conflict handling, and lifecycle audit events are covered.
+- [x] Add cross-role regression tests and validate TypeScript, Vitest, production build, and authenticated workflow behavior; 112 tests pass, TypeScript passes, and the production bundle builds successfully.

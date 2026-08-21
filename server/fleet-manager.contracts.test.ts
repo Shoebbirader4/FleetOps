@@ -56,6 +56,15 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('code: "CONFLICT"');
   });
 
+  it("enforces the closed-loop execution handoff", () => {
+    expect(routersSource).toContain('action: "WORK_ORDER_STARTED"');
+    expect(routersSource).toContain('type: "WORK_ORDER_STARTED"');
+    expect(routersSource).toContain('Start work and move the order into execution before submitting completion.');
+    expect(routersSource).toContain('Complete and save every execution checklist item before submitting completion.');
+    expect(routersSource).toContain('Complete and save every execution checklist item before review.');
+    expect(routersSource).toContain('completedAt: null');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
