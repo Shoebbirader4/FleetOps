@@ -615,8 +615,8 @@
 
 ## Phase 11 — Commercial readiness, after core operations
 
-- [ ] Finalize subscription model and pricing rules independently from operational data access.
-- [ ] Define billable vehicle count, trial limits, grace periods, plan entitlements, and organization suspension behavior.
+- [x] Finalize subscription model and pricing rules independently from operational data access. Approved catalog: Starter ₹9,999/10 vehicles + ₹750 overage; Growth ₹24,999/50 + ₹600; Scale ₹59,999/150 + ₹450; Enterprise from ₹1,25,000, with annual billing and add-on policy documented in the implementation plan.
+- [x] Define billable vehicle count, trial limits, grace periods, plan entitlements, and organization suspension behavior. Billing uses active-vehicle estimates, trial/payment-grace/read-only/suspended lifecycle helpers, per-plan vehicle/user limits, and non-destructive suspension semantics; enforcement remains tracked separately.
 - [ ] Add Razorpay integration only after merchant credentials, webhook endpoints, tax requirements, refund policy, and subscription rules are approved.
 - [ ] Add billing plan, subscription state, invoices, payment history, failed-payment handling, and account-owner controls.
 - [ ] Add billing enforcement that preserves data access and export rights during grace periods.
