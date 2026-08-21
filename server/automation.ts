@@ -58,17 +58,42 @@ export async function evaluateDocumentExpiry(orgId: string) {
   return { expiring: expiring.length };
 }
 
+export async function evaluateEscalations(orgId: string) {
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  let escalated = 0;
+  if (fleetDb.notification?.findMany) {
+    const alerts = await fleetDb.notification.findMany({ where: { orgId, severity: "CRITICAL", acknowledgedAt: null, escalationLevel: 0, createdAt: { lte: cutoff } }, take: 100 });
+    for (const alert of alerts as any[]) {
+      if (fleetDb.notification.updateMany) await fleetDb.notification.updateMany({ where: { id: alert.id, orgId, escalationLevel: 0 }, data: { escalationLevel: 1, updatedAt: new Date() } });
+      await notifyRoles(orgId, ["SUPERADMIN", "FLEET_MANAGER"], "Critical maintenance alert escalated", `${alert.title}: ${alert.message}`, "ALERT_ESCALATION", alert.referenceId ?? undefined);
+      escalated += 1;
+    }
+  }
+  if (fleetDb.workOrder?.findMany) {
+    const overdueOrders = await fleetDb.workOrder.findMany({ where: { orgId, priority: "CRITICAL", status: { in: ["OPEN", "IN_PROGRESS", "WAITING_FOR_PARTS", "REWORK"] }, createdAt: { lte: cutoff } }, take: 100 });
+    for (const order of overdueOrders as any[]) {
+      const marker = fleetDb.notification?.findFirst ? await fleetDb.notification.findFirst({ where: { orgId, type: "WORK_ORDER_ESCALATION", referenceId: order.id } }) : null;
+      if (marker) continue;
+      await notifyRoles(orgId, ["SUPERADMIN", "FLEET_MANAGER"], "Critical work order overdue", `${order.title} remains ${order.status} after 24 hours.`, "WORK_ORDER_ESCALATION", order.id);
+      escalated += 1;
+    }
+  }
+  return escalated;
+}
+
 export async function evaluateAllOrganizations() {
   const organizations = await fleetDb.organization.findMany({ select: { id: true } });
   let maintenanceOrders = 0;
   let lowStockParts = 0;
   let draftPurchaseOrders = 0;
   let expiringDocuments = 0;
+  let escalatedAlerts = 0;
   for (const org of organizations as any[]) {
     const vehicles = await fleetDb.vehicle.findMany({ where: { orgId: org.id }, select: { id: true } });
     for (const vehicle of vehicles as any[]) maintenanceOrders += (await evaluateVehicleMaintenance(vehicle.id, org.id)).createdWorkOrders;
     const inventory = await evaluateLowInventory(org.id); lowStockParts += inventory.lowStock; draftPurchaseOrders += inventory.draftPurchaseOrders;
     expiringDocuments += (await evaluateDocumentExpiry(org.id)).expiring;
+    escalatedAlerts += await evaluateEscalations(org.id);
   }
-  return { organizations: organizations.length, maintenanceOrders, lowStockParts, draftPurchaseOrders, expiringDocuments };
+  return { organizations: organizations.length, maintenanceOrders, lowStockParts, draftPurchaseOrders, expiringDocuments, escalatedAlerts };
 }

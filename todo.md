@@ -508,7 +508,7 @@
 - [x] Prevent duplicate alerts and duplicate automatic work orders for the same component threshold event. Stable component service baselines are audited and deduplicated; focused coverage brings validation to 153 tests.
 - [x] Preserve alert history when a component is replaced, reset, edited, or a work order is completed. Component lifecycle and approved-service audit events preserve the threshold history; regression coverage passes 154 tests.
 - [x] Add alert-to-work-order conversion with source linkage and source evidence. Threshold-generated work orders carry source details through notification reference IDs and audit metadata, including component baseline and current odometer; validation passes 154 tests.
-- [ ] Add escalation rules for unacknowledged critical alerts and overdue work orders.
+- [x] Add escalation rules for unacknowledged critical alerts and overdue work orders. Critical unacknowledged notifications and critical orders older than 24 hours are escalated idempotently; validation passes 155 tests.
 - [ ] Add notification center filters by severity, type, role, vehicle, and status.
 - [ ] Add direct notification actions for acknowledge, open record, create work order, and assign owner.
 - [ ] Add automated tests for odometer updates, component creation, component updates, replacement resets, duplicate prevention, and escalation.

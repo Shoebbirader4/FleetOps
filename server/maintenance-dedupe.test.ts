@@ -20,6 +20,14 @@ describe("predictive maintenance threshold deduplication", () => {
     expect(router).toContain('action: "WORK_ORDER_APPROVED"');
   });
 
+  it("defines a 24-hour escalation window with idempotent escalation markers", () => {
+    const source = readFileSync(resolve(process.cwd(), "server/automation.ts"), "utf8");
+    expect(source).toContain("24 * 60 * 60 * 1000");
+    expect(source).toContain('escalationLevel: 0');
+    expect(source).toContain('"ALERT_ESCALATION"');
+    expect(source).toContain('"WORK_ORDER_ESCALATION"');
+  });
+
   it("keeps an active work-order guard before creating another automatic order", () => {
     const source = readFileSync(resolve(process.cwd(), "server/automation.ts"), "utf8");
     expect(source).toContain('status: { in: ["OPEN", "IN_PROGRESS", "WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK"] }');
