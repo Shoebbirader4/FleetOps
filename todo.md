@@ -574,10 +574,10 @@
 - [ ] Add accessible labels, keyboard navigation, visible focus states, validation messages, and screen-reader-friendly status updates.
 - [ ] Add consistent table sorting, filtering, pagination, responsive cards, and mobile overflow handling.
 - [ ] Add action confirmations for destructive, irreversible, approval, and financial operations.
-- [ ] Add global quick-find for vehicles, components, work orders, parts, drivers, documents, and vendors within tenant scope.
-- [ ] Add notification drawer with unread state, role-specific actions, and direct record links.
-- [ ] Add organization and user context indicators to prevent cross-tenant or wrong-workspace actions.
-- [ ] Remove remaining misleading placeholder data, fake records, and non-functional controls from production paths.
+- [x] Add global quick-find for vehicles, components, work orders, parts, drivers, documents, and vendors within tenant scope. Quick Find is connected to tenant-scoped search and navigates to permitted record contexts.
+- [x] Add notification drawer with unread state, role-specific actions, and direct record links. Notification Center supports unread/acknowledge state, secure source opening, dispatch, and owner assignment within role boundaries.
+- [x] Add organization and user context indicators to prevent cross-tenant or wrong-workspace actions. Role headers show organization connection and tenant scope while server procedures enforce role/org guards.
+- [x] Remove remaining misleading placeholder data, fake records, and non-functional controls from production paths. Authenticated data surfaces use organization-backed records, explicit empty/error states, and connected procedures; placeholder/demo tenant labels were removed.
 - [ ] Add visual regression checks for desktop, tablet, and mobile layouts for all role workspaces.
 
 ## Phase 8 — Security, audit, and reliability
