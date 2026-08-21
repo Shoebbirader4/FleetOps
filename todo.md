@@ -693,3 +693,5 @@
 - [x] Add regression coverage for canonical lifecycle states, tenant scope, role guards, and approval gating. Validation passed with 150 Vitest tests, TypeScript, and production build.
 - [x] Add a tenant- and assignment-scoped work-order detail procedure returning vehicle/component context, parts, evidence, and activity history.
 - [x] Validate work-order detail and lifecycle RBAC changes with 150 Vitest tests, TypeScript, and production build.
+- [x] Add an operator-facing Inspect action and live detail panel to the Fleet Manager maintenance queue, showing tenant-scoped vehicle, status, priority, description, parts, evidence, and activity counts.
+- [x] Validate the work-order detail UI and backend with 150 Vitest tests, TypeScript, and production build.
