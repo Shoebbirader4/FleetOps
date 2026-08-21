@@ -82,6 +82,13 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('This driver issue already has a dispatched work order.');
   });
 
+  it("links inventory issues to active assigned maintenance work", () => {
+    expect(routersSource).toContain('workOrderId: z.string().uuid().optional()');
+    expect(routersSource).toContain('status: { notIn: ["COMPLETED", "CANCELLED"] }');
+    expect(routersSource).toContain('outside your assigned maintenance scope.');
+    expect(routersSource).toContain('workOrderId: input.workOrderId ?? null');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
