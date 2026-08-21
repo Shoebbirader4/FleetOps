@@ -502,7 +502,7 @@
 
 ## Phase 2 — Predictive maintenance and alerts
 
-- [ ] Display the full component threshold calculation: installation odometer, expected life, current odometer, alert threshold, and remaining life.
+- [x] Display the full component threshold calculation: installation odometer, expected life, current odometer, alert threshold, and remaining life. Validation passed with 150 Vitest tests, TypeScript, and production build.
 - [ ] Add alert severity levels and deterministic prioritization based on overdue status, vehicle criticality, and safety impact.
 - [ ] Add persistent alert acknowledgement, assignment, snooze, and resolution states.
 - [ ] Prevent duplicate alerts and duplicate automatic work orders for the same component threshold event.
