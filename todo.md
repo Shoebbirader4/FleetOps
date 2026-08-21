@@ -549,7 +549,7 @@
 - [x] Add configurable expiry windows and notifications for upcoming renewals. Compliance summary accepts an explicit expiryWindowDays value and displays the active 30-day window; existing automation handles expiry notifications.
 - [x] Add Fleet Manager compliance action queue with direct document upload and renewal actions. Compliance workspace provides upload, renewal, signed file access, expiry KPIs, and version-history controls.
 - [x] Add secure signed-URL access checks for organization and role scope. Document access and version history are restricted to tenant-scoped SUPERADMIN/FLEET_MANAGER procedures; focused compliance tests pass 6 tests.
-- [ ] Add document deletion/archive controls with audit history and retention rules.
+- [x] Add document deletion/archive controls with audit history and retention rules. Added reversible archive state and actor attribution in Supabase, active-document filtering, role-scoped archive mutation, retention-preserving audit event, and Compliance UI reason prompt.
 - [x] Add compliance CSV import with dry-run validation and row-level error reporting. Existing previewImport/importCsv procedures validate rows, organization vehicle references, and duplicates.
 - [x] Add compliance CSV export and PDF-ready compliance register. Compliance workspace exposes tenant-scoped CSV and PDF export actions.
 - [x] Add document and compliance regression coverage for tenant isolation, expiry, upload, replacement, and download. Compliance versioning, RLS migration, status summaries, secure access, and exports are covered; full suite passes 163 tests.
