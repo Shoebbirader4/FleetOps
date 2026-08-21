@@ -1,0 +1,59 @@
+import { useState } from "react";
+import { ArrowRightLeft, Check, ClipboardCheck, PackageSearch } from "lucide-react";
+import { toast } from "sonner";
+import { WorkspaceState as State } from "@/components/workspaces/WorkspaceState";
+import { trpc } from "@/lib/trpc";
+import type { InventoryPart } from "@/types/fleet";
+
+const money = (value: unknown) => Number(value ?? 0).toLocaleString("en-IN", { style: "currency", currency: "INR" });
+
+export function InventoryManagerWorkspace() {
+  const utils = trpc.useUtils();
+  const parts = trpc.inventory.list.useQuery(undefined, { retry: false });
+  const [selectedPartId, setSelectedPartId] = useState("");
+  const selectedPart = (parts.data ?? []).find((part: InventoryPart) => part.id === selectedPartId);
+  const detail = trpc.inventory.get.useQuery({ partId: selectedPartId }, { enabled: Boolean(selectedPartId), retry: false });
+  const [transfer, setTransfer] = useState({ toBinLocation: "", reason: "" });
+  const [adjustment, setAdjustment] = useState({ delta: "0", reason: "" });
+  const transferPart = trpc.inventory.transfer.useMutation({
+    onSuccess: () => { toast.success("Bin transfer recorded"); setTransfer({ toBinLocation: "", reason: "" }); void utils.inventory.list.invalidate(); void detail.refetch(); void utils.inventory.movements.invalidate(); },
+    onError: (error) => toast.error("Bin transfer failed", { description: error.message }),
+  });
+  const adjustPart = trpc.inventory.adjust.useMutation({
+    onSuccess: () => { toast.success("Cycle-count adjustment recorded"); setAdjustment({ delta: "0", reason: "" }); void utils.inventory.list.invalidate(); void detail.refetch(); void utils.inventory.movements.invalidate(); },
+    onError: (error) => toast.error("Adjustment failed", { description: error.message }),
+  });
+  const movementRows = detail.data?.movements ?? [];
+  return <div className="inventory-manager-workspace">
+    <section className="workspace-form panel">
+      <div><div className="panel-kicker">Inventory control</div><h2>Inspect a part</h2><p>Select a tenant-scoped part to review available stock, reservations, and its auditable movement trail.</p></div>
+      <label>Part<select aria-label="Select inventory part" value={selectedPartId} onChange={(event) => setSelectedPartId(event.target.value)}><option value="">Select a part</option>{(parts.data ?? []).map((part: InventoryPart) => <option key={part.id} value={part.id}>{part.sku} · {part.name}</option>)}</select></label>
+    </section>
+    <State loading={parts.isLoading} error={parts.isError} empty={!parts.isLoading && !parts.isError && !(parts.data ?? []).length}>
+      {selectedPart && <>
+        <section className="workspace-kpi-grid compact-summary">
+          <div className="kpi-card green"><span>On hand</span><strong>{selectedPart.quantityOnHand}</strong><small>{selectedPart.binLocation ?? "No bin assigned"}</small></div>
+          <div className="kpi-card orange"><span>Reserved</span><strong>{detail.isLoading ? "…" : detail.data?.reserved ?? 0}</strong><small>open work-order demand</small></div>
+          <div className="kpi-card green"><span>Available</span><strong>{detail.isLoading ? "…" : detail.data?.available ?? 0}</strong><small>safe to issue</small></div>
+          <div className={`kpi-card ${Number(selectedPart.quantityOnHand) <= Number(selectedPart.minReorderLevel) ? "red" : "green"}`}><span>Unit cost</span><strong>{money(selectedPart.unitCost)}</strong><small>reorder at {selectedPart.minReorderLevel}</small></div>
+        </section>
+        <section className="workspace-form-grid">
+          <form className="workspace-form panel" onSubmit={(event) => { event.preventDefault(); if (!transfer.toBinLocation.trim() || !transfer.reason.trim()) return; transferPart.mutate({ partId: selectedPart.id, toBinLocation: transfer.toBinLocation.trim(), reason: transfer.reason.trim() }); }}>
+            <div><div className="panel-kicker">Movement · transfer</div><h3>Move between bins</h3><p>Changing the bin never changes quantity; the actor and reason remain in the movement ledger.</p></div>
+            <label>Destination bin<input required value={transfer.toBinLocation} onChange={(event) => setTransfer((current) => ({ ...current, toBinLocation: event.target.value }))} placeholder="Rack B · Shelf 2" /></label>
+            <label>Reason<input required minLength={3} maxLength={300} value={transfer.reason} onChange={(event) => setTransfer((current) => ({ ...current, reason: event.target.value }))} placeholder="Cycle reorganization" /></label>
+            <button className="secondary-button" disabled={transferPart.isPending}><ArrowRightLeft size={15} />{transferPart.isPending ? "Recording…" : "Record bin transfer"}</button>
+          </form>
+          <form className="workspace-form panel" onSubmit={(event) => { event.preventDefault(); const delta = Number(adjustment.delta); if (!adjustment.reason.trim() || !Number.isInteger(delta) || delta === 0) return; adjustPart.mutate({ partId: selectedPart.id, expectedQuantityOnHand: Number(selectedPart.quantityOnHand), delta, reason: adjustment.reason.trim() }); }}>
+            <div><div className="panel-kicker">Movement · adjustment</div><h3>Post cycle-count variance</h3><p>Use a signed quantity and the loaded balance to prevent overwriting a newer count.</p></div>
+            <label>Quantity delta<input required type="number" step="1" value={adjustment.delta} onChange={(event) => setAdjustment((current) => ({ ...current, delta: event.target.value }))} placeholder="+2 or -1" /></label>
+            <label>Reason<input required minLength={3} maxLength={300} value={adjustment.reason} onChange={(event) => setAdjustment((current) => ({ ...current, reason: event.target.value }))} placeholder="Physical count variance" /></label>
+            <button className="secondary-button" disabled={adjustPart.isPending}><ClipboardCheck size={15} />{adjustPart.isPending ? "Recording…" : "Record adjustment"}</button>
+          </form>
+        </section>
+        <section className="panel workspace-table"><div className="panel-heading"><div><div className="panel-kicker">{selectedPart.sku} · movement history</div><h2>{selectedPart.name}</h2></div><span className="signal-chip good"><Check size={13} /> Tenant scoped</span></div><State loading={detail.isLoading} error={detail.isError} empty={!detail.isLoading && !detail.isError && !movementRows.length}><div className="resource-list">{movementRows.map((movement: any) => <div className="resource-row" key={movement.id}><div><strong>{movement.movementType}</strong><span>{movement.reason} · {new Date(movement.createdAt).toLocaleString("en-IN")}</span><small>{movement.workOrderId ? `Work order ${movement.workOrderId.slice(0, 8).toUpperCase()}` : "Organization stock movement"}</small></div><span className={`resource-meta ${Number(movement.quantity) < 0 ? "pending" : "accepted"}`}>{Number(movement.quantity) > 0 ? "+" : ""}{movement.quantity} units</span></div>)}</div></State></section>
+      </>}
+    </State>
+    {!selectedPart && !parts.isLoading && !parts.isError && (parts.data ?? []).length > 0 && <div className="panel empty-state"><PackageSearch size={20} /><strong>Select a part to open its detail record.</strong></div>}
+  </div>;
+}
