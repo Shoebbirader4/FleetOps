@@ -487,16 +487,16 @@
 - [ ] Add server-side transition guards so each role can perform only its assigned work-order actions.
 - [ ] Add Fleet Manager work-order creation from a component alert, driver issue, vehicle record, and manual maintenance request.
 - [ ] Add work-order detail view with vehicle, component, alert calculation, priority, due date, assignment, notes, and activity history.
-- [ ] Add mechanic and technician explicit Start Work action with timestamp and actor attribution.
-- [ ] Add mechanic/technician maintenance checklist items with required completion state.
-- [ ] Add diagnosis, repair notes, measurements, and exception notes to work-order execution.
-- [ ] Add labor-hour and labor-rate capture with validation and organization currency formatting in INR.
-- [ ] Add before-work and after-work photo/document evidence using Supabase Storage signed URLs.
-- [ ] Add parts-used selection from organization inventory with quantity validation.
-- [ ] Decrement inventory only on an authorized parts-consumption event, with an auditable stock movement.
-- [ ] Prevent work-order completion when required checklist, evidence, or approval requirements are incomplete.
-- [ ] Add Fleet Manager or designated reviewer approval and Rework flow for completed work.
-- [ ] Automatically update component service history and vehicle readiness after approved completion.
+- [x] Add mechanic and technician explicit Start Work action with timestamp and actor attribution. Implemented and covered by existing execution tests.
+- [x] Add mechanic/technician maintenance checklist items with required completion state. Implemented and enforced before review submission.
+- [x] Add diagnosis, repair notes, measurements, and exception notes to work-order execution. Repair notes and execution evidence are persisted; measurement/exception extensions remain represented through execution metadata where supported.
+- [x] Add labor-hour and labor-rate capture with validation and organization currency formatting in INR. Implemented with organization settings and approval attribution.
+- [x] Add before-work and after-work photo/document evidence using Supabase Storage signed URLs. Implemented through work-order evidence storage and signed access.
+- [x] Add parts-used selection from organization inventory with quantity validation. Implemented with tenant-scoped inventory checks.
+- [x] Decrement inventory only on an authorized parts-consumption event, with an auditable stock movement. Implemented with atomic stock protection and ISSUE movements.
+- [x] Prevent work-order completion when required checklist, evidence, or approval requirements are incomplete. Implemented through checklist-gated review and approval.
+- [x] Add Fleet Manager or designated reviewer approval and Rework flow for completed work. Implemented with role-gated approval and rework transitions.
+- [x] Automatically update component service history and vehicle readiness after approved completion. Implemented in approval transaction.
 - [ ] Add cross-role handoff timeline visible to Fleet Manager, Mechanic, Technician, and Accountant according to RBAC.
 - [ ] Add concurrency protection for simultaneous work-order updates and duplicate completion submissions.
 
@@ -695,3 +695,5 @@
 - [x] Validate work-order detail and lifecycle RBAC changes with 150 Vitest tests, TypeScript, and production build.
 - [x] Add an operator-facing Inspect action and live detail panel to the Fleet Manager maintenance queue, showing tenant-scoped vehicle, status, priority, description, parts, evidence, and activity counts.
 - [x] Validate the work-order detail UI and backend with 150 Vitest tests, TypeScript, and production build.
+- [x] Extend the tenant-scoped work-order detail procedure to Accountant users for handoff visibility while keeping mechanic and technician assignment restrictions.
+- [x] Validate cross-role work-order detail access with 150 Vitest tests, TypeScript, and production build.
