@@ -107,6 +107,11 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('orgId: ctx.fleetopsUser.orgId');
   });
 
+  it("requires assigned work-order linkage for mechanic inventory issues", () => {
+    expect(routersSource).toContain('Mechanics and Technicians must link issued parts to an assigned work order.');
+    expect(routersSource).toContain('(ctx.fleetopsUser.role === "MECHANIC" || ctx.fleetopsUser.role === "TECHNICIAN") && !input.workOrderId');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
