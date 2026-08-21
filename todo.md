@@ -713,3 +713,5 @@
 
 - [x] Add invitation revoke, resend, expiry, and duplicate-email handling with auditable organization-scoped controls. Supabase stores revocation actor/time, resend count, and last-sent time; Team exposes Resend/Revoke actions, active duplicate protection, seven-day expiry refresh, and audit events.
 
+
+- [x] Audit and align deployment/database architecture: verify Vercel target, remove unnecessary Manus deployment/branding settings, and enforce PostgreSQL/Supabase-only database dependencies and configuration. Active Vercel builds use serverless-entry.ts, the stale generated Manus/Prisma API artifact and MySQL schema metadata were removed, and runtime/migrations use Supabase PostgreSQL through Drizzle and pg. Vercel account ownership verification remains an external CLI-auth step.

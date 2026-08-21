@@ -50,6 +50,13 @@
       "when": 1787338169860,
       "tag": "0006_new_lily_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787350272197,
+      "tag": "0007_odd_talon",
+      "breakpoints": true
     }
   ]
 }
