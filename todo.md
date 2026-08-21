@@ -597,7 +597,7 @@
 
 - [ ] Add password-reset and account-recovery UX using Supabase Auth.
 - [ ] Add invited-member acceptance page showing organization name, invited email, assigned role, and invitation expiry.
-- [ ] Add invitation resend, revoke, expiry, and duplicate-email handling.
+- [x] Add invitation resend, revoke, expiry, and duplicate-email handling. Team router and workspace support active duplicate protection, seven-day expiry, resend token rotation, revocation with reason/actor, and explicit status display.
 - [ ] Add transactional invitation email delivery after selecting and configuring an email provider.
 - [ ] Add branded invitation templates with secure join links and no sensitive operational data.
 - [ ] Add email delivery status, bounce/failure handling, and resend guidance.
@@ -710,4 +710,6 @@
 - [x] Add receipt-backed vendor pricing history with tenant-scoped vendor validation, part context, purchase-order references, quantities, unit costs, and average unit cost display. Focused procurement tests pass 3 tests.
 
 - [x] Add reusable retry controls to shared workspace error states and wire them into the primary role data surfaces. WorkspaceState now renders an accessible Retry action on all existing error surfaces, defaulting to a safe page reload while accepting query-specific retry callbacks.
+
+- [x] Add invitation revoke, resend, expiry, and duplicate-email handling with auditable organization-scoped controls. Supabase stores revocation actor/time, resend count, and last-sent time; Team exposes Resend/Revoke actions, active duplicate protection, seven-day expiry refresh, and audit events.
 

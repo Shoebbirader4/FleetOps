@@ -81,6 +81,7 @@ describe("RBAC and invitation procedures", () => {
 
   it("returns a persisted manual-token invitation with explicit audit fields", async () => {
     mocks.user.count.mockResolvedValue(1);
+    mocks.invitation.findFirst.mockResolvedValue(null);
     mocks.invitation.create.mockResolvedValue({ id: "inv-1", email: "driver@example.com", role: "DRIVER", tokenHash: "token-1" });
     const result = await appRouter.createCaller(baseContext).team.invite({ email: "driver@example.com", role: "DRIVER" });
     expect(result).toMatchObject({ id: "inv-1", delivery: "EMAIL", joinUrl: expect.stringContaining("/join/") });
