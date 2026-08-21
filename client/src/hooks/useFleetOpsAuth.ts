@@ -55,6 +55,8 @@ export function useFleetOpsAuth() {
   };
 
   const signOut = () => supabase.auth.signOut({ scope: "local" });
+  const requestPasswordReset = (email: string, redirectTo: string) => supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+  const updatePassword = (password: string) => supabase.auth.updateUser({ password });
 
   return {
     session,
@@ -64,6 +66,8 @@ export function useFleetOpsAuth() {
     signInWithEmail,
     signUpWithEmail: (email: string, password: string, fullName: string, invitationToken?: string) => supabase.auth.signUp({ email: email.trim(), password, options: { data: { fullName, needsOnboarding: invitationToken ? false : true, invitationToken } } }),
     signOut,
+    requestPasswordReset,
+    updatePassword,
     refreshSession: async () => {
       const result = await supabase.auth.refreshSession();
       if (result.error || !result.data.session) {

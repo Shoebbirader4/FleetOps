@@ -91,7 +91,7 @@ function HealthRing({ value }: { value: number }) {
 }
 
 export default function Home({ initialSection = "Command center", publicMode = "landing" }: { initialSection?: string; publicMode?: "landing" | "signin" | "signup" }) {
-  const { session, loading: authLoading, signOut, signInWithEmail, signUpWithEmail, refreshSession } = useFleetOpsAuth();
+  const { session, loading: authLoading, signOut, signInWithEmail, signUpWithEmail, requestPasswordReset, updatePassword, refreshSession } = useFleetOpsAuth();
   useEffect(() => {
     const onExpired = () => toast.warning("Supabase session expired", { description: "Sign in again to resume live FleetOps data." });
     window.addEventListener("fleetops-session-expired", onExpired);
@@ -143,7 +143,9 @@ export default function Home({ initialSection = "Command center", publicMode = "
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authFullName, setAuthFullName] = useState("");
-  const [authMode, setAuthMode] = useState<"signin" | "signup">(publicMode === "signup" ? "signup" : "signin");
+  const [authMode, setAuthMode] = useState<"signin" | "signup" | "recover">(publicMode === "signup" ? "signup" : "signin");
+  const [recoveryPassword, setRecoveryPassword] = useState("");
+  const recoveryLink = typeof window !== "undefined" && window.location.hash.includes("type=recovery");
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -166,6 +168,26 @@ export default function Home({ initialSection = "Command center", publicMode = "
       const refreshed = await refreshSession();
       if (refreshed.error) setAuthError(`Session setup failed: ${describeAuthError(refreshed.error, "sign-in")}`);
     }
+    setAuthSubmitting(false);
+  };
+  const handleRecoveryRequest = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setAuthError("");
+    setAuthSubmitting(true);
+    const redirectTo = `${window.location.origin}/?recovery=1`;
+    const { error } = await requestPasswordReset(authEmail, redirectTo);
+    if (error) setAuthError(describeAuthError(error, "password recovery"));
+    else toast.success("Recovery email requested", { description: "If this email belongs to a FleetOps account, Supabase will send a secure password-reset link." });
+    setAuthSubmitting(false);
+  };
+  const handlePasswordUpdate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setAuthError("");
+    if (recoveryPassword.length < 8) { setAuthError("Your new password must be at least 8 characters."); return; }
+    setAuthSubmitting(true);
+    const { error } = await updatePassword(recoveryPassword);
+    if (error) setAuthError(describeAuthError(error, "password update"));
+    else { toast.success("Password updated", { description: "Your FleetOps password has been changed. You can continue to your workspace." }); window.history.replaceState({}, document.title, window.location.pathname); }
     setAuthSubmitting(false);
   };
   const handleSignUp = async (event: React.FormEvent) => {
@@ -212,12 +234,13 @@ export default function Home({ initialSection = "Command center", publicMode = "
   const operatorName = session?.user.user_metadata?.fullName ?? session?.user.email ?? "";
   const operatorInitials = operatorName.slice(0, 2).toUpperCase();
 
+  if (session && recoveryLink) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">Account recovery</div><h1>Choose a new password.</h1><p>Set a new password for your FleetOps account, then continue to your organization workspace.</p><form className="auth-form" onSubmit={handlePasswordUpdate}><label>New password<input required minLength={8} type="password" value={recoveryPassword} onChange={(event) => setRecoveryPassword(event.target.value)} placeholder="At least 8 characters" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? "Updating password…" : "Update password"}</button></form></section></main>;
   if (session && (metadataNeedsOnboarding || backendSummary?.needsOnboarding)) return <OrganizationOnboarding initialName={String(session.user.user_metadata?.fullName ?? backendSummary?.org?.name ?? "")} initialOrganization={String(session.user.user_metadata?.orgName ?? "")} onComplete={async () => { const { error } = await refreshSession(); if (error) { toast.error("Session refresh failed", { description: error.message }); return; } window.localStorage.setItem("fleetops.openTeam", "1"); window.location.reload(); }} />;
   if (session && staleSessionRecoveryAttempted && !backendSummary) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>Refreshing your session.</h1><p>The previous session no longer maps to an active FleetOps organization. We are signing it out safely so you can start or join the correct workspace.</p><div className="workspace-state"><RefreshCw className="spin" size={18} /> Returning to secure entry…</div></section></main>;
   if (session && !backendSummary && summaryError) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>We could not load your workspace.</h1><p>Your Supabase session is active, but the organization summary did not respond. Refresh the page to retry without losing your session.</p><button className="primary-button" onClick={() => window.location.reload()}>Retry workspace load</button></section></main>;
   if (session && !backendSummary && summaryLoading) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>Loading your workspace.</h1><p>We are checking your organization and role before opening operational data.</p><div className="workspace-state"><RefreshCw className="spin" size={18} /> Connecting to Supabase…</div></section></main>;
   if (!authLoading && !session && publicMode === "landing") return <LandingPage />;
-  if (!authLoading && !session) return <div className="auth-page"><div className="auth-card"><div className="brand-lockup auth-brand"><div className="brand-mark"><span aria-hidden="true" className="brand-mark-glyph">F</span></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div></div><div className="panel-kicker">Fleet operations workspace</div><h1>{authMode === "signup" ? "Create your Superadmin account." : "Sign in to your fleet ledger."}</h1><p>{authMode === "signup" ? "Start with your name and a secure Supabase Auth account. Organization setup comes immediately after signup." : "Use your Supabase Auth account to access vehicles, work orders, inventory, team access, and financial records."}</p><form onSubmit={authMode === "signup" ? handleSignUp : handleSignIn} className="auth-form">{authMode === "signup" && <label>Full name<input required minLength={2} value={authFullName} onChange={(event) => setAuthFullName(event.target.value)} placeholder="Your full name" /></label>}<label>Email<input required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@company.com" /></label><label>Password<input required minLength={8} type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? authMode === "signup" ? "Creating account…" : "Signing in…" : authMode === "signup" ? "Create Superadmin account" : "Sign in to FleetOps"}</button></form><button className="auth-switch" onClick={() => { setAuthMode(authMode === "signup" ? "signin" : "signup"); setAuthError(""); }}>{authMode === "signup" ? "Already have an account? Sign in" : "New to FleetOps? Create the first Superadmin account"}</button></div></div>;
+  if (!authLoading && !session) return <div className="auth-page"><div className="auth-card"><div className="brand-lockup auth-brand"><div className="brand-mark"><span aria-hidden="true" className="brand-mark-glyph">F</span></div><div><div className="brand-name">FleetOps</div><div className="brand-tag">Signal ledger</div></div></div><div className="panel-kicker">Fleet operations workspace</div><h1>{authMode === "signup" ? "Create your Superadmin account." : authMode === "recover" ? "Recover your FleetOps account." : "Sign in to your fleet ledger."}</h1><p>{authMode === "signup" ? "Start with your name and a secure Supabase Auth account. Organization setup comes immediately after signup." : authMode === "recover" ? "Enter your email and Supabase will send a secure password-reset link if the account exists." : "Use your Supabase Auth account to access vehicles, work orders, inventory, team access, and financial records."}</p><form onSubmit={authMode === "signup" ? handleSignUp : authMode === "recover" ? handleRecoveryRequest : handleSignIn} className="auth-form">{authMode === "signup" && <label>Full name<input required minLength={2} value={authFullName} onChange={(event) => setAuthFullName(event.target.value)} placeholder="Your full name" /></label>}<label>Email<input required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@company.com" /></label>{authMode !== "recover" && <label>Password<input required minLength={8} type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /></label>}{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? authMode === "signup" ? "Creating account…" : authMode === "recover" ? "Sending recovery link…" : "Signing in…" : authMode === "signup" ? "Create Superadmin account" : authMode === "recover" ? "Send recovery link" : "Sign in to FleetOps"}</button></form><button className="auth-switch" onClick={() => { setAuthMode(authMode === "signin" ? "signup" : "signin"); setAuthError(""); }}>{authMode === "recover" ? "Back to sign in" : authMode === "signup" ? "Already have an account? Sign in" : "Forgot your password?"}</button>{authMode === "signin" && <button className="auth-switch" onClick={() => { setAuthMode("recover"); setAuthError(""); }}>Need account recovery?</button>}</div></div>;
 
   const completeOrder = (id?: string) => {
     if (!id || !session) return;

@@ -1,4 +1,4 @@
-export function describeAuthError(error: unknown, action: "sign-in" | "sign-up" = "sign-in") {
+export function describeAuthError(error: unknown, action: "sign-in" | "sign-up" | "password recovery" | "password update" = "sign-in") {
   const message = error instanceof Error ? error.message : String(error ?? "");
   const normalized = message.toLowerCase();
 
@@ -17,6 +17,8 @@ export function describeAuthError(error: unknown, action: "sign-in" | "sign-up" 
   if (/network|fetch failed|failed to fetch|timeout/.test(normalized)) {
     return "FleetOps could not reach Supabase Auth. Check your connection and try again.";
   }
+  if (action === "password recovery") return message || "FleetOps could not request a recovery link. Please try again.";
+  if (action === "password update") return message || "FleetOps could not update your password. Please try again.";
   return action === "sign-in"
     ? "FleetOps could not sign you in. Check your credentials and try again."
     : message || "FleetOps could not create the account. Please try again.";

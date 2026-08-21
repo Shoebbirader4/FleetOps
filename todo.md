@@ -595,8 +595,8 @@
 
 ## Phase 9 — Authentication, invitations, and communications
 
-- [ ] Add password-reset and account-recovery UX using Supabase Auth.
-- [ ] Add invited-member acceptance page showing organization name, invited email, assigned role, and invitation expiry.
+- [x] Add password-reset and account-recovery UX using Supabase Auth. Sign-in now offers recovery-email requests, and recovery links open a password-update form using Supabase Auth session state.
+- [x] Add invited-member acceptance page showing organization name, invited email, assigned role, and invitation expiry. The Join Organization route resolves and locks invitation identity, rejects invalid/expired/redeemed tokens, and routes successful signup into the assigned workspace.
 - [x] Add invitation resend, revoke, expiry, and duplicate-email handling. Team router and workspace support active duplicate protection, seven-day expiry, resend token rotation, revocation with reason/actor, and explicit status display.
 - [ ] Add transactional invitation email delivery after selecting and configuring an email provider.
 - [ ] Add branded invitation templates with secure join links and no sensitive operational data.
