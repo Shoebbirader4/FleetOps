@@ -510,7 +510,7 @@
 - [x] Add alert-to-work-order conversion with source linkage and source evidence. Threshold-generated work orders carry source details through notification reference IDs and audit metadata, including component baseline and current odometer; validation passes 154 tests.
 - [x] Add escalation rules for unacknowledged critical alerts and overdue work orders. Critical unacknowledged notifications and critical orders older than 24 hours are escalated idempotently; validation passes 155 tests.
 - [x] Add notification center filters by severity, type, role, vehicle, and status. Recipient-scoped filters now cover severity, source type, read/resolution status, and vehicle-linked references; validation passes 156 tests.
-- [ ] Add direct notification actions for acknowledge, open record, create work order, and assign owner.
+- [x] Add direct notification actions for acknowledge, open record, create work order, and assign owner. Mark-read acknowledgement, secure source opening, vehicle-issue dispatch, and tenant-validated mechanic/technician assignment are wired into Notification Center; validation passes 157 tests.
 - [x] Add automated tests for odometer updates, component creation, component updates, replacement resets, duplicate prevention, and escalation. Existing automation, component-procedure, lifecycle, maintenance-dedupe, and escalation coverage now passes 156 tests.
 
 ## Phase 3 — Inventory, vendors, and purchasing
