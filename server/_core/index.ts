@@ -7,6 +7,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { createRequestId, logRequestError } from "../observability";
+import { createRateLimiter } from "../rateLimit";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -34,9 +35,11 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use((req, res, next) => { const requestId = req.header("x-request-id") || createRequestId(); res.locals.requestId = requestId; res.setHeader("x-request-id", requestId); next(); });
+  const allowApiRequest = createRateLimiter(240, 60_000);
   // tRPC API
   app.use(
     "/api/trpc",
+    (req, res, next) => { const result = allowApiRequest(req.ip || req.socket.remoteAddress || "unknown"); res.setHeader("x-rate-limit-remaining", String(result.remaining)); if (!result.allowed) { res.setHeader("retry-after", String(Math.ceil(result.retryAfterMs / 1000))); res.status(429).json({ error: "Too many requests. Please retry shortly.", requestId: res.locals.requestId }); return; } next(); },
     createExpressMiddleware({
       router: appRouter,
       createContext,
