@@ -670,3 +670,6 @@
 - [x] Remove the remaining nested vehicle filter from Accountant metrics and use explicit organization-scoped vehicle IDs for odometer aggregation, avoiding unsupported relational filtering. Validation passed with 131 Vitest tests, TypeScript, and production build.
 - [x] Restore tenant-scoped vehicle context in the Superadmin financial approval queue using an explicit vehicle lookup, preserving approval visibility without unsupported ORM includes. Validation passed with 131 Vitest tests, TypeScript, and production build.
 - [x] Add organization-configured INR labor rate per hour, apply the additive PostgreSQL column through Supabase CLI, and attribute approved work-order labor costs only when both rate and labor hours are positive. Validation passed with 134 Vitest tests, TypeScript, production build, and information_schema verification.
+- [x] Add tenant-safe inventory part detail data with current, reserved, and available balances plus recent movement history.
+- [x] Connect Inventory Manager stock rows to a live selected-part detail panel and movement summary.
+- [x] Add server and client regression coverage for inventory part detail access and availability calculations. Validation passed with 138 Vitest tests, TypeScript, and production build.
