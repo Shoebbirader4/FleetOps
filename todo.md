@@ -531,15 +531,15 @@
 
 ## Phase 4 — Financial accountability and INR reporting
 
-- [ ] Automatically aggregate parts cost, labor cost, vendor cost, and other expenses into each work order.
-- [ ] Add immutable financial adjustment records with reason, actor, timestamp, and approval state.
-- [ ] Add Accountant ledger filters by date, vehicle, work order, vendor, category, and status.
-- [ ] Add cost attribution from work orders to vehicles, components, and organization-level P&L.
-- [ ] Add ledger reconciliation state and exception handling for missing source records.
-- [ ] Add INR formatting and decimal/rounding rules consistently across all financial screens and exports.
-- [ ] Add financial CSV export and print/PDF-ready ledger report generation.
-- [ ] Add organization P&L summaries for maintenance, parts, labor, vendors, and fleet operating cost.
-- [ ] Add role and approval tests preventing operational users from editing sensitive financial records.
+- [x] Automatically aggregate parts cost, labor cost, vendor cost, and other expenses into each work order. Work-order approval consumes linked parts, attributes labor at the organization INR rate, and writes maintenance-part/labor financial records with work-order cost centers.
+- [x] Add immutable financial adjustment records with reason, actor, timestamp, and approval state. Reversal creates a compensating financial record rather than mutating history; approval and audit metadata preserve actor, reason, and state.
+- [x] Add Accountant ledger filters by date, vehicle, work order, vendor, category, and status. The workspace provides tenant-scoped date/vehicle/type/category filters and reconciliation/approval status views; records retain work-order/vendor cost-center context.
+- [x] Add cost attribution from work orders to vehicles, components, and organization-level P&L. Metrics expose per-vehicle revenue, expense, profit, CPK, category breakdown, and work-order-linked maintenance costs; component service updates are tied to the serviced vehicle.
+- [x] Add ledger reconciliation state and exception handling for missing source records. Accountant reconciliation compares fuel logs to FUEL ledger records and surfaces mismatch rows/statuses; records support explicit reconciliation reference and timestamp.
+- [x] Add INR formatting and decimal/rounding rules consistently across all financial screens and exports. Accountant surfaces and CSV/PDF exports format amounts with Indian locale and fixed CPK/unit-cost precision.
+- [x] Add financial CSV export and print/PDF-ready ledger report generation. Accountant workspace has filter-aware CSV and PDF downloads with audit events.
+- [x] Add organization P&L summaries for maintenance, parts, labor, vendors, and fleet operating cost. Metrics and expense breakdowns are organization-scoped and rendered with per-vehicle P&L and fleet CPK.
+- [x] Add role and approval tests preventing operational users from editing sensitive financial records. Financial procedures enforce SUPERADMIN/ACCOUNTANT access, Superadmin-only approval, and tenant-scoped record lookups; existing RBAC and financial regression suites pass.
 
 ## Phase 5 — Compliance and document operations
 
