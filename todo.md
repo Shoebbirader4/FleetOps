@@ -678,3 +678,5 @@
 - [x] Connect the Inventory Manager transfer procedure to a live bin-transfer form with success, error, refresh, and persisted movement feedback. Validation passed with 140 Vitest tests, TypeScript, and production build.
 - [x] Add client regression coverage for Inventory Manager transfer-form submission, destination-bin validation, and persisted mutation wiring. Validation passed with 141 Vitest tests, TypeScript, and production build.
 - [x] Label persisted inventory movement types accurately in the Inventory Manager ledger, including transfer, adjustment, return, reservation, issue, and receipt events. Validation passed with 141 Vitest tests, TypeScript, and production build.
+- [x] Add Superadmin organization-settings controls for the persisted INR labor rate, including safe zero default, non-negative validation, and mutation persistence.
+- [x] Add client regression coverage for labor-rate settings load and save behavior. Validation passed with 143 Vitest tests, TypeScript, and production build.
