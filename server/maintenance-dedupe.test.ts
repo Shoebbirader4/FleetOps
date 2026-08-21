@@ -8,6 +8,8 @@ describe("predictive maintenance threshold deduplication", () => {
     expect(source).toContain('action: "MAINTENANCE_THRESHOLD_TRIGGERED"');
     expect(source).toContain("serviceBaseline");
     expect(source).toContain("sameServiceBaselineAlreadyTriggered");
+    expect(source).toContain("workOrderId: workOrder.id");
+    expect(source).toContain("currentOdometer: Number(vehicle.currentOdometer)");
   });
 
   it("preserves component lifecycle history through audit events", () => {
