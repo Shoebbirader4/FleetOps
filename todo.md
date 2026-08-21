@@ -685,3 +685,5 @@
 - [x] Add client regression coverage for compliance status classification and visible status labels. Validation passed with 145 Vitest tests, TypeScript, and production build.
 - [x] Wire tenant- and role-checked signed-URL document access into the Compliance workspace, with disabled state for missing files and secure open-in-new-tab behavior.
 - [x] Add client regression coverage for secure compliance file access. Validation passed with 146 Vitest tests, TypeScript, and production build.
+- [x] Extend tenant-scoped Accountant metrics with sorted category-level expense totals and show the breakdown beside organization P&L and per-vehicle CPK.
+- [x] Add regression coverage for category expense aggregation and presentation wiring. Validation passed with 148 Vitest tests, TypeScript, and production build.
