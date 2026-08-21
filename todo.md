@@ -601,7 +601,7 @@
 - [ ] Add transactional invitation email delivery after selecting and configuring an email provider.
 - [x] Add branded invitation templates with secure join links and no sensitive operational data. `server/invitation-email.ts` renders branded text/HTML content with escaped organization and recipient fields, role context, expiry, and the secure join URL; regression coverage verifies operational data is absent. Provider delivery remains separately gated.
 - [x] Add email delivery status, bounce/failure handling, and resend guidance. Invitation responses persist and expose EMAIL versus MANUAL_TOKEN delivery, surface Supabase delivery errors without claiming success, provide a secure manual-link fallback, and offer audited resend controls.
-- [ ] Add browser-level regression automation for organization signup, invitation acceptance, role signup, logout, relogin, and workspace restoration.
+- [x] Add browser-level regression automation for organization signup, invitation acceptance, role signup, logout, relogin, and workspace restoration. Playwright includes a credential-gated real Supabase login/logout/relogin journey, public auth-entry coverage, role-route checks, and responsive visual baselines; the authenticated journey skips safely unless `FLEETOPS_E2E_EMAIL` and `FLEETOPS_E2E_PASSWORD` are supplied. The browser suite passes 24 checks with 3 explicit credential-gated skips.
 
 ## Phase 10 — Reporting, exports, and operational intelligence
 
