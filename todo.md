@@ -599,7 +599,7 @@
 - [x] Add invited-member acceptance page showing organization name, invited email, assigned role, and invitation expiry. The Join Organization route resolves and locks invitation identity, rejects invalid/expired/redeemed tokens, and routes successful signup into the assigned workspace.
 - [x] Add invitation resend, revoke, expiry, and duplicate-email handling. Team router and workspace support active duplicate protection, seven-day expiry, resend token rotation, revocation with reason/actor, and explicit status display.
 - [ ] Add transactional invitation email delivery after selecting and configuring an email provider.
-- [ ] Add branded invitation templates with secure join links and no sensitive operational data.
+- [x] Add branded invitation templates with secure join links and no sensitive operational data. `server/invitation-email.ts` renders branded text/HTML content with escaped organization and recipient fields, role context, expiry, and the secure join URL; regression coverage verifies operational data is absent. Provider delivery remains separately gated.
 - [x] Add email delivery status, bounce/failure handling, and resend guidance. Invitation responses persist and expose EMAIL versus MANUAL_TOKEN delivery, surface Supabase delivery errors without claiming success, provide a secure manual-link fallback, and offer audited resend controls.
 - [ ] Add browser-level regression automation for organization signup, invitation acceptance, role signup, logout, relogin, and workspace restoration.
 
