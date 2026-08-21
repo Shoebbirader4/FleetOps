@@ -701,3 +701,5 @@
 - [x] Present recent work-order state events and ownership context in the Accountant workspace. Validation passed with 150 Vitest tests, TypeScript, and production build.
 - [x] Add optimistic concurrency protection to work-order completion so stale submissions and duplicate inventory consumption are rejected before mutation.
 - [x] Validate completion concurrency protection with 150 Vitest tests, TypeScript, and production build.
+- [x] Pass the selected work order update token from the Mechanic and Technician completion form into the completion mutation.
+- [x] Validate operator-side stale-write protection with 150 Vitest tests, TypeScript, and production build.
