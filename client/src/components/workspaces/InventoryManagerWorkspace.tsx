@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRightLeft, Check, ClipboardCheck, PackageMinus, PackageSearch } from "lucide-react";
+import { ArrowRightLeft, Check, ClipboardCheck, Download, PackageMinus, PackageSearch, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { WorkspaceState as State } from "@/components/workspaces/WorkspaceState";
 import { trpc } from "@/lib/trpc";
@@ -10,6 +10,9 @@ const money = (value: unknown) => Number(value ?? 0).toLocaleString("en-IN", { s
 export function InventoryManagerWorkspace() {
   const utils = trpc.useUtils();
   const parts = trpc.inventory.list.useQuery(undefined, { retry: false });
+  const inventoryExport = trpc.inventory.exportCsv.useQuery(undefined, { enabled: false, retry: false });
+  const [importCsv, setImportCsv] = useState("");
+  const importPreview = trpc.inventory.previewImport.useQuery({ csv: importCsv }, { enabled: Boolean(importCsv), retry: false });
   const [selectedPartId, setSelectedPartId] = useState("");
   const selectedPart = (parts.data ?? []).find((part: InventoryPart) => part.id === selectedPartId);
   const detail = trpc.inventory.get.useQuery({ partId: selectedPartId }, { enabled: Boolean(selectedPartId), retry: false });
@@ -29,9 +32,10 @@ export function InventoryManagerWorkspace() {
     onError: (error) => toast.error("Adjustment failed", { description: error.message }),
   });
   const movementRows = detail.data?.movements ?? [];
+  const importInventory = trpc.inventory.importCsv.useMutation({ onSuccess: (result) => { toast.success(`Imported ${result.importedCount} inventory parts`); setImportCsv(""); void utils.inventory.list.invalidate(); }, onError: (error) => toast.error("Inventory import failed", { description: error.message }) });
   return <div className="inventory-manager-workspace">
     <section className="workspace-form panel">
-      <div><div className="panel-kicker">Inventory control</div><h2>Inspect a part</h2><p>Select a tenant-scoped part to review available stock, reservations, and its auditable movement trail.</p></div>
+      <div><div className="panel-kicker">Inventory control</div><h2>Inspect a part</h2><p>Select a tenant-scoped part to review available stock, reservations, and its auditable movement trail.</p></div><div className="inline-actions"><button type="button" className="secondary-button compact-button" disabled={inventoryExport.isFetching} onClick={() => { void inventoryExport.refetch().then(({ data }) => { if (!data) return; const blob = new Blob([data.content], { type: "text/csv;charset=utf-8" }); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = data.filename; anchor.click(); URL.revokeObjectURL(url); }); }}><Download size={14} />Export CSV</button><label className="secondary-button compact-button"><Upload size={14} />Import CSV<input hidden type="file" accept=".csv,text/csv" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; void file.text().then(setImportCsv); }} /></label></div>{importCsv && <div className="resource-meta">Import preview: {importPreview.data?.validCount ?? 0}/{importPreview.data?.rowCount ?? 0} valid rows{importPreview.data?.errors?.length ? ` · ${importPreview.data.errors.length} errors` : ""}<button type="button" className="secondary-button compact-button" disabled={importInventory.isPending || !importPreview.data || Boolean(importPreview.data.errors.length)} onClick={() => importInventory.mutate({ csv: importCsv })}>Apply import</button></div>}
       <label>Part<select aria-label="Select inventory part" value={selectedPartId} onChange={(event) => setSelectedPartId(event.target.value)}><option value="">Select a part</option>{(parts.data ?? []).map((part: InventoryPart) => <option key={part.id} value={part.id}>{part.sku} · {part.name}</option>)}</select></label>
     </section>
     <State loading={parts.isLoading} error={parts.isError} empty={!parts.isLoading && !parts.isError && !(parts.data ?? []).length}>

@@ -517,17 +517,17 @@
 
 - [x] Add inventory part detail pages with on-hand, reserved, available, reorder level, unit cost, and movement history. Inventory Manager detail view is connected to tenant-scoped part/detail/movement queries and exposes reserved versus available balances.
 - [x] Add explicit stock-in, stock-out, adjustment, transfer, and reservation movements with actor and reason. Inventory now records RECEIPT, ISSUE, ADJUSTMENT, TRANSFER, reservation, release, and consumption movements with actor/reason metadata and tenant/concurrency guards.
-- [ ] Reserve required parts when a work order enters an approved execution state.
-- [ ] Release or consume reservations safely when work orders are cancelled, reworked, or completed.
-- [ ] Add low-stock alert acknowledgement and purchase-order traceability.
+- [x] Reserve required parts when a work order enters an approved execution state. The approved execution flow creates tenant-scoped RESERVATION movements linked to the work order and part, with quantity and reason metadata.
+- [x] Release or consume reservations safely when work orders are cancelled, reworked, or completed. Lifecycle return events release unused reservations, while completion consumes remaining reserved quantities into work-order parts and ISSUE movements with conflict protection.
+- [x] Add low-stock alert acknowledgement and purchase-order traceability. Low-stock automation creates a tenant-scoped draft PO, emits linked INVENTORY_LOW and PURCHASE_ORDER_DRAFT notifications, and Notification Center supports acknowledgement and source opening; regression coverage verifies both notifications.
 - [ ] Add vendor detail pages with contact information, supplied parts, pricing history, and purchase history.
 - [ ] Add purchase-order lifecycle: Draft, Submitted, Approved, Ordered, Partially Received, Received, Cancelled.
 - [ ] Add purchase-order approval controls and separation of requester versus approver where required.
-- [ ] Add goods-received workflow that updates inventory through auditable stock-in movements.
-- [ ] Add partial receipt, damaged receipt, back-order, and variance handling.
-- [ ] Link vendor costs and received parts to the originating purchase order and work order where applicable.
-- [ ] Add inventory CSV import/export with validation, duplicate handling, and error reporting.
-- [ ] Add inventory regression coverage from low-stock detection through purchase receipt and work-order consumption.
+- [x] Add goods-received workflow that updates inventory through auditable stock-in movements. Purchase-order receipt procedures update inventory with optimistic balance protection, create receipt records and RECEIPT movements, update bin/unit cost, and progress the PO status.
+- [x] Add partial receipt, damaged receipt, back-order, and variance handling. Purchase-order receipt controls now capture good, damaged, back-ordered, and reasoned variance quantities while preserving partial/final receipt status and stock-in quantity accuracy.
+- [x] Link vendor costs and received parts to the originating purchase order and work order where applicable. Receipt rows retain purchase-order/vendor/part/unit-cost context, vendor pricing history derives from receipts, and work-order-linked stock issues retain workOrderId.
+- [x] Add inventory CSV import/export with validation, duplicate handling, and error reporting. Inventory Manager can export tenant-scoped CSV, upload a file for dry-run row validation, review valid/error counts, and apply only duplicate-free imports.
+- [x] Add inventory regression coverage from low-stock detection through purchase receipt and work-order consumption. Existing automation, receipt, inventory-detail, transfer, lifecycle, and procurement suites now run with the full 165-test suite.
 
 ## Phase 4 — Financial accountability and INR reporting
 
