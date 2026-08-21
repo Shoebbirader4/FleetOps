@@ -95,6 +95,12 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('action: "PURCHASE_ORDER_PARTIALLY_RECEIVED"');
   });
 
+  it("scopes inventory movement visibility by operational role", () => {
+    expect(routersSource).toContain('if (ctx.fleetopsUser.role === "SUPERADMIN" || ctx.fleetopsUser.role === "INVENTORY_MANAGER")');
+    expect(routersSource).toContain('assignedMechanicId: ctx.fleetopsUser.id');
+    expect(routersSource).toContain('workOrderId: { in: assignedOrders.map((order: any) => order.id) }');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
