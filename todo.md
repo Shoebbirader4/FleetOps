@@ -578,7 +578,7 @@
 - [x] Add notification drawer with unread state, role-specific actions, and direct record links. Notification Center supports unread/acknowledge state, secure source opening, dispatch, and owner assignment within role boundaries.
 - [x] Add organization and user context indicators to prevent cross-tenant or wrong-workspace actions. Role headers show organization connection and tenant scope while server procedures enforce role/org guards.
 - [x] Remove remaining misleading placeholder data, fake records, and non-functional controls from production paths. Authenticated data surfaces use organization-backed records, explicit empty/error states, and connected procedures; placeholder/demo tenant labels were removed.
-- [ ] Add visual regression checks for desktop, tablet, and mobile layouts for all role workspaces.
+- [x] Add visual regression checks for desktop, tablet, and mobile layouts for all role workspaces. Playwright runs responsive desktop/tablet/mobile coverage, freezes motion/font loading for deterministic captures, verifies public auth entry points, checks each role route for non-blank rendering, and stores committed landing baselines for visual comparison; the 24-test browser suite passes.
 
 ## Phase 8 — Security, audit, and reliability
 
