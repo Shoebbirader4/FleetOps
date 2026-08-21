@@ -89,6 +89,12 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('workOrderId: input.workOrderId ?? null');
   });
 
+  it("records purchase-order receipts as inventory movements", () => {
+    expect(routersSource).toContain('reason: `Purchase order receipt ${order.id}`');
+    expect(routersSource).toContain('movementType: "RECEIPT", quantity: input.quantity, unitCost: input.unitCost');
+    expect(routersSource).toContain('action: "PURCHASE_ORDER_PARTIALLY_RECEIVED"');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
