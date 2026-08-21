@@ -15,4 +15,10 @@ describe("Inventory Manager part detail UI", () => {
     expect(source).toContain("reserved} reserved · {partDetail.data.available} available");
     expect(source).toContain("persisted reservation, release, and issue movements");
   });
+
+  it("renders the persisted bin-transfer control", () => {
+    expect(source).toContain("const transferStock = trpc.inventory.transfer.useMutation");
+    expect(source).toContain("transferStock.mutate(transfer)");
+    expect(source).toContain("Destination bin location");
+  });
 });
