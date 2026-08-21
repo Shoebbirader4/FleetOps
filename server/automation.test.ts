@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  organization: { findMany: vi.fn() },
   vehicle: { findFirst: vi.fn() },
   workOrder: { findFirst: vi.fn(), create: vi.fn() },
   user: { findMany: vi.fn() },
@@ -8,8 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("./db", () => ({ fleetDb: mocks }));
-
-import { evaluateVehicleMaintenance } from "./automation";
+import { evaluateAllOrganizations, evaluateVehicleMaintenance } from "./automation";
 
 describe("component maintenance automation", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -47,5 +47,20 @@ describe("component maintenance automation", () => {
       type: "MAINTENANCE_THRESHOLD",
       referenceId: "work-order-1",
     })] });
+  });
+
+  it("emits an automation failure signal when the scheduled evaluation fails", async () => {
+    const failure = new Error("refresh_token=secret-value");
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    mocks.organization.findMany.mockRejectedValue(failure);
+
+    await expect(evaluateAllOrganizations()).rejects.toThrow(failure);
+
+    const payload = spy.mock.calls[0]?.[0] as string;
+    expect(payload).toContain('"event":"automation_failure"');
+    expect(payload).toContain('"requestId":"heartbeat"');
+    expect(payload).toContain("[REDACTED]");
+    expect(payload).not.toContain("secret-value");
+    spy.mockRestore();
   });
 });

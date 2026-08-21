@@ -1,4 +1,5 @@
 import { fleetDb } from "./db";
+import { logRequestSignal } from "./observability";
 
 async function notifyRoles(orgId: string, roles: string[], title: string, message: string, type: string, referenceId?: string) {
   const recipients = await fleetDb.user.findMany({ where: { orgId, role: { in: roles } } });
@@ -81,7 +82,7 @@ export async function evaluateEscalations(orgId: string) {
   return escalated;
 }
 
-export async function evaluateAllOrganizations() {
+async function evaluateAllOrganizationsUnsafe() {
   const organizations = await fleetDb.organization.findMany({ select: { id: true } });
   let maintenanceOrders = 0;
   let lowStockParts = 0;
@@ -96,4 +97,13 @@ export async function evaluateAllOrganizations() {
     escalatedAlerts += await evaluateEscalations(org.id);
   }
   return { organizations: organizations.length, maintenanceOrders, lowStockParts, draftPurchaseOrders, expiringDocuments, escalatedAlerts };
+}
+
+export async function evaluateAllOrganizations() {
+  try {
+    return await evaluateAllOrganizationsUnsafe();
+  } catch (error) {
+    logRequestSignal({ event: "automation_failure", requestId: "heartbeat", path: "evaluateAllOrganizations", message: error instanceof Error ? error.message : String(error) });
+    throw error;
+  }
 }
