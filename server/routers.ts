@@ -7,7 +7,7 @@ import { fleetDb } from "./db";
 import { getSupabaseAuthIdentity, provisionFleetOpsUser, supabaseAdmin } from "./supabase";
 import { storageGetSignedUrl, storagePut } from "./storage";
 import { roleCanAct, type FleetRole } from "./role-policy";
-import { BILLING_PLANS, billingLifecycle, calculateMonthlyBill, normalizePlan } from "./billing-plans";
+import { BILLING_PLANS, billingLifecycle, billingWriteAllowed, calculateMonthlyBill, normalizePlan } from "./billing-plans";
 const Priority = { LOW: "LOW", MEDIUM: "MEDIUM", HIGH: "HIGH", CRITICAL: "CRITICAL" } as const;
 const WorkOrderStatus = { OPEN: "OPEN", IN_PROGRESS: "IN_PROGRESS", COMPLETED: "COMPLETED", CANCELLED: "CANCELLED" } as const;
 export const CITY_BUS_MAINTENANCE_TEMPLATE = [
@@ -18,7 +18,7 @@ export const CITY_BUS_MAINTENANCE_TEMPLATE = [
 import { evaluateAllOrganizations, evaluateLowInventory, evaluateVehicleMaintenance } from "./automation";
 
 export function assertWritable(org: { subscriptionTier: string; trialEndsAt: Date; billingStatus?: string | null; paymentFailedAt?: Date | null }) {
-  if (org.billingStatus === "SUSPENDED") throw new TRPCError({ code: "FORBIDDEN", message: "Billing is suspended. Historical data and exports remain available, but operational writes are paused until payment is restored." });
+  if (!billingWriteAllowed(org.billingStatus)) throw new TRPCError({ code: "FORBIDDEN", message: org.billingStatus === "CANCELLED" ? "The subscription is cancelled. Historical data and exports remain available, but operational writes are paused." : "Billing is suspended. Historical data and exports remain available, but operational writes are paused until payment is restored." });
   if (org.subscriptionTier === "TRIAL_FREE" && org.trialEndsAt.getTime() < Date.now()) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Your trial has expired. Upgrade your FleetOps plan to continue writing data." });
   }

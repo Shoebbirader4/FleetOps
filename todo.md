@@ -620,7 +620,7 @@
 - [ ] Add Razorpay integration only after merchant credentials, webhook endpoints, tax requirements, refund policy, and subscription rules are approved.
 - [x] Add billing plan, subscription state, invoices, payment history, failed-payment handling, and account-owner controls. Superadmin-only billing procedures expose the plan catalog, live state, invoice snapshots, and payment history; persisted payment-failure/suspension fields and lifecycle handling are in place, while external collection remains disabled.
 - [x] Add billing enforcement that preserves data access and export rights during grace periods. Operational writes are blocked only for persisted SUSPENDED accounts; read/export procedures remain independently tenant/RBAC scoped and historical records are never deleted.
-- [ ] Add billing and entitlement tests for trial, upgrade, downgrade, cancellation, payment failure, and renewal.
+- [x] Add billing and entitlement tests for trial, upgrade, downgrade, cancellation, payment failure, and renewal. Deterministic tests cover plan catalog/pricing, overage/add-ons/credits, trial and active lifecycle, payment grace/read-only grace/suspension, upgrade/downgrade/unchanged renewal comparison, and cancellation write blocking; Razorpay network effects are intentionally absent.
 
 ## Phase 12 — Release and operational verification
 

@@ -41,6 +41,10 @@ export function billingLifecycle(trialEndsAt: Date, paymentFailedAt?: Date | nul
   return trialEndsAt.getTime() >= now.getTime() ? "TRIAL" as const : "ACTIVE" as const;
 }
 
+export function billingWriteAllowed(status: unknown) {
+  return status !== "SUSPENDED" && status !== "CANCELLED";
+}
+
 export function comparePlanChange(fromPlan: unknown, toPlan: unknown, activeVehicles: number) {
   const from = calculateMonthlyBill(fromPlan, activeVehicles);
   const to = calculateMonthlyBill(toPlan, activeVehicles);

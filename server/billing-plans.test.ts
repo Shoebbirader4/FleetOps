@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BILLING_PLANS, billingLifecycle, calculateMonthlyBill, comparePlanChange, formatInrPaise } from "./billing-plans";
+import { BILLING_PLANS, billingLifecycle, billingWriteAllowed, calculateMonthlyBill, comparePlanChange, formatInrPaise } from "./billing-plans";
 
 describe("FleetOps billing plans", () => {
   it("matches the approved plan catalog", () => {
@@ -34,5 +34,7 @@ describe("FleetOps billing plans", () => {
     expect(comparePlanChange("SCALE", "GROWTH", 100).direction).toBe("DOWNGRADE");
     expect(comparePlanChange("GROWTH", "GROWTH", 100).direction).toBe("UNCHANGED");
     expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), null, new Date("2026-02-01T00:00:00Z"))).toBe("ACTIVE");
+    expect(billingWriteAllowed("PAYMENT_GRACE")).toBe(true);
+    expect(billingWriteAllowed("CANCELLED")).toBe(false);
   });
 });
