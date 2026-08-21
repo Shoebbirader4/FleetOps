@@ -511,7 +511,7 @@
 - [x] Add escalation rules for unacknowledged critical alerts and overdue work orders. Critical unacknowledged notifications and critical orders older than 24 hours are escalated idempotently; validation passes 155 tests.
 - [x] Add notification center filters by severity, type, role, vehicle, and status. Recipient-scoped filters now cover severity, source type, read/resolution status, and vehicle-linked references; validation passes 156 tests.
 - [ ] Add direct notification actions for acknowledge, open record, create work order, and assign owner.
-- [ ] Add automated tests for odometer updates, component creation, component updates, replacement resets, duplicate prevention, and escalation.
+- [x] Add automated tests for odometer updates, component creation, component updates, replacement resets, duplicate prevention, and escalation. Existing automation, component-procedure, lifecycle, maintenance-dedupe, and escalation coverage now passes 156 tests.
 
 ## Phase 3 — Inventory, vendors, and purchasing
 
