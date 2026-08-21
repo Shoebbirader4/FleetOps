@@ -112,6 +112,14 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('(ctx.fleetopsUser.role === "MECHANIC" || ctx.fleetopsUser.role === "TECHNICIAN") && !input.workOrderId');
   });
 
+  it("consumes active reservations and records their INR cost at approval", () => {
+    expect(routersSource).toContain('action: "INVENTORY_PART_RESERVED"');
+    expect(routersSource).toContain('action: "INVENTORY_PART_RETURNED"');
+    expect(routersSource).toContain('tx.workOrderPart.create');
+    expect(routersSource).toContain('movementType: "ISSUE"');
+    expect(routersSource).toContain('amount: partsCost + reservedPartsCost');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
