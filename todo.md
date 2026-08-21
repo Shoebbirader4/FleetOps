@@ -687,3 +687,5 @@
 - [x] Add client regression coverage for secure compliance file access. Validation passed with 146 Vitest tests, TypeScript, and production build.
 - [x] Extend tenant-scoped Accountant metrics with sorted category-level expense totals and show the breakdown beside organization P&L and per-vehicle CPK.
 - [x] Add regression coverage for category expense aggregation and presentation wiring. Validation passed with 148 Vitest tests, TypeScript, and production build.
+- [x] Present tenant-scoped category expense totals in the Accountant workspace alongside P&L and CPK metrics.
+- [x] Protect the category expense breakdown with regression coverage. Validation passed with 148 Vitest tests, TypeScript, and production build.
