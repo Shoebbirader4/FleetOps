@@ -10,6 +10,12 @@ describe("Drizzle FleetOps data layer", () => {
     expect(source).toContain("auditedTables.has(table)");
   });
 
+  it("renders arithmetic update operators for inventory balances", () => {
+    const source = readFileSync(new URL("./db.ts", import.meta.url), "utf8");
+    expect(source).toContain("quote(k)} = ${quote(k)} - ${Number(v.decrement)}");
+    expect(source).toContain("quote(k)} = ${quote(k)} + ${Number(v.increment)}");
+  });
+
   it("exposes the PostgreSQL client and FleetOps table definitions", () => {
     expect(typeof db.execute).toBe("function");
     expect(fleetDb).toBeDefined();
