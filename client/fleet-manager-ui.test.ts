@@ -33,6 +33,15 @@ describe("Fleet Manager workspace UI refinement", () => {
     expect(resourceWorkspace).toContain(">Next</button>");
   });
 
+  it("provides shared resource search, deterministic sorting, paging, and overflow-safe controls", () => {
+    expect(resourceWorkspace).toContain("Search records");
+    expect(resourceWorkspace).toContain("resourcePageCount");
+    expect(resourceWorkspace).toContain("Search ${labels[section]}");
+    expect(resourceWorkspace).toContain("Previous records page");
+    expect(resourceWorkspace).toContain("Next records page");
+    expect(css).toContain("overflow-x:auto");
+  });
+
   it("provides shared context summaries for organization resource pages", () => {
     expect(wrapper).toContain("People and access");
     expect(wrapper).toContain("Parts control");
