@@ -125,6 +125,11 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('dedupeKey: `WORK_ORDER_REVIEW:${order.id}:${approver.id}`');
   });
 
+  it("keeps purchase orders attached to same-tenant vendors", () => {
+    expect(routersSource).toContain('const vendor = await fleetDb.vendor.findFirst({ where: { id: input.vendorId, orgId: ctx.fleetopsUser.orgId } });');
+    expect(routersSource).toContain('Vendor not found in your organization.');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");

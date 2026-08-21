@@ -658,3 +658,4 @@
 - [ ] Add an organization-configured INR labor rate per hour and use it for approved work-order labor-cost attribution without fabricating costs when the rate is zero or unset.
 - [x] Add role-aware notification actions: all recipients can mark alerts read, while Fleet Managers and Superadmins can escalate or resolve with a required note and source-state validation. Validation passed with 122 Vitest tests, TypeScript, and production build.
 - [x] Add client regression coverage for notification lifecycle controls, management-role gating, and required resolution notes. Validation passed with 124 Vitest tests, TypeScript, and production build.
+- [x] Enforce same-organization vendor validation when creating purchase orders, preventing cross-tenant vendor references. Validation passed with 125 Vitest tests, TypeScript, and production build.
