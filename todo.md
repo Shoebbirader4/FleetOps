@@ -699,3 +699,5 @@
 - [x] Validate cross-role work-order detail access with 150 Vitest tests, TypeScript, and production build.
 - [x] Add a tenant-scoped work-order handoff timeline for Fleet Manager, Mechanic, Technician, and Accountant views with read-only role boundaries.
 - [x] Present recent work-order state events and ownership context in the Accountant workspace. Validation passed with 150 Vitest tests, TypeScript, and production build.
+- [x] Add optimistic concurrency protection to work-order completion so stale submissions and duplicate inventory consumption are rejected before mutation.
+- [x] Validate completion concurrency protection with 150 Vitest tests, TypeScript, and production build.

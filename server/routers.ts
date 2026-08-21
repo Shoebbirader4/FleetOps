@@ -255,11 +255,12 @@ export const appRouter = router({
       await recordAudit(ctx, { action: "WORK_ORDER_CREATED", entityType: "WORK_ORDER", entityId: created.id, summary: `Work order created: ${created.title}`, metadata: { priority: created.priority, assignedMechanicId: created.assignedMechanicId } });
       return created;
     }),
-    complete: fleetOpsProcedure.input(z.object({ workOrderId: z.string().uuid(), parts: z.array(z.object({ partId: z.string().uuid(), qtyUsed: z.number().int().positive() })).default([]), laborHours: z.number().nonnegative().max(1000).default(0), repairNotes: z.string().trim().min(3).max(5000).default("Completed from organization oversight."), evidence: z.array(z.object({ fileData: z.string().max(6_000_000), contentType: z.string().startsWith("image/"), fileName: z.string().min(1).max(200), caption: z.string().max(500).optional() })).max(8).default([]) })).mutation(async ({ ctx, input }) => {
+    complete: fleetOpsProcedure.input(z.object({ workOrderId: z.string().uuid(), expectedUpdatedAt: z.coerce.date().optional(), parts: z.array(z.object({ partId: z.string().uuid(), qtyUsed: z.number().int().positive() })).default([]), laborHours: z.number().nonnegative().max(1000).default(0), repairNotes: z.string().trim().min(3).max(5000).default("Completed from organization oversight."), evidence: z.array(z.object({ fileData: z.string().max(6_000_000), contentType: z.string().startsWith("image/"), fileName: z.string().min(1).max(200), caption: z.string().max(500).optional() })).max(8).default([]) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["MECHANIC", "TECHNICIAN"]);
       assertWritable(ctx.fleetopsUser.org);
       const order = await fleetDb.workOrder.findFirst({ where: { id: input.workOrderId, orgId: ctx.fleetopsUser.orgId, ...(["MECHANIC", "TECHNICIAN"].includes(ctx.fleetopsUser.role) ? { assignedMechanicId: ctx.fleetopsUser.id } : {}) }, include: { vehicle: true } });
       if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Work order not found." });
+      if (input.expectedUpdatedAt && new Date(order.updatedAt).getTime() !== input.expectedUpdatedAt.getTime()) throw new TRPCError({ code: "CONFLICT", message: "This work order changed elsewhere. Refresh before submitting completion." });
       if (!["IN_PROGRESS", "REWORK"].includes(order.status)) throw new TRPCError({ code: "BAD_REQUEST", message: "Start work and move the order into execution before submitting completion." });
       const checklistEvents = await fleetDb.auditEvent.findMany({ where: { orgId: ctx.fleetopsUser.orgId, entityType: "WORK_ORDER", entityId: order.id, action: "WORK_ORDER_CHECKLIST_UPDATED" }, orderBy: { createdAt: "desc" }, take: 1 });
       let checklistItems: any[] = [];
