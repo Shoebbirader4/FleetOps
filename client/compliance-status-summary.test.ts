@@ -26,6 +26,13 @@ describe("compliance status summaries", () => {
     expect(source).toContain("updateDocument.mutate({ id: document.id, expiryDate: new Date(renewalDate) })");
   });
 
+  it("exposes confirmed bulk archive controls for compliance documents", () => {
+    expect(source).toContain("Select all compliance documents");
+    expect(source).toContain("Archive selected");
+    expect(source).toContain("Reason for archiving the selected compliance documents");
+    expect(source).toContain("archiveDocument.mutateAsync");
+  });
+
   it("uses the signed-url access procedure for stored files", () => {
     expect(source).toContain("trpc.documents.access.useMutation");
     expect(source).toContain('accessDocument.mutate({ id: document.id, kind: "DOCUMENT" })');
