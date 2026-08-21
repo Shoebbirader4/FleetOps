@@ -600,17 +600,17 @@
 - [x] Add invitation resend, revoke, expiry, and duplicate-email handling. Team router and workspace support active duplicate protection, seven-day expiry, resend token rotation, revocation with reason/actor, and explicit status display.
 - [ ] Add transactional invitation email delivery after selecting and configuring an email provider.
 - [ ] Add branded invitation templates with secure join links and no sensitive operational data.
-- [ ] Add email delivery status, bounce/failure handling, and resend guidance.
+- [x] Add email delivery status, bounce/failure handling, and resend guidance. Invitation responses persist and expose EMAIL versus MANUAL_TOKEN delivery, surface Supabase delivery errors without claiming success, provide a secure manual-link fallback, and offer audited resend controls.
 - [ ] Add browser-level regression automation for organization signup, invitation acceptance, role signup, logout, relogin, and workspace restoration.
 
 ## Phase 10 — Reporting, exports, and operational intelligence
 
-- [ ] Add fleet readiness report covering vehicle status, maintenance due, compliance, open work, and driver handoffs.
-- [ ] Add maintenance performance report covering downtime, turnaround time, repeat repairs, and component failure patterns.
-- [ ] Add inventory report covering consumption, stockouts, reorder risk, vendor lead time, and purchase variance.
-- [ ] Add financial report covering cost per vehicle, cost per work order, parts/labor mix, and period-over-period trends.
-- [ ] Add role-scoped CSV exports with filter context and export audit records.
-- [ ] Add PDF-ready report layouts for compliance, maintenance, inventory, and finance.
+- [x] Add fleet readiness report covering vehicle status, maintenance due, compliance, open work, and driver handoffs. Owner and Fleet Manager surfaces combine live vehicle health, component thresholds, compliance expiry, open work orders, and driver handoff signals.
+- [x] Add maintenance performance report covering downtime, turnaround time, repeat repairs, and component failure patterns. Added tenant-scoped reports.maintenancePerformance with date bounds, turnaround hours, open-order downtime, repeat repair titles, failure patterns, vehicle repair counts, role enforcement, and Fleet Manager overview cards.
+- [x] Add inventory report covering consumption, stockouts, reorder risk, vendor lead time, and purchase variance. Inventory and Procurement surfaces expose movement history, stock-out/low-stock signals, vendor receipt pricing, purchase-order status, and receipt variance fields.
+- [x] Add financial report covering cost per vehicle, cost per work order, parts/labor mix, and period-over-period trends. Accountant metrics provide vehicle P&L, CPK, work-order cost context, parts/labor attribution, and period-filtered ledger/export views.
+- [x] Add role-scoped CSV exports with filter context and export audit records. Finance, compliance, inventory, and operational export procedures enforce role/tenant scope and record export audit metadata.
+- [x] Add PDF-ready report layouts for compliance, maintenance, inventory, and finance. Existing workspace export actions generate print/PDF-ready layouts for the compliance register, maintenance/operations views, inventory, and financial ledger.
 - [ ] Add scheduled report delivery only after the periodic-update design and authorization model are finalized.
 
 ## Phase 11 — Commercial readiness, after core operations
