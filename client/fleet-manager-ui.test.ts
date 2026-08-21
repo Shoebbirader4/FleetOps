@@ -23,6 +23,14 @@ describe("Fleet Manager workspace UI refinement", () => {
     expect(resourceWorkspace).toContain("resource-list");
   });
 
+  it("shows deterministic maintenance severity and full threshold context", () => {
+    const workspace = readFileSync(resolve(process.cwd(), "client/src/components/RoleWorkspaces.tsx"), "utf8");
+    expect(workspace).toContain('severity = overdue && safetyCritical ? "CRITICAL"');
+    expect(workspace).toContain('remainingLifeKm');
+    expect(workspace).toContain('item.severity === "CRITICAL"');
+    expect(workspace).toContain('item.overdue ? " · overdue" : " · due"');
+  });
+
   it("includes the refined operational hierarchy and responsive states", () => {
     expect(css).toContain(".fleet-manager-surface");
     expect(css).toContain(".workspace-page-header");
