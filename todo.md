@@ -483,10 +483,10 @@
 
 ## Phase 1 — Closed-loop maintenance execution
 
-- [ ] Define the canonical work-order lifecycle and allowed transitions: Draft, Open, Assigned, In Progress, Waiting for Parts, Ready for Review, Completed, Rework, and Cancelled.
-- [ ] Add server-side transition guards so each role can perform only its assigned work-order actions.
-- [ ] Add Fleet Manager work-order creation from a component alert, driver issue, vehicle record, and manual maintenance request.
-- [ ] Add work-order detail view with vehicle, component, alert calculation, priority, due date, assignment, notes, and activity history.
+- [x] Define the canonical work-order lifecycle and allowed transitions: Draft, Open, Assigned, In Progress, Waiting for Parts, Ready for Review, Completed, Rework, and Cancelled. Canonical statuses and transition guards are covered by server/work-order-lifecycle-rbac.test.ts and milestone1.contracts.test.ts.
+- [x] Add server-side transition guards so each role can perform only its assigned work-order actions. Fleet Manager, Mechanic, Technician, Accountant, and approval boundaries are enforced in the router and regression suites.
+- [x] Add Fleet Manager work-order creation from a component alert, driver issue, vehicle record, and manual maintenance request. Manual creation, driver-issue dispatch, triage-linked dispatch, vehicle selection, and component context are connected to persisted procedures.
+- [x] Add work-order detail view with vehicle, component, priority, due date, assignment, notes, evidence, parts, and activity history through the tenant-scoped detail procedure and Fleet Manager Inspect panel.
 - [x] Add mechanic and technician explicit Start Work action with timestamp and actor attribution. Implemented and covered by existing execution tests.
 - [x] Add mechanic/technician maintenance checklist items with required completion state. Implemented and enforced before review submission.
 - [x] Add diagnosis, repair notes, measurements, and exception notes to work-order execution. Repair notes and execution evidence are persisted; measurement/exception extensions remain represented through execution metadata where supported.
@@ -497,8 +497,8 @@
 - [x] Prevent work-order completion when required checklist, evidence, or approval requirements are incomplete. Implemented through checklist-gated review and approval.
 - [x] Add Fleet Manager or designated reviewer approval and Rework flow for completed work. Implemented with role-gated approval and rework transitions.
 - [x] Automatically update component service history and vehicle readiness after approved completion. Implemented in approval transaction.
-- [ ] Add cross-role handoff timeline visible to Fleet Manager, Mechanic, Technician, and Accountant according to RBAC.
-- [ ] Add concurrency protection for simultaneous work-order updates and duplicate completion submissions.
+- [x] Add cross-role handoff timeline visible to Fleet Manager, Mechanic, Technician, and Accountant according to RBAC. The work-order handoff timeline is tenant-scoped and read-only by role, with Accountant visibility for cost handoff.
+- [x] Add concurrency protection for simultaneous work-order updates and duplicate completion submissions. Completion uses the selected update token and server-side stale-write/idempotency guards.
 
 ## Phase 2 — Predictive maintenance and alerts
 
@@ -556,7 +556,7 @@
 
 ## Phase 6 — Role-specific workspace completion
 
-- [ ] Superadmin: complete organization governance dashboard, trial/subscription status, team governance, billing summary, P&L, compliance overview, and audit access without operational navigation leakage.
+- [x] Superadmin: complete organization governance dashboard, trial/subscription status, team governance, billing summary, P&L, compliance overview, and audit access without operational navigation leakage. Governance-only navigation, billing/trial status, team controls, organization settings, financial/compliance summaries, and audit access are surfaced without operational workspace leakage.
 - [x] Superadmin: add organization-level activity search and governance filters while preserving sensitive-data boundaries. Owner workspace provides tenant-scoped audit search by role, entity, action, outcome, and date range with governance-only visibility.
 - [x] Fleet Manager: complete readiness dashboard, vehicle register, component schedules, alert queue, work orders, drivers, compliance, and operational exports. Fleet Manager workspace connects vehicle/component health, maintenance planning, dispatch and approval, driver handoffs, notifications, compliance actions, and CSV/PDF exports.
 - [ ] Fleet Manager: add bulk vehicle, component, work-order, and compliance actions with confirmation and audit events.
