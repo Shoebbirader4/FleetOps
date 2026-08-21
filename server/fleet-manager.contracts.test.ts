@@ -101,6 +101,12 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('workOrderId: { in: assignedOrders.map((order: any) => order.id) }');
   });
 
+  it("validates unified triage references inside the tenant", () => {
+    expect(routersSource).toContain("const triageEntity = input.kind === \"VEHICLE_ISSUE\"");
+    expect(routersSource).toContain('Triage item was not found in this organization.');
+    expect(routersSource).toContain('orgId: ctx.fleetopsUser.orgId');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
