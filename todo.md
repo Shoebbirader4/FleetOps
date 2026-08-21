@@ -569,7 +569,7 @@
 
 ## Phase 7 — Shared UI/UX quality
 
-- [ ] Establish consistent page headers, breadcrumbs, context summaries, and primary next actions for every workspace page.
+- [x] Establish consistent page headers, breadcrumbs, context summaries, and primary next actions for every workspace page. FunctionalWorkspace now supplies consistent page context for resource/team/settings surfaces, role workspaces retain their dedicated RoleHeader, and the shell provides an accessible return path plus workflow context summary.
 - [x] Add robust loading, empty, error, retry, success, and unsaved-change states to every data surface. Shared WorkspaceState covers loading, empty, error, and retry; connected mutations provide success/error feedback; Mechanic execution persists an offline-capable local draft and exposes its save state.
 - [ ] Add accessible labels, keyboard navigation, visible focus states, validation messages, and screen-reader-friendly status updates.
 - [ ] Add consistent table sorting, filtering, pagination, responsive cards, and mobile overflow handling.
@@ -631,7 +631,7 @@
 - [x] Verify the complete cross-role scenario: driver issue or component alert → Fleet Manager work order → mechanic execution → inventory part use → review → completion → accountant cost visibility. The existing closed-loop regression and authenticated workflow harness cover issue/alert dispatch, assignment, mechanic execution, reservation/consumption, approval, and Accountant cost visibility.
 - [x] Verify cleanup of temporary test users, invitations, organizations, files, and records after every background regression. Prior Supabase Auth/organization/invitation role harnesses include cleanup and the release checklist requires cleanup after each run.
 - [x] Add a release checklist documenting database migration status, Supabase deployment status, Vercel deployment status, GitHub commit, and rollback checkpoint. See `docs/release-checklist.md`.
-- [ ] Add production monitoring for API errors, authentication failures, background automation failures, storage errors, and slow queries.
+- [x] Add production monitoring for API errors, authentication failures, background automation failures, storage errors, and slow queries. Structured correlated signals are emitted at the API/tRPC, Supabase Auth, automation heartbeat, Supabase Storage, and slow-request boundaries; regression coverage verifies redaction and payload shape. External alert routing can be connected later.
 
 
 # Active Implementation — Milestone 1: Closed-loop maintenance execution

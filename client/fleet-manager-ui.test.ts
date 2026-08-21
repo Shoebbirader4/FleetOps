@@ -14,6 +14,15 @@ describe("Fleet Manager workspace UI refinement", () => {
     expect(wrapper).toContain("Work orders");
     expect(wrapper).toContain("Compliance vault");
     expect(wrapper).toContain("workspace-chain");
+    expect(wrapper).toContain("aria-label={`Return from ${section} to command center`}");
+  });
+
+  it("provides shared context summaries for organization resource pages", () => {
+    expect(wrapper).toContain("People and access");
+    expect(wrapper).toContain("Parts control");
+    expect(wrapper).toContain("Subscription governance");
+    expect(wrapper).toContain("Organization workspace");
+    expect(wrapper).toContain("workflow context");
   });
 
   it("keeps dedicated resource pages on shared responsive form and table primitives", () => {
