@@ -18,4 +18,10 @@ describe("compliance status summaries", () => {
     expect(source).toContain('Kpi label="Missing file"');
     expect(source).toContain('isMissing ? "File missing"');
   });
+
+  it("uses the signed-url access procedure for stored files", () => {
+    expect(source).toContain("trpc.documents.access.useMutation");
+    expect(source).toContain('accessDocument.mutate({ id: document.id, kind: "DOCUMENT" })');
+    expect(source).toContain('disabled={accessDocument.isPending || !document.fileKey}');
+  });
 });

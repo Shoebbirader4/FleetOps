@@ -683,3 +683,5 @@
 - [x] Connect the tenant-safe inventory adjustment procedure to an Inventory Manager cycle-count form with expected-balance conflict protection, non-negative input, and refreshed detail history. Validation passed with 143 Vitest tests, TypeScript, and production build.
 - [x] Add compliance status summaries for valid, expiring, expired, and missing-file records, with accurate per-document labels and tenant-scoped source data.
 - [x] Add client regression coverage for compliance status classification and visible status labels. Validation passed with 145 Vitest tests, TypeScript, and production build.
+- [x] Wire tenant- and role-checked signed-URL document access into the Compliance workspace, with disabled state for missing files and secure open-in-new-tab behavior.
+- [x] Add client regression coverage for secure compliance file access. Validation passed with 146 Vitest tests, TypeScript, and production build.
