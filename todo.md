@@ -703,3 +703,4 @@
 - [x] Validate completion concurrency protection with 150 Vitest tests, TypeScript, and production build.
 - [x] Pass the selected work order update token from the Mechanic and Technician completion form into the completion mutation.
 - [x] Validate operator-side stale-write protection with 150 Vitest tests, TypeScript, and production build.
+- [x] Add tenant-scoped Notification Center Open Record action with secure inline source details for linked work orders, vehicle issues, vehicles, documents, and inventory parts. Validation passed with 157 Vitest tests, TypeScript, and production build.

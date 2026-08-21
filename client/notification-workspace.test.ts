@@ -18,6 +18,12 @@ describe("notification workspace actions", () => {
     expect(source).toContain("trpc.notifications.list.useQuery({ severity: filters.severity");
   });
 
+  it("opens tenant-scoped linked source records", () => {
+    expect(source).toContain("trpc.notifications.sourceDetail.useQuery");
+    expect(source).toContain("Open record");
+    expect(source).toContain("Source record unavailable in your organization scope.");
+  });
+
   it("gates escalation and resolution to management roles", () => {
     expect(source).toContain('me.data?.role === "SUPERADMIN" || me.data?.role === "FLEET_MANAGER"');
     expect(source).toContain("note.trim().length < 3");
