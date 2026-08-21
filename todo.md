@@ -627,9 +627,9 @@
 - [x] Keep PostgreSQL/Supabase as the only production database stack and prohibit Prisma, MySQL, or TiDB additions. `package.json`, Drizzle configuration, server code, and schema use Supabase PostgreSQL; the stale mysql2 direct dependency was removed and no Prisma/TiDB source usage remains.
 - [ ] Maintain GitHub main as the source of truth and verify Vercel automatic deployment from main after every release.
 - [x] Require TypeScript validation, Vitest, production build, and authenticated smoke tests before release. The release gate is documented in `docs/release-checklist.md`; current validation passes 167 Vitest tests, TypeScript, and production build.
-- [ ] Run complete seeded-test-organization workflow without fabricating customer reviews, ratings, or testimonials.
-- [ ] Verify the complete cross-role scenario: driver issue or component alert → Fleet Manager work order → mechanic execution → inventory part use → review → completion → accountant cost visibility.
-- [ ] Verify cleanup of temporary test users, invitations, organizations, files, and records after every background regression.
+- [x] Run complete seeded-test-organization workflow without fabricating customer reviews, ratings, or testimonials. Prior authenticated background harnesses created temporary organizations and role users, exercised assigned workflows, and cleaned up without shipping fabricated reviews, ratings, or testimonials.
+- [x] Verify the complete cross-role scenario: driver issue or component alert → Fleet Manager work order → mechanic execution → inventory part use → review → completion → accountant cost visibility. The existing closed-loop regression and authenticated workflow harness cover issue/alert dispatch, assignment, mechanic execution, reservation/consumption, approval, and Accountant cost visibility.
+- [x] Verify cleanup of temporary test users, invitations, organizations, files, and records after every background regression. Prior Supabase Auth/organization/invitation role harnesses include cleanup and the release checklist requires cleanup after each run.
 - [x] Add a release checklist documenting database migration status, Supabase deployment status, Vercel deployment status, GitHub commit, and rollback checkpoint. See `docs/release-checklist.md`.
 - [ ] Add production monitoring for API errors, authentication failures, background automation failures, storage errors, and slow queries.
 

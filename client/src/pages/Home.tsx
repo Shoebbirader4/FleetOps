@@ -145,7 +145,7 @@ export default function Home({ initialSection = "Command center", publicMode = "
   const [authFullName, setAuthFullName] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup" | "recover">(publicMode === "signup" ? "signup" : "signin");
   const [recoveryPassword, setRecoveryPassword] = useState("");
-  const recoveryLink = typeof window !== "undefined" && window.location.hash.includes("type=recovery");
+  const [isRecoveryFlow, setIsRecoveryFlow] = useState(() => typeof window !== "undefined" && window.location.hash.includes("type=recovery"));
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -187,7 +187,7 @@ export default function Home({ initialSection = "Command center", publicMode = "
     setAuthSubmitting(true);
     const { error } = await updatePassword(recoveryPassword);
     if (error) setAuthError(describeAuthError(error, "password update"));
-    else { toast.success("Password updated", { description: "Your FleetOps password has been changed. You can continue to your workspace." }); window.history.replaceState({}, document.title, window.location.pathname); }
+    else { toast.success("Password updated", { description: "Your FleetOps password has been changed. You can continue to your workspace." }); window.history.replaceState({}, document.title, window.location.pathname); setIsRecoveryFlow(false); }
     setAuthSubmitting(false);
   };
   const handleSignUp = async (event: React.FormEvent) => {
@@ -234,7 +234,7 @@ export default function Home({ initialSection = "Command center", publicMode = "
   const operatorName = session?.user.user_metadata?.fullName ?? session?.user.email ?? "";
   const operatorInitials = operatorName.slice(0, 2).toUpperCase();
 
-  if (session && recoveryLink) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">Account recovery</div><h1>Choose a new password.</h1><p>Set a new password for your FleetOps account, then continue to your organization workspace.</p><form className="auth-form" onSubmit={handlePasswordUpdate}><label>New password<input required minLength={8} type="password" value={recoveryPassword} onChange={(event) => setRecoveryPassword(event.target.value)} placeholder="At least 8 characters" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? "Updating password…" : "Update password"}</button></form></section></main>;
+  if (session && isRecoveryFlow) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">Account recovery</div><h1>Choose a new password.</h1><p>Set a new password for your FleetOps account, then continue to your organization workspace.</p><form className="auth-form" onSubmit={handlePasswordUpdate}><label>New password<input required minLength={8} type="password" value={recoveryPassword} onChange={(event) => setRecoveryPassword(event.target.value)} placeholder="At least 8 characters" /></label>{authError && <div className="auth-error">{authError}</div>}<button className="primary-button" disabled={authSubmitting}>{authSubmitting ? "Updating password…" : "Update password"}</button></form></section></main>;
   if (session && (metadataNeedsOnboarding || backendSummary?.needsOnboarding)) return <OrganizationOnboarding initialName={String(session.user.user_metadata?.fullName ?? backendSummary?.org?.name ?? "")} initialOrganization={String(session.user.user_metadata?.orgName ?? "")} onComplete={async () => { const { error } = await refreshSession(); if (error) { toast.error("Session refresh failed", { description: error.message }); return; } window.localStorage.setItem("fleetops.openTeam", "1"); window.location.reload(); }} />;
   if (session && staleSessionRecoveryAttempted && !backendSummary) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>Refreshing your session.</h1><p>The previous session no longer maps to an active FleetOps organization. We are signing it out safely so you can start or join the correct workspace.</p><div className="workspace-state"><RefreshCw className="spin" size={18} /> Returning to secure entry…</div></section></main>;
   if (session && !backendSummary && summaryError) return <main className="auth-page"><section className="auth-card"><div className="panel-kicker">FleetOps connection</div><h1>We could not load your workspace.</h1><p>Your Supabase session is active, but the organization summary did not respond. Refresh the page to retry without losing your session.</p><button className="primary-button" onClick={() => window.location.reload()}>Retry workspace load</button></section></main>;
