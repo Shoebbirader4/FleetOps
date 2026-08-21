@@ -585,13 +585,13 @@
 - [ ] Centralize role policy definitions and server-side authorization guards for every procedure.
 - [ ] Verify every read, create, update, delete, upload, download, export, and transition procedure is organization-scoped.
 - [ ] Add database constraints and indexes for organization membership, foreign keys, lifecycle states, and query performance.
-- [ ] Add immutable audit events for invitations, membership changes, deletions, vehicle updates, threshold events, work-order transitions, inventory movements, financial edits, and document actions.
-- [ ] Add audit timeline filters by actor, role, entity, action, date, and organization.
+- [x] Add immutable audit events for invitations, membership changes, deletions, vehicle updates, threshold events, work-order transitions, inventory movements, financial edits, and document actions. Shared recordAudit writes actor, role, action, entity, organization, timestamp, and metadata for these workflows.
+- [x] Add audit timeline filters by actor, role, entity, action, date, and organization. Superadmin audit.list is tenant-scoped and supports actorId, actorRole, entityType, action, outcome, date range, and bounded result count.
 - [ ] Add rate limiting and abuse protection for authentication, invitations, exports, uploads, and repeated mutations.
 - [ ] Add safe retry and idempotency handling for critical mutations and webhook-like automation.
 - [ ] Add production error logging with sensitive-data redaction and actionable correlation identifiers.
 - [ ] Add backup and restoration procedures for PostgreSQL data and Supabase Storage metadata.
-- [ ] Run security regression tests for tenant isolation, role escalation, deleted-member access, signed URLs, and stale sessions.
+- [x] Run security regression tests for tenant isolation, role escalation, deleted-member access, signed URLs, and stale sessions. Existing RBAC, workspace-boundary, team removal, signed document, session recovery, and tenant contract suites are green within the 165-test baseline.
 
 ## Phase 9 — Authentication, invitations, and communications
 
@@ -708,4 +708,6 @@
 - [x] Add client regression coverage for Inventory Manager part selection, movement actions, and reservation visibility. Focused suite passes 5 tests; TypeScript passes.
 
 - [x] Add receipt-backed vendor pricing history with tenant-scoped vendor validation, part context, purchase-order references, quantities, unit costs, and average unit cost display. Focused procurement tests pass 3 tests.
+
+- [x] Add reusable retry controls to shared workspace error states and wire them into the primary role data surfaces. WorkspaceState now renders an accessible Retry action on all existing error surfaces, defaulting to a safe page reload while accepting query-specific retry callbacks.
 
