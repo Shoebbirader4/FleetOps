@@ -17,7 +17,8 @@ export const CITY_BUS_MAINTENANCE_TEMPLATE = [
 ] as const;
 import { evaluateAllOrganizations, evaluateLowInventory, evaluateVehicleMaintenance } from "./automation";
 
-export function assertWritable(org: { subscriptionTier: string; trialEndsAt: Date }) {
+export function assertWritable(org: { subscriptionTier: string; trialEndsAt: Date; billingStatus?: string | null; paymentFailedAt?: Date | null }) {
+  if (org.billingStatus === "SUSPENDED") throw new TRPCError({ code: "FORBIDDEN", message: "Billing is suspended. Historical data and exports remain available, but operational writes are paused until payment is restored." });
   if (org.subscriptionTier === "TRIAL_FREE" && org.trialEndsAt.getTime() < Date.now()) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Your trial has expired. Upgrade your FleetOps plan to continue writing data." });
   }

@@ -11,6 +11,11 @@ describe("FleetOps rules", () => {
     expect(() => assertWritable({ subscriptionTier: "TRIAL_FREE", trialEndsAt: new Date(Date.now() - 60_000) })).toThrowError(TRPCError);
   });
 
+  it("blocks persisted suspended accounts while allowing payment-grace writes", () => {
+    expect(() => assertWritable({ subscriptionTier: "GROWTH", trialEndsAt: new Date(Date.now() - 60_000), billingStatus: "PAYMENT_GRACE" })).not.toThrow();
+    expect(() => assertWritable({ subscriptionTier: "GROWTH", trialEndsAt: new Date(Date.now() - 60_000), billingStatus: "SUSPENDED" })).toThrowError(TRPCError);
+  });
+
   it("allows only explicitly granted roles", () => {
     expect(() => requireRole("MECHANIC", ["MECHANIC", "TECHNICIAN"])).not.toThrow();
     expect(() => requireRole("DRIVER", ["MECHANIC", "TECHNICIAN"])).toThrowError(TRPCError);

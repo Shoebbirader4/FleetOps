@@ -35,5 +35,10 @@ await client.query(`CREATE TABLE IF NOT EXISTS "billing_payments" (
   "metadata" text,
   "createdAt" timestamptz NOT NULL DEFAULT now()
 );`);
-console.log("Supabase billing tables ready");
+await client.query(`ALTER TABLE "organizations" ADD COLUMN IF NOT EXISTS "subscriptionStartedAt" timestamptz;`);
+await client.query(`ALTER TABLE "organizations" ADD COLUMN IF NOT EXISTS "renewalAt" timestamptz;`);
+await client.query(`ALTER TABLE "organizations" ADD COLUMN IF NOT EXISTS "paymentFailedAt" timestamptz;`);
+await client.query(`ALTER TABLE "organizations" ADD COLUMN IF NOT EXISTS "billingStatus" text NOT NULL DEFAULT 'TRIAL';`);
+await client.query(`ALTER TABLE "organizations" ADD COLUMN IF NOT EXISTS "suspendedAt" timestamptz;`);
+console.log("Supabase billing tables and organization lifecycle columns ready");
 await client.end();
