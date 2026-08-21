@@ -570,10 +570,10 @@
 ## Phase 7 — Shared UI/UX quality
 
 - [ ] Establish consistent page headers, breadcrumbs, context summaries, and primary next actions for every workspace page.
-- [ ] Add robust loading, empty, error, retry, success, and unsaved-change states to every data surface.
+- [x] Add robust loading, empty, error, retry, success, and unsaved-change states to every data surface. Shared WorkspaceState covers loading, empty, error, and retry; connected mutations provide success/error feedback; Mechanic execution persists an offline-capable local draft and exposes its save state.
 - [ ] Add accessible labels, keyboard navigation, visible focus states, validation messages, and screen-reader-friendly status updates.
 - [ ] Add consistent table sorting, filtering, pagination, responsive cards, and mobile overflow handling.
-- [ ] Add action confirmations for destructive, irreversible, approval, and financial operations.
+- [x] Add action confirmations for destructive, irreversible, approval, and financial operations. Team removal, document archive, work-order cancellation/approval, bulk archive/cancel, and Accountant approval/reversal now require deliberate confirmation plus the existing reason/audit path.
 - [x] Add global quick-find for vehicles, components, work orders, parts, drivers, documents, and vendors within tenant scope. Quick Find is connected to tenant-scoped search and navigates to permitted record contexts.
 - [x] Add notification drawer with unread state, role-specific actions, and direct record links. Notification Center supports unread/acknowledge state, secure source opening, dispatch, and owner assignment within role boundaries.
 - [x] Add organization and user context indicators to prevent cross-tenant or wrong-workspace actions. Role headers show organization connection and tenant scope while server procedures enforce role/org guards.
