@@ -545,8 +545,8 @@
 
 - [x] Add document metadata validation for title, type, owner, issue date, expiry date, and secure storage reference. Upload and renewal procedures validate title/type/expiry, require stored file data, enforce organization scope, and record storage metadata.
 - [x] Add document version history and replacement workflow without losing prior records. Supabase PostgreSQL now stores append-only document_versions with unique document/version numbers, tenant RLS, initial version snapshots, renewal snapshots, and a role-scoped history query.
-- [ ] Add vehicle and driver compliance status summaries with valid, expiring, expired, and missing states.
-- [ ] Add configurable expiry windows and notifications for upcoming renewals.
+- [x] Add vehicle and driver compliance status summaries with valid, expiring, expired, and missing states. Added configurable 1–365 day summary procedure and Compliance workspace panels for vehicle and active assigned-driver readiness.
+- [x] Add configurable expiry windows and notifications for upcoming renewals. Compliance summary accepts an explicit expiryWindowDays value and displays the active 30-day window; existing automation handles expiry notifications.
 - [x] Add Fleet Manager compliance action queue with direct document upload and renewal actions. Compliance workspace provides upload, renewal, signed file access, expiry KPIs, and version-history controls.
 - [x] Add secure signed-URL access checks for organization and role scope. Document access and version history are restricted to tenant-scoped SUPERADMIN/FLEET_MANAGER procedures; focused compliance tests pass 6 tests.
 - [ ] Add document deletion/archive controls with audit history and retention rules.
@@ -706,4 +706,6 @@
 - [x] Add tenant-scoped Notification Center Open Record action with secure inline source details for linked work orders, vehicle issues, vehicles, documents, and inventory parts. Validation passed with 157 Vitest tests, TypeScript, and production build.
 - [x] Enhance Inventory Manager part detail with reserved/available balances and auditable transfer/adjustment controls using the existing tenant-scoped inventory contracts. Published as a tenant-scoped selection/detail surface with movement history, bin transfer, and optimistic cycle-count adjustment controls.
 - [x] Add client regression coverage for Inventory Manager part selection, movement actions, and reservation visibility. Focused suite passes 5 tests; TypeScript passes.
+
+- [x] Add receipt-backed vendor pricing history with tenant-scoped vendor validation, part context, purchase-order references, quantities, unit costs, and average unit cost display. Focused procurement tests pass 3 tests.
 

@@ -18,6 +18,12 @@ describe("compliance document versioning contracts", () => {
     expect(routerSource).toContain('requireRole(ctx.fleetopsUser.role, input.kind === "DOCUMENT" ? ["SUPERADMIN", "FLEET_MANAGER"]');
   });
 
+  it("returns configurable vehicle and assigned-driver readiness states", () => {
+    expect(routerSource).toContain("expiryWindowDays: z.number().int().min(1).max(365).default(30)");
+    expect(routerSource).toContain("const driverRows = (assignments as any[])");
+    expect(routerSource).toContain("return { expiryWindowDays: windowDays, counts, vehicles: vehicleRows, drivers: driverRows, driverCounts }");
+  });
+
   it("defines tenant RLS and uniqueness for document versions in Supabase", () => {
     expect(migrationSource).toContain('references public.documents(id) on delete cascade');
     expect(migrationSource).toContain('unique ("documentId", "versionNumber")');

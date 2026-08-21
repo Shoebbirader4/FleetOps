@@ -10,6 +10,13 @@ describe("procurement workspace", () => {
     expect(source).toContain("purchaseOrders.list.useQuery");
   });
 
+  it("shows receipt-backed vendor pricing history after vendor selection", () => {
+    expect(source).toContain("trpc.vendors.pricingHistory.useQuery({ vendorId: selectedVendorId }");
+    expect(source).toContain("Pricing history");
+    expect(source).toContain("averageUnitCost");
+    expect(source).toContain("setSelectedVendorId(event.target.value)");
+  });
+
   it("keeps receipt controls connected to persisted purchase-order procedures", () => {
     expect(source).toContain("purchaseOrders.receivePartial.useMutation");
     expect(source).toContain("purchaseOrders.updateStatus.useMutation");
