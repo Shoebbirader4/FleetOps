@@ -9,7 +9,7 @@ import { serveStatic, setupVite } from "./vite";
 import { createRequestId, logRequestError, logRequestSignal } from "../observability";
 import { createRateLimiter } from "../rateLimit";
 import { fleetDb } from "../db";
-import { verifyRazorpayWebhook } from "../razorpay";
+import { isRazorpayWebhookEnabled, verifyRazorpayWebhook } from "../razorpay";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -34,6 +34,7 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   app.post("/api/razorpay/webhook", express.raw({ type: "application/json", limit: "2mb" }), async (req, res) => {
+    if (!isRazorpayWebhookEnabled()) { res.status(404).json({ error: "Webhook processing is disabled" }); return; }
     const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : "";
     if (!verifyRazorpayWebhook(rawBody, req.header("x-razorpay-signature"))) { res.status(400).json({ error: "Invalid webhook signature", requestId: res.locals.requestId ?? "unknown" }); return; }
     const eventId = req.header("x-razorpay-event-id");

@@ -1,5 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+export function isRazorpayWebhookEnabled() {
+  return process.env.RAZORPAY_TEST_WEBHOOK_ENABLED === "true" && Boolean(process.env.RAZORPAY_TEST_WEBHOOK_SECRET);
+}
+
 export function assertRazorpayTestMode() {
   const keyId = process.env.RAZORPAY_TEST_KEY_ID ?? "";
   const keySecret = process.env.RAZORPAY_TEST_KEY_SECRET ?? "";
