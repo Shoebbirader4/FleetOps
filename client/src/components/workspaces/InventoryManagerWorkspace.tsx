@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRightLeft, Check, ClipboardCheck, PackageSearch } from "lucide-react";
+import { ArrowRightLeft, Check, ClipboardCheck, PackageMinus, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
 import { WorkspaceState as State } from "@/components/workspaces/WorkspaceState";
 import { trpc } from "@/lib/trpc";
@@ -15,9 +15,14 @@ export function InventoryManagerWorkspace() {
   const detail = trpc.inventory.get.useQuery({ partId: selectedPartId }, { enabled: Boolean(selectedPartId), retry: false });
   const [transfer, setTransfer] = useState({ toBinLocation: "", reason: "" });
   const [adjustment, setAdjustment] = useState({ delta: "0", reason: "" });
+  const [issue, setIssue] = useState({ quantity: "1", reason: "" });
   const transferPart = trpc.inventory.transfer.useMutation({
     onSuccess: () => { toast.success("Bin transfer recorded"); setTransfer({ toBinLocation: "", reason: "" }); void utils.inventory.list.invalidate(); void detail.refetch(); void utils.inventory.movements.invalidate(); },
     onError: (error) => toast.error("Bin transfer failed", { description: error.message }),
+  });
+  const issuePart = trpc.inventory.issue.useMutation({
+    onSuccess: () => { toast.success("Stock-out movement recorded"); setIssue({ quantity: "1", reason: "" }); void utils.inventory.list.invalidate(); void detail.refetch(); void utils.inventory.movements.invalidate(); },
+    onError: (error) => toast.error("Stock-out failed", { description: error.message }),
   });
   const adjustPart = trpc.inventory.adjust.useMutation({
     onSuccess: () => { toast.success("Cycle-count adjustment recorded"); setAdjustment({ delta: "0", reason: "" }); void utils.inventory.list.invalidate(); void detail.refetch(); void utils.inventory.movements.invalidate(); },
@@ -43,6 +48,12 @@ export function InventoryManagerWorkspace() {
             <label>Destination bin<input required value={transfer.toBinLocation} onChange={(event) => setTransfer((current) => ({ ...current, toBinLocation: event.target.value }))} placeholder="Rack B · Shelf 2" /></label>
             <label>Reason<input required minLength={3} maxLength={300} value={transfer.reason} onChange={(event) => setTransfer((current) => ({ ...current, reason: event.target.value }))} placeholder="Cycle reorganization" /></label>
             <button className="secondary-button" disabled={transferPart.isPending}><ArrowRightLeft size={15} />{transferPart.isPending ? "Recording…" : "Record bin transfer"}</button>
+          </form>
+          <form className="workspace-form panel" onSubmit={(event) => { event.preventDefault(); const quantity = Number(issue.quantity); if (!issue.reason.trim() || !Number.isInteger(quantity) || quantity < 1 || quantity > Number(selectedPart.quantityOnHand)) return; issuePart.mutate({ partId: selectedPart.id, quantity, reason: issue.reason.trim() }); }}>
+            <div><div className="panel-kicker">Movement · stock out</div><h3>Issue inventory</h3><p>Record a controlled stock-out with actor, reason, and an immutable negative movement.</p></div>
+            <label>Quantity<input required type="number" min="1" max={selectedPart.quantityOnHand} step="1" value={issue.quantity} onChange={(event) => setIssue((current) => ({ ...current, quantity: event.target.value }))} /></label>
+            <label>Reason<input required minLength={3} maxLength={300} value={issue.reason} onChange={(event) => setIssue((current) => ({ ...current, reason: event.target.value }))} placeholder="Issued for workshop use" /></label>
+            <button className="secondary-button" disabled={issuePart.isPending}><PackageMinus size={15} />{issuePart.isPending ? "Recording…" : "Record stock out"}</button>
           </form>
           <form className="workspace-form panel" onSubmit={(event) => { event.preventDefault(); const delta = Number(adjustment.delta); if (!adjustment.reason.trim() || !Number.isInteger(delta) || delta === 0) return; adjustPart.mutate({ partId: selectedPart.id, expectedQuantityOnHand: Number(selectedPart.quantityOnHand), delta, reason: adjustment.reason.trim() }); }}>
             <div><div className="panel-kicker">Movement · adjustment</div><h3>Post cycle-count variance</h3><p>Use a signed quantity and the loaded balance to prevent overwriting a newer count.</p></div>

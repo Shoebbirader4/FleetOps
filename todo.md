@@ -515,8 +515,8 @@
 
 ## Phase 3 — Inventory, vendors, and purchasing
 
-- [ ] Add inventory part detail pages with on-hand, reserved, available, reorder level, unit cost, and movement history.
-- [ ] Add explicit stock-in, stock-out, adjustment, transfer, and reservation movements with actor and reason.
+- [x] Add inventory part detail pages with on-hand, reserved, available, reorder level, unit cost, and movement history. Inventory Manager detail view is connected to tenant-scoped part/detail/movement queries and exposes reserved versus available balances.
+- [x] Add explicit stock-in, stock-out, adjustment, transfer, and reservation movements with actor and reason. Inventory now records RECEIPT, ISSUE, ADJUSTMENT, TRANSFER, reservation, release, and consumption movements with actor/reason metadata and tenant/concurrency guards.
 - [ ] Reserve required parts when a work order enters an approved execution state.
 - [ ] Release or consume reservations safely when work orders are cancelled, reworked, or completed.
 - [ ] Add low-stock alert acknowledgement and purchase-order traceability.
