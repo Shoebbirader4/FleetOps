@@ -135,6 +135,11 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('Purchase order vendor is not in this organization.');
   });
 
+  it("returns tenant-scoped vendor details with purchase-order listings", () => {
+    expect(routersSource).toContain('const [orders, vendors] = await Promise.all([fleetDb.purchaseOrder.findMany');
+    expect(routersSource).toContain('vendor: vendorById.get(order.vendorId) ?? null');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
