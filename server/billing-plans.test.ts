@@ -1,0 +1,31 @@
+import { describe, expect, it } from "vitest";
+import { BILLING_PLANS, billingLifecycle, calculateMonthlyBill, formatInrPaise } from "./billing-plans";
+
+describe("FleetOps billing plans", () => {
+  it("matches the approved plan catalog", () => {
+    expect(BILLING_PLANS.STARTER).toMatchObject({ platformFeePaise: 999900, includedVehicles: 10, overageVehicleFeePaise: 75000 });
+    expect(BILLING_PLANS.GROWTH).toMatchObject({ platformFeePaise: 2499900, includedVehicles: 50, overageVehicleFeePaise: 60000 });
+    expect(BILLING_PLANS.SCALE).toMatchObject({ platformFeePaise: 5999900, includedVehicles: 150, overageVehicleFeePaise: 45000 });
+    expect(BILLING_PLANS.ENTERPRISE).toMatchObject({ platformFeePaise: 12500000, includedVehicles: 500, overageVehicleFeePaise: 40000 });
+  });
+
+  it("calculates 100-vehicle Growth billing deterministically", () => {
+    const bill = calculateMonthlyBill("GROWTH", 100);
+    expect(bill.overageVehicles).toBe(50);
+    expect(bill.subtotalPaise).toBe(5499900);
+    expect(formatInrPaise(bill.subtotalPaise)).toBe("₹54,999.00");
+  });
+
+  it("keeps credits and add-ons in the invoice calculation", () => {
+    const bill = calculateMonthlyBill("STARTER", 12, 12500, 5000);
+    expect(bill.overageVehicles).toBe(2);
+    expect(bill.subtotalPaise).toBe(1157400);
+  });
+
+  it("models seven-day write grace, read-only grace, and suspension", () => {
+    const paymentFailedAt = new Date("2026-01-01T00:00:00Z");
+    expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), paymentFailedAt, new Date("2026-01-07T00:00:00Z"))).toBe("PAYMENT_GRACE");
+    expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), paymentFailedAt, new Date("2026-01-15T00:00:00Z"))).toBe("READ_ONLY_GRACE");
+    expect(billingLifecycle(new Date("2026-01-01T00:00:00Z"), paymentFailedAt, new Date("2026-01-30T00:00:00Z"))).toBe("SUSPENDED");
+  });
+});

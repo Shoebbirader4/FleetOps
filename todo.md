@@ -715,3 +715,5 @@
 
 
 - [x] Audit and align deployment/database architecture: verify Vercel target, remove unnecessary Manus deployment/branding settings, and enforce PostgreSQL/Supabase-only database dependencies and configuration. Active Vercel builds use serverless-entry.ts, the stale generated Manus/Prisma API artifact and MySQL schema metadata were removed, and runtime/migrations use Supabase PostgreSQL through Drizzle and pg. Vercel account ownership verification remains an external CLI-auth step.
+
+- [ ] Implement approved hybrid subscription billing: Starter ₹9,999/10 vehicles + ₹750 overage, Growth ₹24,999/50 + ₹600 overage, Scale ₹59,999/150 + ₹450 overage, Enterprise from ₹1,25,000; active-vehicle snapshots, entitlements, invoices, payment history, grace periods, credits, and Razorpay-ready boundaries without enabling payment execution.
