@@ -38,11 +38,12 @@ async function startServer() {
     if (!verifyRazorpayWebhook(rawBody, req.header("x-razorpay-signature"))) { res.status(400).json({ error: "Invalid webhook signature", requestId: res.locals.requestId ?? "unknown" }); return; }
     const eventId = req.header("x-razorpay-event-id");
     if (!eventId) { res.status(400).json({ error: "Missing webhook event id", requestId: res.locals.requestId ?? "unknown" }); return; }
-    const payload = JSON.parse(rawBody) as { event?: string; payload?: { subscription?: { entity?: { notes?: { orgId?: string } } } } };
+    let payload: { event?: string; payload?: { subscription?: { entity?: { notes?: { orgId?: string } } } } };
+    try { payload = JSON.parse(rawBody); } catch { res.status(400).json({ error: "Invalid webhook JSON", requestId: res.locals.requestId ?? "unknown" }); return; }
     const orgId = payload.payload?.subscription?.entity?.notes?.orgId;
     if (orgId && ["subscription.activated", "subscription.charged", "subscription.pending", "subscription.halted"].includes(payload.event ?? "")) {
       const billingStatus = payload.event === "subscription.halted" ? "SUSPENDED" : payload.event === "subscription.pending" ? "PAYMENT_GRACE" : "ACTIVE";
-      await fleetDb.organization.update({ where: { id: orgId }, data: { billingStatus, paymentFailedAt: billingStatus === "PAYMENT_GRACE" ? new Date() : null, billingSuspendedAt: billingStatus === "SUSPENDED" ? new Date() : null } });
+      await fleetDb.organization.update({ where: { id: orgId }, data: { billingStatus, paymentFailedAt: billingStatus === "PAYMENT_GRACE" ? new Date() : null, suspendedAt: billingStatus === "SUSPENDED" ? new Date() : null } });
     }
     res.status(200).json({ received: true, eventId, mode: "TEST" });
   });
