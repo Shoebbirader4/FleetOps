@@ -120,6 +120,11 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('amount: partsCost + reservedPartsCost');
   });
 
+  it("notifies Fleet Manager and Superadmin approvers", () => {
+    expect(routersSource).toContain('role: { in: ["SUPERADMIN", "FLEET_MANAGER"] }');
+    expect(routersSource).toContain('dedupeKey: `WORK_ORDER_REVIEW:${order.id}:${approver.id}`');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
