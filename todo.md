@@ -582,15 +582,15 @@
 
 ## Phase 8 — Security, audit, and reliability
 
-- [ ] Centralize role policy definitions and server-side authorization guards for every procedure.
-- [ ] Verify every read, create, update, delete, upload, download, export, and transition procedure is organization-scoped.
-- [ ] Add database constraints and indexes for organization membership, foreign keys, lifecycle states, and query performance.
+- [x] Centralize role policy definitions and server-side authorization guards for every procedure. `server/role-policy.ts` defines the seven FleetOps roles and policy groups; `requireRole` delegates to `roleCanAct`, while procedures apply the shared guard before mutations and protected reads.
+- [x] Verify every read, create, update, delete, upload, download, export, and transition procedure is organization-scoped. Router review and tenant/RBAC regression suites cover organization filters, assigned-vehicle/work-order restrictions, signed file access, exports, lifecycle transitions, and cross-tenant reference rejection.
+- [x] Add database constraints and indexes for organization membership, foreign keys, lifecycle states, and query performance. Supabase migrations and the Drizzle schema define tenant foreign keys, unique membership/invitation constraints, lifecycle enums, and organization/query indexes.
 - [x] Add immutable audit events for invitations, membership changes, deletions, vehicle updates, threshold events, work-order transitions, inventory movements, financial edits, and document actions. Shared recordAudit writes actor, role, action, entity, organization, timestamp, and metadata for these workflows.
 - [x] Add audit timeline filters by actor, role, entity, action, date, and organization. Superadmin audit.list is tenant-scoped and supports actorId, actorRole, entityType, action, outcome, date range, and bounded result count.
 - [ ] Add rate limiting and abuse protection for authentication, invitations, exports, uploads, and repeated mutations.
-- [ ] Add safe retry and idempotency handling for critical mutations and webhook-like automation.
+- [x] Add safe retry and idempotency handling for critical mutations and webhook-like automation. Threshold alerts, escalations, invitation redemption, work-order completion, stock issuance, and stale updates use dedupe keys, one-time checks, optimistic tokens, or atomic guards.
 - [ ] Add production error logging with sensitive-data redaction and actionable correlation identifiers.
-- [ ] Add backup and restoration procedures for PostgreSQL data and Supabase Storage metadata.
+- [x] Add backup and restoration procedures for PostgreSQL data and Supabase Storage metadata. `backup-recovery-runbook.md` documents PostgreSQL PITR/exports, Storage object/checksum pairing, Auth recovery, migration verification, tenant/RBAC smoke checks, RPO, retention, and rollback safeguards.
 - [x] Run security regression tests for tenant isolation, role escalation, deleted-member access, signed URLs, and stale sessions. Existing RBAC, workspace-boundary, team removal, signed document, session recovery, and tenant contract suites are green within the 165-test baseline.
 
 ## Phase 9 — Authentication, invitations, and communications
