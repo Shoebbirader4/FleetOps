@@ -46,5 +46,7 @@ describe("Fleet Manager workspace UI refinement", () => {
     expect(css).toContain(".workspace-chain");
     expect(css).toContain("@media (max-width: 620px)");
     expect(css).toContain(".workspace-state");
+    expect(css).toContain("button:focus-visible");
+    expect(css).toContain("overflow-x:auto");
   });
 });
