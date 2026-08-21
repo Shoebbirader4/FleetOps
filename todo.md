@@ -697,3 +697,5 @@
 - [x] Validate the work-order detail UI and backend with 150 Vitest tests, TypeScript, and production build.
 - [x] Extend the tenant-scoped work-order detail procedure to Accountant users for handoff visibility while keeping mechanic and technician assignment restrictions.
 - [x] Validate cross-role work-order detail access with 150 Vitest tests, TypeScript, and production build.
+- [x] Add a tenant-scoped work-order handoff timeline for Fleet Manager, Mechanic, Technician, and Accountant views with read-only role boundaries.
+- [x] Present recent work-order state events and ownership context in the Accountant workspace. Validation passed with 150 Vitest tests, TypeScript, and production build.
