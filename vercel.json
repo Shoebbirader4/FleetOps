@@ -4,7 +4,7 @@
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install --frozen-lockfile",
   "rewrites": [
-    { "source": "/api/trpc/:path*", "destination": "/api" },
+    { "source": "/api/trpc/:path*", "destination": "/api/index" },
     { "source": "/((?!api(?:/|$)).*)", "destination": "/index.html" }
   ]
 }
