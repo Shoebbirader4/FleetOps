@@ -18,3 +18,15 @@ export function logRequestError(input: { requestId: string; path?: string; code?
     timestamp: new Date().toISOString(),
   }));
 }
+
+export function logRequestSignal(input: { event: "auth_failure" | "slow_query" | "storage_error" | "automation_failure"; requestId: string; path?: string; durationMs?: number; code?: string; message?: string }) {
+  console.warn(JSON.stringify({
+    event: input.event,
+    requestId: input.requestId,
+    path: input.path ?? "unknown",
+    ...(input.durationMs === undefined ? {} : { durationMs: Math.round(input.durationMs) }),
+    ...(input.code ? { code: input.code } : {}),
+    ...(input.message ? { message: redactMessage(input.message) } : {}),
+    timestamp: new Date().toISOString(),
+  }));
+}

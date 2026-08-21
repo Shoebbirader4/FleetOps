@@ -6,7 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { createRequestId, logRequestError } from "../observability";
+import { createRequestId, logRequestError, logRequestSignal } from "../observability";
 import { createRateLimiter } from "../rateLimit";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -40,10 +40,11 @@ async function startServer() {
   app.use(
     "/api/trpc",
     (req, res, next) => { const result = allowApiRequest(req.ip || req.socket.remoteAddress || "unknown"); res.setHeader("x-rate-limit-remaining", String(result.remaining)); if (!result.allowed) { res.setHeader("retry-after", String(Math.ceil(result.retryAfterMs / 1000))); res.status(429).json({ error: "Too many requests. Please retry shortly.", requestId: res.locals.requestId }); return; } next(); },
+    (req, res, next) => { const startedAt = performance.now(); res.on("finish", () => { const durationMs = performance.now() - startedAt; if (durationMs >= 1000) logRequestSignal({ event: "slow_query", requestId: res.locals.requestId ?? "unknown", path: req.path, durationMs }); }); next(); },
     createExpressMiddleware({
       router: appRouter,
       createContext,
-      onError: ({ path, error, req }) => { logRequestError({ requestId: req.res?.locals?.requestId ?? "unknown", path, code: error.code, message: error.message }); },
+      onError: ({ path, error, req }) => { const requestId = req.res?.locals?.requestId ?? "unknown"; logRequestError({ requestId, path, code: error.code, message: error.message }); if (error.code === "UNAUTHORIZED") logRequestSignal({ event: "auth_failure", requestId, path, code: error.code, message: error.message }); },
     })
   );
   // development mode uses Vite, production mode uses static files
