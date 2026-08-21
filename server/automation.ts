@@ -16,8 +16,12 @@ export async function evaluateVehicleMaintenance(vehicleId: string, orgId: strin
     if (consumed < Number(component.alertThresholdKm)) continue;
     const existing = await fleetDb.workOrder.findFirst({ where: { orgId, vehicleId, status: { in: ["OPEN", "IN_PROGRESS", "WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK"] }, title: { contains: component.name } } });
     if (existing) continue;
+    const priorTriggers = fleetDb.auditEvent?.findMany ? await fleetDb.auditEvent.findMany({ where: { orgId, entityType: "COMPONENT", entityId: component.id, action: "MAINTENANCE_THRESHOLD_TRIGGERED" }, orderBy: { createdAt: "desc" }, take: 10 }) : [];
+    const sameServiceBaselineAlreadyTriggered = (priorTriggers as any[]).some((event) => { try { return Number(JSON.parse(event.metadata ?? "{}").serviceBaseline ?? -1) === Number(component.lastServicedOdometer); } catch { return false; } });
+    if (sameServiceBaselineAlreadyTriggered) continue;
     const workOrder = await fleetDb.workOrder.create({ data: { orgId, vehicleId, title: `${component.name} service threshold reached`, description: `${component.name} has consumed ${Math.round((consumed / Number(component.expectedLifeKm)) * 100)}% of expected life.`, priority: consumed >= Number(component.expectedLifeKm) ? "CRITICAL" : "HIGH" } });
     await notifyRoles(orgId, ["SUPERADMIN", "FLEET_MANAGER"], "Predictive maintenance alert", `${vehicle.licensePlate}: ${component.name} crossed its service threshold.`, "MAINTENANCE_THRESHOLD", workOrder.id);
+    if (fleetDb.auditEvent?.create) await fleetDb.auditEvent.create({ data: { id: crypto.randomUUID(), orgId, actorId: null, action: "MAINTENANCE_THRESHOLD_TRIGGERED", entityType: "COMPONENT", entityId: component.id, summary: `Threshold triggered for ${component.name}`, metadata: JSON.stringify({ workOrderId: workOrder.id, serviceBaseline: Number(component.lastServicedOdometer), currentOdometer: Number(vehicle.currentOdometer), alertThresholdKm: Number(component.alertThresholdKm) }), createdAt: new Date() } });
     createdWorkOrders += 1;
   }
   return { createdWorkOrders };
