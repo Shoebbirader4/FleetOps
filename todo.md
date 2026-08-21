@@ -662,3 +662,4 @@
 - [x] Enforce same-organization vendor validation during purchase-order receiving, preventing legacy or malformed orders from increasing inventory through a cross-tenant vendor relationship. Validation passed with 126 Vitest tests, TypeScript, and production build.
 - [x] Return tenant-scoped vendor details with purchase-order listings through an explicit vendor lookup, compatible with the custom Drizzle adapter. Validation passed with 127 Vitest tests, TypeScript, and production build.
 - [x] Add procurement workspace regression coverage for tenant-resolved vendor context, INR totals, status transitions, and receipt controls. Validation passed with 129 Vitest tests, TypeScript, and production build.
+- [x] Add compliance export regression coverage for organization-scoped CSV/PDF procedures, role restrictions, and export audit events. Validation passed with 131 Vitest tests, TypeScript, and production build.
