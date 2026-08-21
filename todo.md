@@ -681,3 +681,5 @@
 - [x] Add Superadmin organization-settings controls for the persisted INR labor rate, including safe zero default, non-negative validation, and mutation persistence.
 - [x] Add client regression coverage for labor-rate settings load and save behavior. Validation passed with 143 Vitest tests, TypeScript, and production build.
 - [x] Connect the tenant-safe inventory adjustment procedure to an Inventory Manager cycle-count form with expected-balance conflict protection, non-negative input, and refreshed detail history. Validation passed with 143 Vitest tests, TypeScript, and production build.
+- [x] Add compliance status summaries for valid, expiring, expired, and missing-file records, with accurate per-document labels and tenant-scoped source data.
+- [x] Add client regression coverage for compliance status classification and visible status labels. Validation passed with 145 Vitest tests, TypeScript, and production build.

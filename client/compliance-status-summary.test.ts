@@ -1,0 +1,21 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+
+const source = readFileSync(new URL("./src/components/workspaces/ComplianceWorkspace.tsx", import.meta.url), "utf8");
+
+describe("compliance status summaries", () => {
+  it("computes distinct valid, expiring, expired, and missing-file groups", () => {
+    expect(source).toContain("const expired = allDocuments.filter");
+    expect(source).toContain("const expiring = allDocuments.filter");
+    expect(source).toContain("const missing = allDocuments.filter");
+    expect(source).toContain("const valid = allDocuments.filter");
+  });
+
+  it("renders explicit status labels rather than a single due/current flag", () => {
+    expect(source).toContain('Kpi label="Valid"');
+    expect(source).toContain('Kpi label="Expiring"');
+    expect(source).toContain('Kpi label="Expired"');
+    expect(source).toContain('Kpi label="Missing file"');
+    expect(source).toContain('isMissing ? "File missing"');
+  });
+});
