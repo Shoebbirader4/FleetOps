@@ -689,3 +689,5 @@
 - [x] Add regression coverage for category expense aggregation and presentation wiring. Validation passed with 148 Vitest tests, TypeScript, and production build.
 - [x] Present tenant-scoped category expense totals in the Accountant workspace alongside P&L and CPK metrics.
 - [x] Protect the category expense breakdown with regression coverage. Validation passed with 148 Vitest tests, TypeScript, and production build.
+- [x] Harden work-order status transitions by role: mechanics and technicians execute and submit for review, Fleet Managers control cancellation and rework, and completion remains approval-gated.
+- [x] Add regression coverage for canonical lifecycle states, tenant scope, role guards, and approval gating. Validation passed with 150 Vitest tests, TypeScript, and production build.
