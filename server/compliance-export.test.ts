@@ -12,7 +12,9 @@ describe("compliance exports", () => {
   });
 
   it("keeps exported document rows inside the active organization", () => {
-    expect(source).toContain('const rows = await fleetDb.document.findMany({ where: { orgId: ctx.fleetopsUser.orgId }');
+    expect(source).toContain('fleetDb.document.findMany({ where: { orgId: ctx.fleetopsUser.orgId }');
     expect(source).toContain("csvDocument");
+    expect(source).toContain('fleetDb.vehicle.findMany({ where: { orgId: ctx.fleetopsUser.orgId } })');
+    expect(source).toContain('vehicleById.get(row.vehicleId) ?? null');
   });
 });
