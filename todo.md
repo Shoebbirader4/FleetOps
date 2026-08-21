@@ -673,3 +673,5 @@
 - [x] Add tenant-safe inventory part detail data with current, reserved, and available balances plus recent movement history.
 - [x] Connect Inventory Manager stock rows to a live selected-part detail panel and movement summary.
 - [x] Add server and client regression coverage for inventory part detail access and availability calculations. Validation passed with 138 Vitest tests, TypeScript, and production build.
+- [x] Add explicit tenant-safe inventory transfer movement that updates bin location, preserves stock quantity, and records actor, source, destination, and reason.
+- [x] Add regression coverage for inventory transfer role isolation and audit movement semantics. Validation passed with 140 Vitest tests, TypeScript, and production build.
