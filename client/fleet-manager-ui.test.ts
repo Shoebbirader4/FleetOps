@@ -25,6 +25,14 @@ describe("Fleet Manager workspace UI refinement", () => {
     expect(resourceWorkspace).toContain("Each removal will be audited");
   });
 
+  it("provides work-order search, sorting, and pagination controls", () => {
+    expect(resourceWorkspace).toContain("Search work orders");
+    expect(resourceWorkspace).toContain("Sort work orders");
+    expect(resourceWorkspace).toContain("workOrderPageCount");
+    expect(resourceWorkspace).toContain(">Previous</button>");
+    expect(resourceWorkspace).toContain(">Next</button>");
+  });
+
   it("provides shared context summaries for organization resource pages", () => {
     expect(wrapper).toContain("People and access");
     expect(wrapper).toContain("Parts control");
