@@ -680,3 +680,4 @@
 - [x] Label persisted inventory movement types accurately in the Inventory Manager ledger, including transfer, adjustment, return, reservation, issue, and receipt events. Validation passed with 141 Vitest tests, TypeScript, and production build.
 - [x] Add Superadmin organization-settings controls for the persisted INR labor rate, including safe zero default, non-negative validation, and mutation persistence.
 - [x] Add client regression coverage for labor-rate settings load and save behavior. Validation passed with 143 Vitest tests, TypeScript, and production build.
+- [x] Connect the tenant-safe inventory adjustment procedure to an Inventory Manager cycle-count form with expected-balance conflict protection, non-negative input, and refreshed detail history. Validation passed with 143 Vitest tests, TypeScript, and production build.
