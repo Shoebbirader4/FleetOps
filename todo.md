@@ -691,3 +691,5 @@
 - [x] Protect the category expense breakdown with regression coverage. Validation passed with 148 Vitest tests, TypeScript, and production build.
 - [x] Harden work-order status transitions by role: mechanics and technicians execute and submit for review, Fleet Managers control cancellation and rework, and completion remains approval-gated.
 - [x] Add regression coverage for canonical lifecycle states, tenant scope, role guards, and approval gating. Validation passed with 150 Vitest tests, TypeScript, and production build.
+- [x] Add a tenant- and assignment-scoped work-order detail procedure returning vehicle/component context, parts, evidence, and activity history.
+- [x] Validate work-order detail and lifecycle RBAC changes with 150 Vitest tests, TypeScript, and production build.
