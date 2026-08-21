@@ -624,13 +624,13 @@
 
 ## Phase 12 — Release and operational verification
 
-- [ ] Keep PostgreSQL/Supabase as the only production database stack and prohibit Prisma, MySQL, or TiDB additions.
+- [x] Keep PostgreSQL/Supabase as the only production database stack and prohibit Prisma, MySQL, or TiDB additions. `package.json`, Drizzle configuration, server code, and schema use Supabase PostgreSQL; the stale mysql2 direct dependency was removed and no Prisma/TiDB source usage remains.
 - [ ] Maintain GitHub main as the source of truth and verify Vercel automatic deployment from main after every release.
-- [ ] Require TypeScript validation, Vitest, production build, and authenticated smoke tests before release.
+- [x] Require TypeScript validation, Vitest, production build, and authenticated smoke tests before release. The release gate is documented in `docs/release-checklist.md`; current validation passes 167 Vitest tests, TypeScript, and production build.
 - [ ] Run complete seeded-test-organization workflow without fabricating customer reviews, ratings, or testimonials.
 - [ ] Verify the complete cross-role scenario: driver issue or component alert → Fleet Manager work order → mechanic execution → inventory part use → review → completion → accountant cost visibility.
 - [ ] Verify cleanup of temporary test users, invitations, organizations, files, and records after every background regression.
-- [ ] Add a release checklist documenting database migration status, Supabase deployment status, Vercel deployment status, GitHub commit, and rollback checkpoint.
+- [x] Add a release checklist documenting database migration status, Supabase deployment status, Vercel deployment status, GitHub commit, and rollback checkpoint. See `docs/release-checklist.md`.
 - [ ] Add production monitoring for API errors, authentication failures, background automation failures, storage errors, and slow queries.
 
 
@@ -655,7 +655,7 @@
 - [x] Add a visible Inventory Manager recent stock-movement ledger backed by the tenant-safe movement query, showing receipt/issue type, quantity, reason, timestamp, and linked work-order reference. Validation passed with 120 Vitest tests, TypeScript, and production build.
 - [x] Notify both Fleet Manager and Superadmin approvers when a mechanic or technician submits a work order for review, with recipient-specific deduplication and linked work-order context. Validation passed with 121 Vitest tests, TypeScript, and production build.
 - [x] Fix the Drizzle/PostgreSQL adapter to render `{ increment }` arithmetic correctly for inventory receipts while preserving decrement handling. Validation passed with 122 Vitest tests, TypeScript, and production build.
-- [ ] Add an organization-configured INR labor rate per hour and use it for approved work-order labor-cost attribution without fabricating costs when the rate is zero or unset.
+- [x] Add an organization-configured INR labor rate per hour and use it for approved work-order labor-cost attribution without fabricating costs when the rate is zero or unset. Organization settings persist a non-negative INR hourly rate; approved work orders attribute labor only when rate and logged hours are both positive.
 - [x] Add role-aware notification actions: all recipients can mark alerts read, while Fleet Managers and Superadmins can escalate or resolve with a required note and source-state validation. Validation passed with 122 Vitest tests, TypeScript, and production build.
 - [x] Add client regression coverage for notification lifecycle controls, management-role gating, and required resolution notes. Validation passed with 124 Vitest tests, TypeScript, and production build.
 - [x] Enforce same-organization vendor validation when creating purchase orders, preventing cross-tenant vendor references. Validation passed with 125 Vitest tests, TypeScript, and production build.
