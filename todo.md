@@ -677,3 +677,4 @@
 - [x] Add regression coverage for inventory transfer role isolation and audit movement semantics. Validation passed with 140 Vitest tests, TypeScript, and production build.
 - [x] Connect the Inventory Manager transfer procedure to a live bin-transfer form with success, error, refresh, and persisted movement feedback. Validation passed with 140 Vitest tests, TypeScript, and production build.
 - [x] Add client regression coverage for Inventory Manager transfer-form submission, destination-bin validation, and persisted mutation wiring. Validation passed with 141 Vitest tests, TypeScript, and production build.
+- [x] Label persisted inventory movement types accurately in the Inventory Manager ledger, including transfer, adjustment, return, reservation, issue, and receipt events. Validation passed with 141 Vitest tests, TypeScript, and production build.
