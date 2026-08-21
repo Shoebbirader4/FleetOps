@@ -11,7 +11,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("./db", () => ({ fleetDb: mocks }));
-vi.mock("./supabase", () => ({ supabaseAdmin: { auth: { admin: { inviteUserByEmail: vi.fn().mockResolvedValue({ data: { user: { id: "auth-1" } }, error: null }) } } } }));
+vi.mock("./supabase", () => ({ supabaseAdmin: { auth: { admin: { generateLink: vi.fn().mockResolvedValue({ data: { properties: { action_link: "https://auth.example/invite" } }, error: null }), inviteUserByEmail: vi.fn().mockResolvedValue({ data: { user: { id: "auth-1" } }, error: null }) } } } }));
+vi.mock("./invitation-email", () => ({ sendInvitationEmail: vi.fn().mockResolvedValue({ id: "email-test" }) }));
 
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
