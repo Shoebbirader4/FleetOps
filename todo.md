@@ -506,7 +506,7 @@
 - [x] Add alert severity levels and deterministic prioritization based on overdue status, vehicle criticality, and safety impact. Critical safety components and overdue signals are ranked first; regression coverage now passes 151 tests.
 - [x] Add persistent alert acknowledgement, assignment, snooze, and resolution states. Existing tenant-scoped triage state and notification actions persist ACKNOWLEDGED, ASSIGNED, DEFERRED, and RESOLVED states.
 - [x] Prevent duplicate alerts and duplicate automatic work orders for the same component threshold event. Stable component service baselines are audited and deduplicated; focused coverage brings validation to 153 tests.
-- [ ] Preserve alert history when a component is replaced, reset, edited, or a work order is completed.
+- [x] Preserve alert history when a component is replaced, reset, edited, or a work order is completed. Component lifecycle and approved-service audit events preserve the threshold history; regression coverage passes 154 tests.
 - [ ] Add alert-to-work-order conversion with source linkage and source evidence.
 - [ ] Add escalation rules for unacknowledged critical alerts and overdue work orders.
 - [ ] Add notification center filters by severity, type, role, vehicle, and status.

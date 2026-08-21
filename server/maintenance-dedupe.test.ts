@@ -10,6 +10,14 @@ describe("predictive maintenance threshold deduplication", () => {
     expect(source).toContain("sameServiceBaselineAlreadyTriggered");
   });
 
+  it("preserves component lifecycle history through audit events", () => {
+    const router = readFileSync(resolve(process.cwd(), "server/routers.ts"), "utf8");
+    expect(router).toContain('action: "COMPONENT_CREATED"');
+    expect(router).toContain('"COMPONENT_SERVICE_BASELINE_RESET"');
+    expect(router).toContain('action: "COMPONENT_REMOVED"');
+    expect(router).toContain('action: "WORK_ORDER_APPROVED"');
+  });
+
   it("keeps an active work-order guard before creating another automatic order", () => {
     const source = readFileSync(resolve(process.cwd(), "server/automation.ts"), "utf8");
     expect(source).toContain('status: { in: ["OPEN", "IN_PROGRESS", "WAITING_FOR_PARTS", "READY_FOR_REVIEW", "REWORK"] }');
