@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "./supabase";
+import { logRequestSignal } from "./observability";
 
 const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "fleetops-files";
 
@@ -19,6 +20,7 @@ async function ensureBucket() {
     fileSizeLimit: "50MB",
   });
   if (error && !/already exists|duplicate/i.test(error.message)) {
+    logRequestSignal({ event: "storage_error", requestId: "storage", path: "createBucket", message: error.message });
     throw new Error(`Supabase Storage bucket setup failed: ${error.message}`);
   }
 }
@@ -36,7 +38,7 @@ export async function storagePut(
     upsert: false,
     cacheControl: "3600",
   });
-  if (error) throw new Error(`Supabase Storage upload failed: ${error.message}`);
+  if (error) { logRequestSignal({ event: "storage_error", requestId: "storage", path: "upload", message: error.message }); throw new Error(`Supabase Storage upload failed: ${error.message}`); }
 
   const url = await storageGetSignedUrl(key);
   return { key, url };
@@ -51,6 +53,7 @@ export async function storageGetSignedUrl(relKey: string): Promise<string> {
   const key = normalizeKey(relKey);
   const { data, error } = await supabaseAdmin.storage.from(STORAGE_BUCKET).createSignedUrl(key, 900);
   if (error || !data?.signedUrl) {
+    logRequestSignal({ event: "storage_error", requestId: "storage", path: "createSignedUrl", message: error?.message ?? "empty signed URL" });
     throw new Error(`Supabase Storage signed URL failed: ${error?.message ?? "empty signed URL"}`);
   }
   return data.signedUrl;
