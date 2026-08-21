@@ -636,9 +636,9 @@
 
 # Active Implementation — Milestone 1: Closed-loop maintenance execution
 
-- [ ] Audit existing work-order, component, vehicle, inventory, activity, notification, and document models plus role policies before implementation.
+- [x] Audit existing work-order, component, vehicle, inventory, activity, notification, and document models plus role policies before implementation; reviewed schema, router contracts, role scopes, mechanic UI, and existing tests.
 - [x] Define and enforce the work-order transition matrix across Fleet Manager, Mechanic, Technician, Inventory Manager, and Accountant; guarded transitions, role scope, stale-write conflicts, and review gates are enforced server-side.
 - [x] Implement missing mechanic/technician execution details: explicit start work, checklist, diagnosis, labor, parts, evidence, submit for review, and rework; explicit start-work auditing/manager notifications and checklist-gated submission are now enforced.
-- [ ] Implement reviewer approval and completion-side updates for component service history, vehicle readiness, inventory, and financial cost records.
+- [x] Implement reviewer approval and completion-side updates for component service history, vehicle readiness, inventory, and financial cost records; approval now closes the work order, resets title-matched component service readings, restores maintenance vehicles to ACTIVE, and posts linked INR parts cost to the ledger. Labor-rate accounting remains intentionally pending until an organization labor-rate policy is defined.
 - [x] Add idempotency, validation, tenant isolation, and audit coverage for critical maintenance mutations; closed-order start protection, organization/assignment scope, stale status conflict handling, and lifecycle audit events are covered.
 - [x] Add cross-role regression tests and validate TypeScript, Vitest, production build, and authenticated workflow behavior; 112 tests pass, TypeScript passes, and the production bundle builds successfully.

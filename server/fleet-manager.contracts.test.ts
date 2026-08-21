@@ -65,6 +65,15 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('completedAt: null');
   });
 
+  it("closes the maintenance loop on reviewer approval", () => {
+    expect(routersSource).toContain('include: { vehicle: true, partsUsed: true }');
+    expect(routersSource).toContain('lastServicedOdometer: order.vehicle.currentOdometer');
+    expect(routersSource).toContain('status: "ACTIVE"');
+    expect(routersSource).toContain('category: "MAINTENANCE_PARTS"');
+    expect(routersSource).toContain('costCenterType: "WORK_ORDER"');
+    expect(routersSource).toContain('action: "WORK_ORDER_APPROVED"');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
