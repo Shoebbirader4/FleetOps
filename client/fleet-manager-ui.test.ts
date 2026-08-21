@@ -17,6 +17,14 @@ describe("Fleet Manager workspace UI refinement", () => {
     expect(wrapper).toContain("aria-label={`Return from ${section} to command center`}");
   });
 
+  it("exposes confirmed bulk actions for vehicles and components", () => {
+    expect(resourceWorkspace).toContain("Select all vehicles");
+    expect(resourceWorkspace).toContain("Delete selected");
+    expect(resourceWorkspace).toContain("Select all components");
+    expect(resourceWorkspace).toContain("Remove selected");
+    expect(resourceWorkspace).toContain("Each removal will be audited");
+  });
+
   it("provides shared context summaries for organization resource pages", () => {
     expect(wrapper).toContain("People and access");
     expect(wrapper).toContain("Parts control");
