@@ -509,7 +509,7 @@
 - [x] Preserve alert history when a component is replaced, reset, edited, or a work order is completed. Component lifecycle and approved-service audit events preserve the threshold history; regression coverage passes 154 tests.
 - [x] Add alert-to-work-order conversion with source linkage and source evidence. Threshold-generated work orders carry source details through notification reference IDs and audit metadata, including component baseline and current odometer; validation passes 154 tests.
 - [x] Add escalation rules for unacknowledged critical alerts and overdue work orders. Critical unacknowledged notifications and critical orders older than 24 hours are escalated idempotently; validation passes 155 tests.
-- [ ] Add notification center filters by severity, type, role, vehicle, and status.
+- [x] Add notification center filters by severity, type, role, vehicle, and status. Recipient-scoped filters now cover severity, source type, read/resolution status, and vehicle-linked references; validation passes 156 tests.
 - [ ] Add direct notification actions for acknowledge, open record, create work order, and assign owner.
 - [ ] Add automated tests for odometer updates, component creation, component updates, replacement resets, duplicate prevention, and escalation.
 

@@ -10,6 +10,14 @@ describe("notification workspace actions", () => {
     expect(source).toContain("trpc.notifications.resolve.useMutation");
   });
 
+  it("exposes tenant-safe notification filter controls", () => {
+    expect(source).toContain("Filter notifications by severity");
+    expect(source).toContain("Filter notifications by source type");
+    expect(source).toContain("Filter notifications by status");
+    expect(source).toContain("Filter notifications by vehicle ID");
+    expect(source).toContain("trpc.notifications.list.useQuery({ severity: filters.severity");
+  });
+
   it("gates escalation and resolution to management roles", () => {
     expect(source).toContain('me.data?.role === "SUPERADMIN" || me.data?.role === "FLEET_MANAGER"');
     expect(source).toContain("note.trim().length < 3");
