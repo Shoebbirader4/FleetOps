@@ -74,6 +74,14 @@ describe("Fleet Manager responsibility contracts", () => {
     expect(routersSource).toContain('action: "WORK_ORDER_APPROVED"');
   });
 
+  it("connects driver issue triage to a deduplicated maintenance dispatch", () => {
+    expect(routersSource).toContain("createWorkOrderFromIssue: fleetOpsProcedure");
+    expect(routersSource).toContain('JSON.parse(event.metadata ?? "{}").sourceIssueId === issue.id');
+    expect(routersSource).toContain('action: "VEHICLE_ISSUE_DISPATCHED"');
+    expect(routersSource).toContain('title: `Driver issue: ${issue.title}`');
+    expect(routersSource).toContain('This driver issue already has a dispatched work order.');
+  });
+
   it("defines tenant-scoped maintenance planning with bounded date validation", () => {
     expect(routersSource).toContain("planning: router({");
     expect(routersSource).toContain("maintenance: fleetOpsProcedure");
