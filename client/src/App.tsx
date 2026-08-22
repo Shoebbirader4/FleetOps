@@ -5,6 +5,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import JoinOrganization from "./pages/JoinOrganization";
+import { AboutPage, PricingPage, SecurityPage } from "./pages/MarketingPages";
 import { useFleetOpsAuth } from "./hooks/useFleetOpsAuth";
 import { trpc } from "./lib/trpc";
 import { Route, Switch, useRoute } from "wouter";
@@ -51,6 +52,9 @@ function App() {
             <Route path="/join/:token" component={JoinOrganization} />
             <Route path="/login" component={LoginRoute} />
             <Route path="/create-organization" component={CreateOrganizationRoute} />
+            <Route path="/pricing" component={PricingPage} />
+            <Route path="/about" component={AboutPage} />
+            <Route path="/security" component={SecurityPage} />
             <Route path="/fleet-manager" component={FleetManagerRoute} />
             <Route path="/mechanic" component={MechanicRoute} />
             <Route path="/driver" component={DriverRoute} />
