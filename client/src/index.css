@@ -377,3 +377,19 @@ nav { display: grid; gap: 3px; }
 .work-order-edit-trigger { justify-content: center; min-width: 78px; }
 @media (max-width: 900px) { .work-order-edit-form { grid-template-columns: 1fr 1fr; } .work-order-edit-form .work-order-edit-description { grid-column: 1 / -1; } .work-order-edit-form .work-order-submit { grid-column: 1 / -1; } }
 @media (max-width: 620px) { .work-order-edit-form { grid-template-columns: 1fr; } .work-order-edit-form .work-order-edit-description, .work-order-edit-form .work-order-submit { grid-column: auto; } .work-order-edit-trigger { margin-left: 0; } }
+
+/* Work-order queue refinement */
+.queue-stat-strip { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: auto; margin-right: 12px; }
+.queue-stat-strip span { display: inline-flex; align-items: baseline; gap: 5px; padding: 7px 10px; border: 1px solid #eee4d8; border-radius: 999px; background: #fffaf4; color: #8a8177; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.queue-stat-strip strong { color: #36343a; font: 700 15px/1 "Space Grotesk", sans-serif; letter-spacing: 0; }
+.work-order-queue .bulk-toolbar { gap: 12px; }
+.work-order-queue .bulk-toolbar > label { gap: 4px; }
+.work-order-queue .bulk-toolbar select, .work-order-queue .bulk-toolbar input { min-height: 42px; border-radius: 9px; }
+.work-order-row { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 14px 16px; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+.work-order-row:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(60, 43, 24, .06); }
+.work-order-row > div { display: grid; gap: 5px; min-width: 0; }
+.work-order-row > div strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.work-order-row > div span { color: #8a8177; font-size: 11px; }
+.work-order-edit-card { scroll-margin-top: 24px; }
+@media (max-width: 900px) { .queue-stat-strip { order: 3; flex-basis: 100%; margin: 8px 0 0; } }
+@media (max-width: 620px) { .work-order-row { grid-template-columns: auto minmax(0, 1fr); } .work-order-row .work-order-edit-trigger, .work-order-row > .resource-meta { grid-column: 2; } .queue-stat-strip span { flex: 1; justify-content: center; } }

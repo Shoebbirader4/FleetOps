@@ -23,4 +23,18 @@ describe("Fleet Manager work-order workspace", () => {
     expect(source).toContain('assignedMechanicId: editingWorkOrder.assignedMechanicId ?? null');
     expect(source).toContain("Save work-order changes");
   });
+
+  it("provides a status-aware maintenance queue with operational counters", () => {
+    expect(source).toContain("const [workOrderStatus, setWorkOrderStatus]");
+    expect(source).toContain('aria-label="Filter work orders by status"');
+    expect(source).toContain("queue-stat-strip");
+    expect(source).toContain("unassigned");
+    expect(source).toContain("active");
+  });
+
+  it("keeps the queue usable on narrow screens", () => {
+    const stylesheet = readFileSync(resolve(process.cwd(), "client/src/index.css"), "utf8");
+    expect(stylesheet).toContain(".work-order-row { grid-template-columns: auto minmax(0, 1fr)");
+    expect(stylesheet).toContain(".queue-stat-strip");
+  });
 });
