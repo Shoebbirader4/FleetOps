@@ -393,3 +393,38 @@ nav { display: grid; gap: 3px; }
 .work-order-edit-card { scroll-margin-top: 24px; }
 @media (max-width: 900px) { .queue-stat-strip { order: 3; flex-basis: 100%; margin: 8px 0 0; } }
 @media (max-width: 620px) { .work-order-row { grid-template-columns: auto minmax(0, 1fr); } .work-order-row .work-order-edit-trigger, .work-order-row > .resource-meta { grid-column: 2; } .queue-stat-strip span { flex: 1; justify-content: center; } }
+
+/* Active Fleet Manager dispatch console polish */
+.work-order-page { gap: 20px; }
+.work-order-create-hero { position: relative; overflow: hidden; border: 1px solid #d9c9b8; box-shadow: 0 18px 42px rgba(65, 47, 30, .08); }
+.work-order-create-hero::after { content: ""; position: absolute; width: 280px; height: 280px; right: -120px; bottom: -170px; border: 1px solid rgba(217, 103, 47, .22); border-radius: 50%; pointer-events: none; }
+.work-order-hero-copy { position: relative; z-index: 1; }
+.work-order-hero-copy h1 { max-width: 620px; letter-spacing: -.055em; }
+.work-order-hero-copy p { max-width: 600px; }
+.work-order-flow > div { position: relative; }
+.work-order-flow > div::before { content: ""; position: absolute; top: 4px; left: -1px; width: 5px; height: 5px; border-radius: 50%; background: #d9672f; box-shadow: 0 0 0 4px rgba(217, 103, 47, .12); }
+.work-order-create-card { border-color: #dfd1c3; box-shadow: 0 14px 32px rgba(65, 47, 30, .06); }
+.work-order-create-card .panel-heading { padding-bottom: 17px; border-bottom: 1px solid #eee5da; }
+.work-order-create-card .panel-heading h2, .work-order-edit-card .panel-heading h2, .work-order-queue .panel-heading h2 { letter-spacing: -.025em; }
+.work-order-form { gap: 17px 18px; }
+.work-order-form > label, .work-order-edit-form > label { gap: 7px; }
+.work-order-form input, .work-order-form select, .work-order-form textarea, .work-order-edit-form input, .work-order-edit-form select, .work-order-edit-form textarea { border-color: #dfd3c7; background: rgba(255, 253, 249, .86); box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
+.work-order-form input:focus, .work-order-form select:focus, .work-order-form textarea:focus, .work-order-edit-form input:focus, .work-order-edit-form select:focus, .work-order-edit-form textarea:focus { border-color: #d9672f; box-shadow: 0 0 0 3px rgba(217, 103, 47, .12), inset 0 1px 0 rgba(255,255,255,.8); }
+.work-order-submit { box-shadow: 0 8px 18px rgba(217, 103, 47, .18); }
+.work-order-edit-card { border-left: 3px solid #d9672f; box-shadow: 0 14px 32px rgba(65, 47, 30, .07); }
+.work-order-edit-card .panel-heading { align-items: flex-start; }
+.work-order-queue { border: 1px solid #dfd5ca; box-shadow: 0 14px 32px rgba(65, 47, 30, .05); }
+.work-order-queue .panel-heading { align-items: flex-start; gap: 18px; }
+.work-order-queue .panel-heading > div:first-child { min-width: 0; }
+.work-order-queue .panel-heading p { max-width: 580px; }
+.work-order-queue .bulk-toolbar { display: grid; grid-template-columns: minmax(220px, 1.4fr) minmax(140px, .7fr) auto auto; align-items: end; }
+.work-order-queue .bulk-toolbar > label:first-child, .work-order-queue .bulk-toolbar > label:nth-child(2) { min-width: 0; }
+.work-order-queue .bulk-toolbar > label:nth-child(3) { white-space: nowrap; }
+.work-order-queue .bulk-toolbar > select, .work-order-queue .bulk-toolbar > button { min-height: 42px; }
+.work-order-queue .bulk-toolbar > select[aria-label="Bulk priority"], .work-order-queue .bulk-toolbar > select[aria-label="Bulk assignee"] { min-width: 165px; }
+.work-order-queue .resource-list { gap: 9px; }
+.work-order-row { border-left: 3px solid #dbe7df; border-radius: 10px; }
+.work-order-row:has(.resource-meta.pending) { border-left-color: #d9672f; }
+.work-order-row .resource-meta { min-width: 82px; text-align: center; }
+@media (max-width: 1050px) { .work-order-queue .bulk-toolbar { grid-template-columns: minmax(210px, 1fr) minmax(150px, .7fr) auto; } .work-order-queue .bulk-toolbar > label:nth-child(3) { grid-column: 1 / -1; } }
+@media (max-width: 620px) { .work-order-create-hero::after { width: 180px; height: 180px; right: -100px; bottom: -110px; } .work-order-queue .bulk-toolbar { display: flex; } .work-order-queue .bulk-toolbar > label:nth-child(3) { grid-column: auto; } .work-order-queue .panel-heading { gap: 10px; } .work-order-row { border-left-width: 2px; } }

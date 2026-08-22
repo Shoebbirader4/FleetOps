@@ -32,6 +32,11 @@ describe("Fleet Manager work-order workspace", () => {
     expect(source).toContain("active");
   });
 
+  it("keeps the modern renderer active instead of shadowing it with a legacy branch", () => {
+    expect((source.match(/if \(section === \"Work orders\"\)/g) ?? []).length).toBe(1);
+    expect(source).toContain("Move a repair from alert to action");
+  });
+
   it("keeps the queue usable on narrow screens", () => {
     const stylesheet = readFileSync(resolve(process.cwd(), "client/src/index.css"), "utf8");
     expect(stylesheet).toContain(".work-order-row { grid-template-columns: auto minmax(0, 1fr)");
