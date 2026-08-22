@@ -859,6 +859,33 @@ var appRouter = router({
       if (!org) throw new TRPCError3({ code: "NOT_FOUND", message: "The invitation organization no longer exists." });
       return { email: invite.email, role: invite.role, organization: { id: org.id, name: org.name }, expiresAt: invite.expiresAt };
     }),
+    completeInviteWithPassword: publicProcedure.input(z2.object({ token: z2.string().uuid(), fullName: z2.string().min(2), password: z2.string().min(8).max(128) })).mutation(async ({ input }) => {
+      const invite = await fleetDb.invitation.findFirst({ where: { tokenHash: input.token, acceptedAt: null, expiresAt: { gt: /* @__PURE__ */ new Date() } } });
+      if (!invite) throw new TRPCError3({ code: "NOT_FOUND", message: "This invitation is invalid, expired, or already redeemed." });
+      const email = invite.email.toLowerCase();
+      const existingAuth = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1e3 });
+      let authUser = existingAuth.data.users.find((user) => user.email?.toLowerCase() === email);
+      let authError = existingAuth.error;
+      if (authUser) {
+        const updatedAuth = await supabaseAdmin.auth.admin.updateUserById(authUser.id, { password: input.password, email_confirm: true, user_metadata: { ...authUser.user_metadata, fullName: input.fullName, needsOnboarding: false, invitationToken: input.token } });
+        authUser = updatedAuth.data.user ?? authUser;
+        authError = updatedAuth.error;
+      } else {
+        const createdAuth = await supabaseAdmin.auth.admin.createUser({ email, password: input.password, email_confirm: true, user_metadata: { fullName: input.fullName, needsOnboarding: false, invitationToken: input.token } });
+        authUser = createdAuth.data.user ?? void 0;
+        authError = createdAuth.error;
+      }
+      if (authError || !authUser) throw new TRPCError3({ code: "INTERNAL_SERVER_ERROR", message: `The invited account could not be prepared: ${authError?.message ?? "Auth user was not returned."}` });
+      const joined = await fleetDb.$transaction(async (tx) => {
+        const user = await tx.user.upsert({ where: { authUserId: authUser.id }, update: { orgId: invite.orgId, role: invite.role, email, fullName: input.fullName }, create: { authUserId: authUser.id, orgId: invite.orgId, role: invite.role, email, fullName: input.fullName } });
+        await tx.invitation.update({ where: { id: invite.id }, data: { acceptedAt: /* @__PURE__ */ new Date() } });
+        return user;
+      });
+      const inviteOrg = await fleetDb.organization.findFirst({ where: { id: invite.orgId } });
+      const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(authUser.id, { user_metadata: { ...authUser.user_metadata, fullName: joined.fullName, orgId: joined.orgId, orgName: inviteOrg?.name, role: joined.role, needsOnboarding: false, invitationToken: void 0 } });
+      if (metadataError) throw new TRPCError3({ code: "INTERNAL_SERVER_ERROR", message: `Membership was created, but the session metadata could not be finalized: ${metadataError.message}` });
+      return { email, role: joined.role, organizationName: inviteOrg?.name ?? "" };
+    }),
     acceptInvite: publicProcedure.input(z2.object({ token: z2.string().uuid(), fullName: z2.string().min(2).optional() })).mutation(async ({ ctx, input }) => {
       const authUser = await getSupabaseAuthIdentity(ctx.req);
       if (!authUser?.email) throw new TRPCError3({ code: "UNAUTHORIZED", message: "A valid Supabase access token is required." });
@@ -1207,6 +1234,19 @@ var appRouter = router({
       const created = await fleetDb.workOrder.create({ data: { id: crypto.randomUUID(), ...input, status: "OPEN", orgId: ctx.fleetopsUser.orgId, createdAt: /* @__PURE__ */ new Date() } });
       await recordAudit(ctx, { action: "WORK_ORDER_CREATED", entityType: "WORK_ORDER", entityId: created.id, summary: `Work order created: ${created.title}`, metadata: { priority: created.priority, assignedMechanicId: created.assignedMechanicId } });
       return created;
+    }),
+    update: fleetOpsProcedure.input(z2.object({ workOrderId: z2.string().uuid(), title: z2.string().trim().min(3).max(160).optional(), description: z2.string().trim().max(2e3).nullable().optional(), priority: z2.nativeEnum(Priority).optional(), assignedMechanicId: z2.string().uuid().nullable().optional() }).refine((input) => input.title !== void 0 || input.description !== void 0 || input.priority !== void 0 || input.assignedMechanicId !== void 0, { message: "Provide at least one work-order field to update." })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]);
+      assertWritable(ctx.fleetopsUser.org);
+      const order = await fleetDb.workOrder.findFirst({ where: { id: input.workOrderId, orgId: ctx.fleetopsUser.orgId } });
+      if (!order) throw new TRPCError3({ code: "NOT_FOUND", message: "Work order not found in this organization." });
+      if (input.assignedMechanicId) {
+        const assignee = await fleetDb.user.findFirst({ where: { id: input.assignedMechanicId, orgId: ctx.fleetopsUser.orgId, role: { in: ["MECHANIC", "TECHNICIAN"] } } });
+        if (!assignee) throw new TRPCError3({ code: "BAD_REQUEST", message: "Mechanic or Technician must belong to this organization." });
+      }
+      const updated = await fleetDb.workOrder.update({ where: { id: order.id }, data: { ...input.title !== void 0 ? { title: input.title } : {}, ...input.description !== void 0 ? { description: input.description } : {}, ...input.priority !== void 0 ? { priority: input.priority } : {}, ...input.assignedMechanicId !== void 0 ? { assignedMechanicId: input.assignedMechanicId } : {} } });
+      await recordAudit(ctx, { action: "WORK_ORDER_UPDATED", entityType: "WORK_ORDER", entityId: updated.id, summary: `Updated work order: ${updated.title}`, metadata: { title: input.title, descriptionChanged: input.description !== void 0, priority: input.priority, assignedMechanicId: input.assignedMechanicId ?? null } });
+      return updated;
     }),
     complete: fleetOpsProcedure.input(z2.object({ workOrderId: z2.string().uuid(), expectedUpdatedAt: z2.coerce.date().optional(), parts: z2.array(z2.object({ partId: z2.string().uuid(), qtyUsed: z2.number().int().positive() })).default([]), laborHours: z2.number().nonnegative().max(1e3).default(0), repairNotes: z2.string().trim().min(3).max(5e3).default("Completed from organization oversight."), evidence: z2.array(z2.object({ fileData: z2.string().max(6e6), contentType: z2.string().startsWith("image/"), fileName: z2.string().min(1).max(200), caption: z2.string().max(500).optional() })).max(8).default([]) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["MECHANIC", "TECHNICIAN"]);

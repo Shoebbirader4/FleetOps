@@ -16,6 +16,9 @@ describe("signup to organization invitation flow", () => {
     const source = read("client/src/pages/JoinOrganization.tsx");
     expect(source).toContain("trpc.onboarding.inviteDetails.useQuery");
     expect(source).toContain("trpc.onboarding.acceptInvite.useMutation");
+    expect(source).toContain("trpc.onboarding.completeInviteWithPassword.useMutation");
+    expect(source).toContain("completeInvite.mutateAsync");
+    expect(source).toContain("signInWithEmail");
     expect(source).toContain("organization");
     expect(source).toContain("role");
     expect(source).toContain("acceptInvite.mutate");
@@ -27,5 +30,9 @@ describe("signup to organization invitation flow", () => {
     expect(appSource).toContain("JoinOrganization");
     expect(appSource).toContain("/create-organization");
     expect(homeSource).toContain("signIn");
+    const routerSource = read("server/routers.ts");
+    expect(routerSource).toContain("completeInviteWithPassword");
+    expect(routerSource).toContain("updateUserById(authUser.id");
+    expect(routerSource).toContain("password: input.password");
   });
 });

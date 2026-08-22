@@ -142,6 +142,33 @@ export const appRouter = router({
       if (!org) throw new TRPCError({ code: "NOT_FOUND", message: "The invitation organization no longer exists." });
       return { email: invite.email, role: invite.role, organization: { id: org.id, name: org.name }, expiresAt: invite.expiresAt };
     }),
+    completeInviteWithPassword: publicProcedure.input(z.object({ token: z.string().uuid(), fullName: z.string().min(2), password: z.string().min(8).max(128) })).mutation(async ({ input }) => {
+      const invite = await fleetDb.invitation.findFirst({ where: { tokenHash: input.token, acceptedAt: null, expiresAt: { gt: new Date() } } });
+      if (!invite) throw new TRPCError({ code: "NOT_FOUND", message: "This invitation is invalid, expired, or already redeemed." });
+      const email = invite.email.toLowerCase();
+      const existingAuth = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      let authUser = existingAuth.data.users.find((user) => user.email?.toLowerCase() === email);
+      let authError = existingAuth.error;
+      if (authUser) {
+        const updatedAuth = await supabaseAdmin.auth.admin.updateUserById(authUser.id, { password: input.password, email_confirm: true, user_metadata: { ...authUser.user_metadata, fullName: input.fullName, needsOnboarding: false, invitationToken: input.token } });
+        authUser = updatedAuth.data.user ?? authUser;
+        authError = updatedAuth.error;
+      } else {
+        const createdAuth = await supabaseAdmin.auth.admin.createUser({ email, password: input.password, email_confirm: true, user_metadata: { fullName: input.fullName, needsOnboarding: false, invitationToken: input.token } });
+        authUser = createdAuth.data.user ?? undefined;
+        authError = createdAuth.error;
+      }
+      if (authError || !authUser) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `The invited account could not be prepared: ${authError?.message ?? "Auth user was not returned."}` });
+      const joined = await fleetDb.$transaction(async (tx: any) => {
+        const user = await tx.user.upsert({ where: { authUserId: authUser!.id }, update: { orgId: invite.orgId, role: invite.role, email, fullName: input.fullName }, create: { authUserId: authUser!.id, orgId: invite.orgId, role: invite.role, email, fullName: input.fullName } });
+        await tx.invitation.update({ where: { id: invite.id }, data: { acceptedAt: new Date() } });
+        return user;
+      });
+      const inviteOrg = await fleetDb.organization.findFirst({ where: { id: invite.orgId } });
+      const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(authUser.id, { user_metadata: { ...authUser.user_metadata, fullName: joined.fullName, orgId: joined.orgId, orgName: inviteOrg?.name, role: joined.role, needsOnboarding: false, invitationToken: undefined } });
+      if (metadataError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Membership was created, but the session metadata could not be finalized: ${metadataError.message}` });
+      return { email, role: joined.role, organizationName: inviteOrg?.name ?? "" };
+    }),
     acceptInvite: publicProcedure.input(z.object({ token: z.string().uuid(), fullName: z.string().min(2).optional() })).mutation(async ({ ctx, input }) => {
       const authUser = await getSupabaseAuthIdentity(ctx.req);
       if (!authUser?.email) throw new TRPCError({ code: "UNAUTHORIZED", message: "A valid Supabase access token is required." });

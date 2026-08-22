@@ -10,9 +10,10 @@ const routeForRole = (role: string) => ({ FLEET_MANAGER: "/fleet-manager", INVEN
 export default function JoinOrganization() {
   const [, params] = useRoute("/join/:token");
   const token = params?.token ?? "";
-  const { session, loading: authLoading, signUpWithEmail, refreshSession, signOut } = useFleetOpsAuth();
+  const { session, loading: authLoading, signInWithEmail, refreshSession, signOut } = useFleetOpsAuth();
   const details = trpc.onboarding.inviteDetails.useQuery({ token }, { enabled: Boolean(token), retry: false });
   const acceptInvite = trpc.onboarding.acceptInvite.useMutation();
+  const completeInvite = trpc.onboarding.completeInviteWithPassword.useMutation();
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,9 +36,11 @@ export default function JoinOrganization() {
     event.preventDefault();
     setError("");
     if (!details.data) return;
-    const { data, error: signUpError } = await signUpWithEmail(details.data.email, password, fullName, token);
-    if (signUpError) { setError(signUpError.message); return; }
-    if (!data.session) setError("Account created. Confirm the invitation email, then return to this link to finish joining.");
+    const completed = await completeInvite.mutateAsync({ token, fullName, password }).catch((mutationError) => ({ error: mutationError as Error }));
+    if ("error" in completed && completed.error) { setError(completed.error.message); return; }
+    const { error: signInError } = await signInWithEmail(details.data.email, password);
+    if (signInError) { setError(signInError.message); return; }
+    await refreshSession();
   };
 
   if (authLoading || details.isLoading) return <main className="auth-page"><section className="auth-card"><Loader2 className="spin" /><h1>Checking invitation…</h1><p>Validating the secure organization invitation.</p></section></main>;

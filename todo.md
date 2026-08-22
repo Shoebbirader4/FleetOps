@@ -741,3 +741,11 @@
 - [x] Modernize the Fleet Manager work-order creation and edit experience and enhance the Maintenance Queue with clearer status, assignment, filtering, and action affordances.
 
 - [x] Resolve the Vercel deployment block caused by an unmatched dev-agent@manus.ai commit email, verify the GitHub author identity, and redeploy production from a correctly attributed commit. The repository-local identity is now Shoeb Ahmed Birader <shoebahmedbirader4@gmail.com>, the corrected commit b6f7ff7 is on GitHub main, and the Vercel production deployment completed successfully at fleetops-v2.vercel.app.
+
+- [ ] Audit the live Fleet Manager work-order page with the provided account, verify the latest creation/edit/mechanic-assignment/Maintenance Queue UI is deployed, and fix any mismatch or visual defect found.
+
+- [ ] Refine the active Fleet Manager Work orders visual hierarchy so creation, editing, mechanic assignment, and Maintenance Queue controls feel compact, modern, and dispatch-console professional rather than bulky.
+
+- [ ] Diagnose the production `api/trpc/workOrders.update` 404, verify Fleet Manager edit/assignment persistence, and confirm the assigned work order reaches the Mechanic workspace for the supplied test account.
+
+- [ ] Diagnose and fix the shared invited-member sign-out/relogin failure across Mechanic, Fleet Manager, Inventory Manager, Driver, Accountant, and Superadmin accounts; add regression coverage and deploy the authentication correction.
