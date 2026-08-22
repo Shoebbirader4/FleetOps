@@ -757,3 +757,4 @@
 - [ ] Verify `change left tire` as Humsafar Travels Superadmin, invite `mrfamily9890@gmail.com` as Driver, complete the real invitation profile flow, then verify Driver sign-out and relogin with the confirmed password.
 
 - [ ] Resolve the repeated Vercel deployment block caused by `dev-agent@manus.ai` author metadata on the Driver invitation-flow fix, then push the corrected commit and redeploy production.
+- [x] Fix Vercel FUNCTION_INVOCATION_FAILED caused by the API bundle’s ESM dynamic require of Express dependencies for invited Driver sessions. Added an API-local CommonJS package boundary, regenerated `api/index.js` as CommonJS, deployed Vercel production, and verified Driver dashboard and portal API requests returned 200.
