@@ -20,8 +20,9 @@ describe("FleetOps production architecture", () => {
     expect(compatibilitySchema).toContain('export * from "./fleetops-schema"');
   });
 
-  it("builds Vercel from the current serverless entrypoint rather than a checked-in bundle", () => {
-    expect(vercelManifest).toContain("serverless-entry.ts");
-    expect(existsSync(resolve(root, "api/index.js"))).toBe(false);
+  it("publishes the tracked Vercel API function and routes tRPC requests to it", () => {
+    expect(vercelManifest).toContain('"destination": "/api/index"');
+    expect(vercelManifest).toContain('"source": "/api/trpc/:path*"');
+    expect(existsSync(resolve(root, "api/index.js"))).toBe(true);
   });
 });
