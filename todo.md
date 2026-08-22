@@ -739,3 +739,5 @@
 - [x] Re-check the inherited live tenant roster/work-order issue. The current application path is tenant-scoped through `team.operationalRoster` and the edit mutation validates same-organization mechanic/technician assignment; a direct SQL spot-check was attempted, but the project SQL connection exposed a stale schema without the FleetOps tables, so no destructive data action was taken.
 
 - [x] Modernize the Fleet Manager work-order creation and edit experience and enhance the Maintenance Queue with clearer status, assignment, filtering, and action affordances.
+
+- [x] Resolve the Vercel deployment block caused by an unmatched dev-agent@manus.ai commit email, verify the GitHub author identity, and redeploy production from a correctly attributed commit. The repository-local identity is now Shoeb Ahmed Birader <shoebahmedbirader4@gmail.com>, the corrected commit b6f7ff7 is on GitHub main, and the Vercel production deployment completed successfully at fleetops-v2.vercel.app.
