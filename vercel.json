@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm build && pnpm exec esbuild serverless-entry.ts --bundle --platform=node --packages=external --format=esm --outfile=api/index.js",
+  "buildCommand": "pnpm build",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install --frozen-lockfile",
   "rewrites": [
