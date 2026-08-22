@@ -726,4 +726,4 @@
 
 - [x] Diagnose and fix the deployed `/api/trpc/dashboard.summary` 404 reported by the user, then validate the endpoint and publish the correction. Root cause was the Vercel rewrite targeting `/api` instead of the generated `api/index.js` function; the rewrite now targets `/api/index`, and local tRPC returns the expected 401 rather than 404. The exact Vercel serverless bundle also builds successfully.
 
-- [ ] Align Git commit author metadata with the GitHub account and verify a successful Vercel production deployment from the correctly attributed commit.
+- [x] Align Git commit author metadata with the GitHub account and verify a successful Vercel production deployment from the correctly attributed commit. Repository and global Git configuration now use `Shoeb Ahmed Birader <shoebahmedbirader4@gmail.com>`, commit `13ec8d7` is pushed to GitHub main, Vercel production deployment completed successfully, and the live dashboard tRPC endpoint returns the expected HTTP 401 authentication response rather than 404.
