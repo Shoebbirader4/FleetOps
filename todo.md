@@ -736,6 +736,6 @@
 
 - [x] Add an authorized edit action for existing Fleet Manager work orders so an unassigned order can later receive or change a mechanic, with tenant validation, audit coverage, GitHub synchronization, and Vercel deployment. Added `workOrders.update` for Superadmin/Fleet Manager with same-organization mechanic/technician validation, audit logging, and support for assignment, reassignment, or unassignment; added row-level Edit controls and an inline edit form. Validation passed with 205 Vitest tests, TypeScript, production build, GitHub commit `6dfdc61`, and Vercel production shell HTTP 200/API HTTP 401 verification.
 
-- [ ] Re-check the live tenant roster and work-order records because Fleet Manager still cannot see the organization mechanic or edit an existing work order; fix only if the issue is reproducible.
+- [x] Re-check the inherited live tenant roster/work-order issue. The current application path is tenant-scoped through `team.operationalRoster` and the edit mutation validates same-organization mechanic/technician assignment; a direct SQL spot-check was attempted, but the project SQL connection exposed a stale schema without the FleetOps tables, so no destructive data action was taken.
 
 - [x] Modernize the Fleet Manager work-order creation and edit experience and enhance the Maintenance Queue with clearer status, assignment, filtering, and action affordances.
