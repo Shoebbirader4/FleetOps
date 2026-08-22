@@ -725,3 +725,5 @@
 - [x] Configure Resend transactional invitation email delivery using the user-supplied provider credential, with secure secret handling, branded template delivery, and explicit failure fallback. `RESEND_API_KEY` is configured server-side, the read-only Resend credential check passed, invitation creation/resend now use Supabase `generateLink` for auth provisioning plus Resend for branded delivery, and provider errors return the existing MANUAL_TOKEN fallback. The default sender is `FleetOps <onboarding@resend.dev>`; configure `RESEND_FROM_EMAIL` to a verified sender before broad production sending.
 
 - [x] Diagnose and fix the deployed `/api/trpc/dashboard.summary` 404 reported by the user, then validate the endpoint and publish the correction. Root cause was the Vercel rewrite targeting `/api` instead of the generated `api/index.js` function; the rewrite now targets `/api/index`, and local tRPC returns the expected 401 rather than 404. The exact Vercel serverless bundle also builds successfully.
+
+- [ ] Align Git commit author metadata with the GitHub account and verify a successful Vercel production deployment from the correctly attributed commit.
