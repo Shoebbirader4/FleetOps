@@ -16,4 +16,11 @@ describe("Fleet Manager work-order workspace", () => {
     expect(source).toContain('assignedMechanicId: workOrderAssigneeId');
     expect(source).toContain('Assign to mechanic');
   });
+
+  it("offers an edit action for late mechanic assignment or reassignment", () => {
+    expect(source).toContain("trpc.workOrders.update.useMutation");
+    expect(source).toContain('aria-label={`Edit work order ${row.title}`}');
+    expect(source).toContain('assignedMechanicId: editingWorkOrder.assignedMechanicId ?? null');
+    expect(source).toContain("Save work-order changes");
+  });
 });

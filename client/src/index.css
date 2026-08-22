@@ -369,3 +369,11 @@ nav { display: grid; gap: 3px; }
 .work-order-row:hover { border-color: #dfb79f; background: #fffaf5; }
 @media (max-width: 900px) { .work-order-create-hero, .work-order-form { grid-template-columns: 1fr; } .work-order-form-side { padding-left: 0; border-left: 0; padding-top: 4px; border-top: 1px solid #ece5da; } .work-order-readiness { max-width: none; } .work-order-queue .bulk-toolbar > label:first-child { min-width: 210px; } }
 @media (max-width: 620px) { .work-order-create-hero, .work-order-create-card, .work-order-queue { padding: 18px; border-radius: 13px; } .work-order-hero-copy h1 { font-size: 38px; } .work-order-flow { gap: 8px; margin-top: 23px; } .work-order-flow > div { padding-right: 8px; } .work-order-flow small { font-size: 10px; } .readiness-stats strong { font-size: 16px; } .work-order-queue .bulk-toolbar { align-items: stretch; } .work-order-queue .bulk-toolbar > label, .work-order-queue .bulk-toolbar > label:first-child { min-width: 100%; } .work-order-queue .bulk-toolbar > select, .work-order-queue .bulk-toolbar > button { width: 100%; } }
+
+.work-order-edit-card { padding: 24px; border: 1px solid #e2c1ae; border-radius: 16px; background: linear-gradient(135deg, #fffaf5, #fffdf8); box-shadow: 0 12px 30px rgba(60, 43, 24, .05); }
+.work-order-edit-form { grid-template-columns: minmax(0, 1fr) minmax(190px, .55fr) minmax(0, 1fr); align-items: end; }
+.work-order-edit-form .work-order-edit-description { grid-column: span 2; }
+.work-order-edit-form .work-order-submit { align-self: end; }
+.work-order-edit-trigger { justify-content: center; min-width: 78px; }
+@media (max-width: 900px) { .work-order-edit-form { grid-template-columns: 1fr 1fr; } .work-order-edit-form .work-order-edit-description { grid-column: 1 / -1; } .work-order-edit-form .work-order-submit { grid-column: 1 / -1; } }
+@media (max-width: 620px) { .work-order-edit-form { grid-template-columns: 1fr; } .work-order-edit-form .work-order-edit-description, .work-order-edit-form .work-order-submit { grid-column: auto; } .work-order-edit-trigger { margin-left: 0; } }

@@ -267,6 +267,19 @@ export const appRouter = router({
       await recordAudit(ctx, { action: "WORK_ORDER_CREATED", entityType: "WORK_ORDER", entityId: created.id, summary: `Work order created: ${created.title}`, metadata: { priority: created.priority, assignedMechanicId: created.assignedMechanicId } });
       return created;
     }),
+    update: fleetOpsProcedure.input(z.object({ workOrderId: z.string().uuid(), title: z.string().trim().min(3).max(160).optional(), description: z.string().trim().max(2000).nullable().optional(), priority: z.nativeEnum(Priority).optional(), assignedMechanicId: z.string().uuid().nullable().optional() }).refine((input) => input.title !== undefined || input.description !== undefined || input.priority !== undefined || input.assignedMechanicId !== undefined, { message: "Provide at least one work-order field to update." })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.fleetopsUser.role, ["SUPERADMIN", "FLEET_MANAGER"]);
+      assertWritable(ctx.fleetopsUser.org);
+      const order = await fleetDb.workOrder.findFirst({ where: { id: input.workOrderId, orgId: ctx.fleetopsUser.orgId } });
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Work order not found in this organization." });
+      if (input.assignedMechanicId) {
+        const assignee = await fleetDb.user.findFirst({ where: { id: input.assignedMechanicId, orgId: ctx.fleetopsUser.orgId, role: { in: ["MECHANIC", "TECHNICIAN"] } } });
+        if (!assignee) throw new TRPCError({ code: "BAD_REQUEST", message: "Mechanic or Technician must belong to this organization." });
+      }
+      const updated = await fleetDb.workOrder.update({ where: { id: order.id }, data: { ...(input.title !== undefined ? { title: input.title } : {}), ...(input.description !== undefined ? { description: input.description } : {}), ...(input.priority !== undefined ? { priority: input.priority } : {}), ...(input.assignedMechanicId !== undefined ? { assignedMechanicId: input.assignedMechanicId } : {}) } });
+      await recordAudit(ctx, { action: "WORK_ORDER_UPDATED", entityType: "WORK_ORDER", entityId: updated.id, summary: `Updated work order: ${updated.title}`, metadata: { title: input.title, descriptionChanged: input.description !== undefined, priority: input.priority, assignedMechanicId: input.assignedMechanicId ?? null } });
+      return updated;
+    }),
     complete: fleetOpsProcedure.input(z.object({ workOrderId: z.string().uuid(), expectedUpdatedAt: z.coerce.date().optional(), parts: z.array(z.object({ partId: z.string().uuid(), qtyUsed: z.number().int().positive() })).default([]), laborHours: z.number().nonnegative().max(1000).default(0), repairNotes: z.string().trim().min(3).max(5000).default("Completed from organization oversight."), evidence: z.array(z.object({ fileData: z.string().max(6_000_000), contentType: z.string().startsWith("image/"), fileName: z.string().min(1).max(200), caption: z.string().max(500).optional() })).max(8).default([]) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.fleetopsUser.role, ["MECHANIC", "TECHNICIAN"]);
       assertWritable(ctx.fleetopsUser.org);
