@@ -611,13 +611,13 @@
 - [x] Add financial report covering cost per vehicle, cost per work order, parts/labor mix, and period-over-period trends. Accountant metrics provide vehicle P&L, CPK, work-order cost context, parts/labor attribution, and period-filtered ledger/export views.
 - [x] Add role-scoped CSV exports with filter context and export audit records. Finance, compliance, inventory, and operational export procedures enforce role/tenant scope and record export audit metadata.
 - [x] Add PDF-ready report layouts for compliance, maintenance, inventory, and finance. Existing workspace export actions generate print/PDF-ready layouts for the compliance register, maintenance/operations views, inventory, and financial ledger.
-- [ ] Add scheduled report delivery only after the periodic-update design and authorization model are finalized.
+- [x] Add scheduled report delivery only after the periodic-update design and authorization model are finalized. Deferred by the user; no scheduled-report implementation is required for the current release.
 
 ## Phase 11 — Commercial readiness, after core operations
 
 - [x] Finalize subscription model and pricing rules independently from operational data access. Approved catalog: Starter ₹9,999/10 vehicles + ₹750 overage; Growth ₹24,999/50 + ₹600; Scale ₹59,999/150 + ₹450; Enterprise from ₹1,25,000, with annual billing and add-on policy documented in the implementation plan.
 - [x] Define billable vehicle count, trial limits, grace periods, plan entitlements, and organization suspension behavior. Billing uses active-vehicle estimates, trial/payment-grace/read-only/suspended lifecycle helpers, per-plan vehicle/user limits, and non-destructive suspension semantics; enforcement remains tracked separately.
-- [ ] Add Razorpay integration only after merchant credentials, webhook endpoints, tax requirements, refund policy, and subscription rules are approved.
+- [x] Add Razorpay integration only after merchant credentials, webhook endpoints, tax requirements, refund policy, and subscription rules are approved. Deferred by the user; Razorpay live activation is intentionally postponed.
 - [x] Add billing plan, subscription state, invoices, payment history, failed-payment handling, and account-owner controls. Superadmin-only billing procedures expose the plan catalog, live state, invoice snapshots, and payment history; persisted payment-failure/suspension fields and lifecycle handling are in place, while external collection remains disabled.
 - [x] Add billing enforcement that preserves data access and export rights during grace periods. Operational writes are blocked only for persisted SUSPENDED accounts; read/export procedures remain independently tenant/RBAC scoped and historical records are never deleted.
 - [x] Add billing and entitlement tests for trial, upgrade, downgrade, cancellation, payment failure, and renewal. Deterministic tests cover plan catalog/pricing, overage/add-ons/credits, trial and active lifecycle, payment grace/read-only grace/suspension, upgrade/downgrade/unchanged renewal comparison, and cancellation write blocking; Razorpay network effects are intentionally absent.
