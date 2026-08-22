@@ -749,3 +749,11 @@
 - [x] Diagnose the production `api/trpc/workOrders.update` 404, verify Fleet Manager edit/assignment persistence, and confirm the assigned work order reaches the Mechanic workspace for the supplied test account. The stale Vercel serverless bundle was regenerated; live edit changed the queue from 1 unassigned to 0 unassigned, and the role-scoped mechanic queue path is wired. Direct UI login for the supplied existing account remained blocked by Supabase rejecting its supplied password; the new invitation completion path fixes this for newly completed or reset invited accounts.
 
 - [x] Diagnose and fix the shared invited-member sign-out/relogin failure across Mechanic, Fleet Manager, Inventory Manager, Driver, Accountant, and Superadmin accounts; add regression coverage and deploy the authentication correction. Invitation completion now sets or resets the Supabase Auth password for pre-created invite users, provisions the tenant membership, and signs in directly; 208 tests, TypeScript, and production build passed; commit 0fadb58 is on GitHub main and Vercel production is live.
+
+- [ ] Diagnose the live Supabase `auth/v1/token?grant_type=password` HTTP 400 for invited-member relogin, verify the shared email/password request path, and deploy a safe correction without changing operational data.
+
+- [ ] Complete the active Mechanic work order in production and verify its COMPLETED status from Fleet Manager and Superadmin workspaces in Humsafar Travels.
+
+- [ ] Verify `change left tire` as Humsafar Travels Superadmin, invite `mrfamily9890@gmail.com` as Driver, complete the real invitation profile flow, then verify Driver sign-out and relogin with the confirmed password.
+
+- [ ] Resolve the repeated Vercel deployment block caused by `dev-agent@manus.ai` author metadata on the Driver invitation-flow fix, then push the corrected commit and redeploy production.

@@ -15,13 +15,13 @@ describe("signup to organization invitation flow", () => {
   it("accepts an organization-bound invitation before opening the invited role workspace", () => {
     const source = read("client/src/pages/JoinOrganization.tsx");
     expect(source).toContain("trpc.onboarding.inviteDetails.useQuery");
-    expect(source).toContain("trpc.onboarding.acceptInvite.useMutation");
     expect(source).toContain("trpc.onboarding.completeInviteWithPassword.useMutation");
     expect(source).toContain("completeInvite.mutateAsync");
     expect(source).toContain("signInWithEmail");
     expect(source).toContain("organization");
     expect(source).toContain("role");
-    expect(source).toContain("acceptInvite.mutate");
+    expect(source).not.toContain("acceptInvite.mutate");
+    expect(source).toContain("window.location.href = routeForRole(details.data.role)");
   });
 
   it("keeps signup and invitation redemption in the application route map", () => {
